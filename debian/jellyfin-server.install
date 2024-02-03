@@ -1,4 +1,5 @@
 build/usr/lib/jellyfin usr/lib/
 debian/conf/jellyfin etc/default/
 debian/conf/logging.json etc/jellyfin/
+debian/conf/jellyfin.service lib/systemd/system/
 debian/conf/jellyfin.service.conf etc/systemd/system/jellyfin.service.d/
