@@ -1,0 +1,28 @@
+Source: jellyfin
+Section: misc
+Priority: optional
+Maintainer: Jellyfin Packaging Team <packaging@jellyfin.org>
+Build-Depends:  debhelper (>= 10),
+                dotnet-sdk-8.0,
+                npm | nodejs
+Standards-Version: 3.9.4
+Homepage: https://jellyfin.org
+Vcs-Browser: https://github.com/jellyfin
+
+Package: jellyfin
+Architecture: all
+Depends: jellyfin-server, jellyfin-web, jellyfin-ffmpeg6
+Description: Jellyfin is the Free Software Media System.
+ This metapackage provides the core Jellyfin components from one name.
+
+Package: jellyfin-server
+Architecture: any
+Recommends: jellyfin-web, sudo
+Description: Jellyfin is the Free Software Media System.
+ This package provides the Jellyfin server backend and API.
+
+Package: jellyfin-web
+Architecture: any
+Recommends: jellyfin-server
+Description: Jellyfin is the Free Software Media System.
+ This package provides the Jellyfin web client.
