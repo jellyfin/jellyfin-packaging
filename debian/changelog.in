@@ -1,4 +1,4 @@
-jellyfin ({package_version}-{package_build}) unstable; urgency=medium
+jellyfin ({package_version}+{package_build}) unstable; urgency=medium
 
   * {release_comment}
 

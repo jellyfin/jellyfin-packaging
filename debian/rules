@@ -28,6 +28,8 @@ endif
 
 export DH_VERBOSE=1
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
+export COMPlus_LTTng=0
+export COMPlus_EnableDiagnostics=0
 
 %:
 	dh $@
@@ -40,11 +42,13 @@ override_dh_auto_build:
 	cd jellyfin-server && dotnet publish -maxcpucount:1 --configuration $(CONFIG) \
         --output='$(CURDIR)/build/usr/lib/jellyfin/bin' --self-contained --runtime $(DOTNETRUNTIME) \
 		-p:DebugSymbols=false -p:DebugType=none Jellyfin.Server
+	rm $(CURDIR)/build/usr/lib/jellyfin/bin/libcoreclrtraceptprovider.so
 	cd jellyfin-web && npm ci --no-audit --unsafe-perm && \
         npm run build:production && mv $(CURDIR)/jellyfin-web/dist $(CURDIR)/build/web
 
 override_dh_auto_clean:
 	cd jellyfin-server && dotnet clean -maxcpucount:1 --configuration $(CONFIG) Jellyfin.Server || true
+	cd jellyfin-server && find . -type d \( -name bin -o -name obj \) -exec rm -r {} \; || true
 	test -d $(CURDIR)/jellyfin-web/dist && \
 		rm -rf '$(CURDIR)/jellyfin-web/dist' || true
 	test -d $(CURDIR)/jellyfin-web/web && \
@@ -55,3 +59,6 @@ override_dh_auto_clean:
 
 override_dh_installinit:
 	dh_installinit --name=jellyfin
+
+override_dh_shdeplibs:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
