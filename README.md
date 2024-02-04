@@ -59,4 +59,6 @@ Inside this repository are 6 major components:
 
 4. Docker image builders. Like the above two as well, only building the combined Docker images.
 
-5. Script infrastructure to handle coordinating these builds from the main repos on a release trigger.
+5. Script infrastructure to handle coordinating builds from the main repos on a release trigger.
+
+6. The GitHub Actions CI to build all the above.
