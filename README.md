@@ -62,3 +62,18 @@ Inside this repository are 6 major components:
 5. Script infrastructure to handle coordinating builds from the main repos on a release trigger.
 
 6. The GitHub Actions CI to build all the above.
+
+## Design Decisions
+
+### Debian/Ubuntu Packages
+
+* Unified package build: this entire repo is the "source" and the source package is named "jellyfin".
+
+   This was chosen to simplify the source package system and simplify building. Now, there is only a single "jellyfin" source package rather than 2. There may be more in the future as other repos might be included (e.g. "jellyfin-ffmpeg", "jellyfin-vue", etc.)
+
+   We believe this setup provides better flexibility long-term, for instance allowing rebuilds of a Debian package for configuration changes or build errors, even if the underlying code versions haven't changed.
+
+   We believe this setup provides easier manageability *vis-a-vis* CI, as only a single CI repo is required for both (or all) source repos.
+
+### Docker
+

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # checkout.py - Checkout submodules for a build (checkout a given tag or head)
 #
