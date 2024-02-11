@@ -71,14 +71,29 @@ def build_package_deb(jvers, btype, barch, bvers):
 
     # Build the dockerfile and packages
     os.system(f"docker build --progress=plain --build-arg PTYPE={ostype} --build-arg PVERSION={osversion} --build-arg PARCH={PARCH} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"docker run --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out:/dist --name {imagename} {imagename}")
+    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --name {imagename} {imagename}")
 
 
 def build_package(jvers, btype, barch, bvers):
     pass
 
 
-def build_docker(jvers, btype, barch, bvers):
+def build_portable(jvers, btype, _barch, _bvers):
+    # Set the dockerfile
+    dockerfile = configurations[btype]["dockerfile"]
+
+    # Use a unique docker image name for consistency
+    imagename = f"{configurations[btype]['imagename']}-{jvers}_{btype}"
+
+    # Set the archive type (tar-gz or zip)
+    archivetypes = f"{configurations[btype]['archivetypes']}"
+
+    # Build the dockerfile and packages
+    os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+
+
+def build_docker(jvers, btype, _barch, _bvers):
     print("> Building Docker images...")
     print()
 
@@ -201,7 +216,10 @@ configurations = {
         "def": build_package,
     },
     "portable": {
-        "def": build_package,
+        "def": build_portable,
+        "dockerfile": "portable/Dockerfile",
+        "imagename": "jellyfin-builder",
+        "archivetypes": "tar,zip",
     },
     "docker": {
         "def": build_docker,
