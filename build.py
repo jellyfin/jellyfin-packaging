@@ -31,12 +31,15 @@ def build_package_deb(jvers, btype, barch, bvers):
         osversion = bvers if bvers in configurations[btype]['releases'] else None
         if osversion is None:
             raise ValueError(f"{bvers} is not a valid {btype} version in {configurations[btype]['releases']}")
-        dockerfiles = configurations[btype]['files'][barch] if barch in configurations[btype]['files'].keys() else None
-        if dockerfiles is None:
-            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['files'].keys()}")
+        PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
+        if PARCH is None:
+            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
     except Exception as e:
         print(f"Invalid/unsupported arguments: {e}")
         exit(1)
+
+    # Set the dockerfile
+    dockerfile = configurations[btype]["dockerfile"]
 
     # Set the cross-gcc version
     crossgccvers = configurations[btype]['cross-gcc'][bvers]
@@ -63,47 +66,119 @@ def build_package_deb(jvers, btype, barch, bvers):
     with open(changelog_dst, "w") as fh:
         fh.write(changelog)
 
-    # Build the dockerfile(s) and packages
-    for dockerfile in dockerfiles:
-        imagename = f"jellyfin-builder-{btype}-{barch}-{bvers}-{abs(hash(dockerfile))}"
-        os.system(f"docker build --progress=plain --build-arg PTYPE={ostype} --build-arg PVERSION={osversion} --build-arg PARCH={barch} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-        os.system(f"docker run --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out:/dist --name {imagename} {imagename}")
+    # Use a unique docker image name for consistency
+    imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}-{bvers}"
 
-    # Clean up the docker containers and images
-    for dockerfile in dockerfiles:
-        imagename = f"jellyfin-builder-{btype}-{barch}-{bvers}-{abs(hash(dockerfile))}"
-        os.system(f"docker rm {imagename}")
-        os.system(f"docker image rm {imagename}")
+    # Build the dockerfile and packages
+    os.system(f"docker build --progress=plain --build-arg PTYPE={ostype} --build-arg PVERSION={osversion} --build-arg PARCH={PARCH} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"docker run --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out:/dist --name {imagename} {imagename}")
 
-def build_package(btype, barch, bvers):
+
+def build_package(jvers, btype, barch, bvers):
     pass
 
-def build_docker(ostype, osversion, dockerfiles):
-    pass
+
+def build_docker(jvers, btype, barch, bvers):
+    print("> Building Docker images...")
+    print()
+
+    # We build all architectures simultaneously to push a single tag, so no conditional checks
+    architectures = configurations['docker']['archmaps'].keys()
+
+    # Set the dockerfile
+    dockerfile = configurations[btype]["dockerfile"]
+
+    # Determine if this is a "latest"-type image (v in jvers) or not
+    if "v" in jvers:
+        is_latest = True
+        version_suffix = True
+    else:
+        is_latest = False
+        version_suffix = False
+
+    # Set today's date in a convenient format for use as an image suffix
+    date = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+    images = list()
+    for _barch in architectures:
+        print(f">> Building Docker image for {_barch}...")
+        print()
+
+        # Get our ARCH variables from the archmaps
+        PARCH = configurations['docker']['archmaps'][_barch]['PARCH']
+        DARCH = configurations['docker']['archmaps'][_barch]['DARCH']
+        QARCH = configurations['docker']['archmaps'][_barch]['QARCH']
+        BARCH = configurations['docker']['archmaps'][_barch]['BARCH']
+
+        # Use a unique docker image name for consistency
+        if version_suffix:
+            imagename = f"{configurations['docker']['imagename']}:{jvers}-{_barch}.{date}"
+        else:
+            imagename = f"{configurations['docker']['imagename']}:{jvers}-{_barch}"
+
+        # Clean up any existing qemu static image
+        os.system(f"docker run --rm --privileged multiarch/qemu-user-static:register --reset")
+        print()
+
+        # Build the dockerfile
+        os.system(f"docker build --no-cache --progress=plain --build-arg PARCH={PARCH} --build-arg DARCH={DARCH} --build-arg QARCH={QARCH} --build-arg BARCH={BARCH} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+
+        images.append(imagename)
+        print()
+
+    # Build the manifests
+    print(f">> Building Docker manifests...")
+
+    if version_suffix:
+        print(f">>> Building dated version manifest...")
+        os.system(f"docker manifest create --amend {configurations['docker']['imagename']}:{jvers}.{date} {' '.join(images)}") 
+
+    print(f">>> Building version manifest...")
+    os.system(f"docker manifest create --amend {configurations['docker']['imagename']}:{jvers} {' '.join(images)}") 
+    if is_latest:
+        print(f">>> Building latest manifest...")
+        os.system(f"docker manifest create --amend {configurations['docker']['imagename']}:latest {' '.join(images)}") 
+
 
 # Define a map of possible configurations
 configurations = {
     "debian": {
-        "files": {
-            "amd64": [ "debian/docker/Dockerfile" ],
-            "arm64": [ "debian/docker/Dockerfile" ],
-            "armhf": [ "debian/docker/Dockerfile" ],
+        "def": build_package_deb,
+        "dockerfile": "debian/docker/Dockerfile",
+        "imagename": "jellyfin-builder",
+        "archmaps": {
+            "amd64": {
+                "PARCH": "amd64",
+            },
+            "arm64": {
+                "PARCH": "arm64",
+            },
+            "armhf": {
+                "PARCH": "armhf",
+            },
         },
         "releases": [ "11", "12" ],
-        "def": build_package_deb,
         "cross-gcc": {
             "11": "10",
             "12": "12",
         },
     },
     "ubuntu": {
-        "files": {
-            "amd64": [ "debian/docker/Dockerfile" ],
-            "arm64": [ "debian/docker/Dockerfile" ],
-            "armhf": [ "debian/docker/Dockerfile" ],
+        "def": build_package_deb,
+        "dockerfile": "debian/docker/Dockerfile",
+        "imagename": "jellyfin-builder",
+        "archmaps": {
+            "amd64": {
+                "PARCH": "amd64",
+            },
+            "arm64": {
+                "PARCH": "arm64",
+            },
+            "armhf": {
+                "PARCH": "armhf",
+            },
         },
         "releases": [ "20.04", "22.04" ],
-        "def": build_package_deb,
         "cross-gcc": {
             "20.04": "10",
             "22.04": "12",
@@ -130,23 +205,49 @@ configurations = {
     },
     "docker": {
         "def": build_docker,
+        "dockerfile": "docker/Dockerfile",
+        "imagename": "jellyfin/jellyfin",
+        "archmaps": {
+            # This insanity is needed because no one can agree on how to name architectures :-(
+            "amd64": {
+                "PARCH": "amd64",
+                "DARCH": "x64",
+                "QARCH": "x86_64",
+                "BARCH": "amd64",
+            },
+            "arm64": {
+                "PARCH": "arm64",
+                "DARCH": "arm64",
+                "QARCH": "aarch64",
+                "BARCH": "arm64v8",
+            },
+            "armhf": {
+                "PARCH": "armhf",
+                "DARCH": "arm",
+                "QARCH": "arm",
+                "BARCH": "arm32v7",
+            },
+        }
     },
 }
 
 def usage():
-    print(f"{sys.argv[0]} JVERS BTYPE BARCH [BVERS]")
+    print(f"{sys.argv[0]} JVERS BTYPE [BARCH] [BVERS]")
     print(f" JVERS: The Jellyfin version being built")
     print(f" BTYPE: A valid build OS type")
-    print(f" BARCH: A valid build OS CPU architecture")
+    print(f" BARCH: A valid build OS CPU architecture (packaged OS types only)")
     print(f" BVERS: A valid build OS version (packaged OS types only)")
 
 try:
     jvers = sys.argv[1]
-    barch = sys.argv[2]
-    btype = sys.argv[3]
+    btype = sys.argv[2]
 except IndexError:
     usage()
     exit(1)
+try:
+    barch = sys.argv[3]
+except IndexError:
+    barch = None
 try:
     bvers = sys.argv[4]
 except IndexError:
