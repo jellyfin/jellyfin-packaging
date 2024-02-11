@@ -55,9 +55,10 @@ def build_package_deb(jvers, btype, barch, bvers):
         comment = f"Jellyfin release {jvers}, see https://github.com/jellyfin/jellyfin/releases/{jvers} for details."
     else:
         comment = f"Jellyin unstable release {jvers}."
+    jvers = jvers.replace('v', '')
 
     changelog = changelog.format(
-        package_version=jvers.replace('v', ''),
+        package_version=jvers,
         package_build=f"{btype[:3]}{bvers.replace('.', '')}",
         release_comment=comment,
         release_date=format_datetime(localtime())
@@ -74,7 +75,7 @@ def build_package_deb(jvers, btype, barch, bvers):
     os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --name {imagename} {imagename}")
 
 
-def build_package(jvers, btype, barch, bvers):
+def build_package_rpm(jvers, btype, barch, bvers):
     pass
 
 
@@ -88,18 +89,55 @@ def build_linux(jvers, btype, barch, _bvers):
         print(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
+    jvers = jvers.replace('v', '')
+
     # Set the dockerfile
     dockerfile = configurations[btype]["dockerfile"]
 
     # Use a unique docker image name for consistency
     imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}"
 
+    # Set the archive type (tar-gz or zip)
+    archivetypes = f"{configurations[btype]['archivetypes']}"
+
     # Build the dockerfile and packages
     os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env PARCH={PARCH} --env DARCH={DARCH} --name {imagename} {imagename}")
+    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=linux --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+
+
+def build_windows(jvers, btype, _barch, _bvers):
+    pass
+
+
+def build_macos(jvers, btype, barch, _bvers):
+    try:
+        PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
+        if PARCH is None:
+            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
+        DARCH = configurations[btype]['archmaps'][barch]['DARCH']
+    except Exception as e:
+        print(f"Invalid/unsupported arguments: {e}")
+        exit(1)
+
+    jvers = jvers.replace('v', '')
+
+    # Set the dockerfile
+    dockerfile = configurations[btype]["dockerfile"]
+
+    # Use a unique docker image name for consistency
+    imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}"
+
+    # Set the archive type (tar-gz or zip)
+    archivetypes = f"{configurations[btype]['archivetypes']}"
+
+    # Build the dockerfile and packages
+    os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=osx --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
 def build_portable(jvers, btype, _barch, _bvers):
+    jvers = jvers.replace('v', '')
+
     # Set the dockerfile
     dockerfile = configurations[btype]["dockerfile"]
 
@@ -111,7 +149,7 @@ def build_portable(jvers, btype, _barch, _bvers):
 
     # Build the dockerfile and packages
     os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
 def build_docker(jvers, btype, _barch, _bvers):
@@ -131,6 +169,8 @@ def build_docker(jvers, btype, _barch, _bvers):
     else:
         is_latest = False
         version_suffix = False
+
+    jvers = jvers.replace('v', '')
 
     # Set today's date in a convenient format for use as an image suffix
     date = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -222,15 +262,16 @@ configurations = {
         },
     },
     "fedora": {
-        "def": build_package,
+        "def": build_package_rpm,
     },
     "centos": {
-        "def": build_package,
+        "def": build_package_rpm,
     },
     "linux": {
         "def": build_linux,
-        "dockerfile": "linux/Dockerfile",
+        "dockerfile": "portable/Dockerfile",
         "imagename": "jellyfin-builder",
+        "archivetypes": "tar",
         "archmaps": {
             "amd64": {
                 "PARCH": "amd64",
@@ -255,10 +296,23 @@ configurations = {
         },
     },
     "windows": {
-        "def": build_package,
+        "def": build_windows,
     },
     "macos": {
-        "def": build_package,
+        "def": build_macos,
+        "dockerfile": "portable/Dockerfile",
+        "imagename": "jellyfin-builder",
+        "archivetypes": "tar",
+        "archmaps": {
+            "amd64": {
+                "PARCH": "amd64",
+                "DARCH": "x64",
+            },
+            "arm64": {
+                "PARCH": "arm64",
+                "DARCH": "arm64",
+            },
+        },
     },
     "portable": {
         "def": build_portable,

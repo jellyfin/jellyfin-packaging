@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#= Debian .deb builder
+#= Generic portable builder (portable, linux, macos, windows)
 
 set -o errexit
 set -o xtrace
@@ -14,7 +14,17 @@ pushd "${SOURCE_DIR}"
 
 # Build server
 pushd jellyfin-server
-dotnet publish Jellyfin.Server --configuration Release --output ${BUILD_DIR}/ -p:DebugSymbols=false -p:DebugType=none -p:UseAppHost=false
+case ${BTYPE} in
+    portable)
+        RUNTIME=""
+        APPHOST="-p:UseAppHost=false"
+    ;;
+    *)
+        RUNTIME="--self-contained --runtime ${DTYPE}-${DARCH}"
+        APPHOST="-p:UseAppHost=true"
+    ;;
+esac
+dotnet publish Jellyfin.Server --configuration Release ${RUNTIME} --output ${BUILD_DIR}/ -p:DebugSymbols=false -p:DebugType=none ${APPHOST}
 popd
 
 # Build web
@@ -30,10 +40,10 @@ pushd ${BUILD_DIR}
 for ARCHIVE_TYPE in $( tr ',' '\n' <<<"${ARCHIVE_TYPES}" ); do
     case ${ARCHIVE_TYPE} in
         tar)
-            tar -czf "${ARTIFACT_DIR}"/jellyfin_${JVERS}.tar.gz .
+            tar -czf "${ARTIFACT_DIR}"/jellyfin_${JVERS}-${PARCH}.tar.gz .
         ;;
         zip)
-            zip -qr "${ARTIFACT_DIR}"/jellyfin_${JVERS}.zip .
+            zip -qr "${ARTIFACT_DIR}"/jellyfin_${JVERS}-${PARCH}.zip .
         ;;
     esac
 done
