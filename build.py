@@ -23,6 +23,10 @@ except IndexError:
 revparse = run(["git", "rev-parse", "--show-toplevel"], stdout=PIPE)
 repo_root_dir = revparse.stdout.decode().strip()
 
+# Base Docker commands
+docker_build_cmd = "docker build --progress=plain --no-cache"
+docker_run_cmd = "docker run --rm"
+
 def build_package_deb(jvers, btype, barch, bvers):
     try:
         ostype = btype if btype in configurations.keys() else None
@@ -71,8 +75,8 @@ def build_package_deb(jvers, btype, barch, bvers):
     imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}-{bvers}"
 
     # Build the dockerfile and packages
-    os.system(f"docker build --progress=plain --build-arg PTYPE={ostype} --build-arg PVERSION={osversion} --build-arg PARCH={PARCH} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --name {imagename} {imagename}")
+    os.system(f"{docker_build_cmd} --build-arg PTYPE={ostype} --build-arg PVERSION={osversion} --build-arg PARCH={PARCH} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --name {imagename} {imagename}")
 
 
 def build_package_rpm(jvers, btype, barch, bvers):
@@ -101,8 +105,8 @@ def build_linux(jvers, btype, barch, _bvers):
     archivetypes = f"{configurations[btype]['archivetypes']}"
 
     # Build the dockerfile and packages
-    os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=linux --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=linux --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
 def build_windows(jvers, btype, _barch, _bvers):
@@ -127,8 +131,8 @@ def build_windows(jvers, btype, _barch, _bvers):
     archivetypes = f"{configurations[btype]['archivetypes']}"
 
     # Build the dockerfile and packages
-    os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=win --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=win --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
 
@@ -155,8 +159,8 @@ def build_macos(jvers, btype, barch, _bvers):
     archivetypes = f"{configurations[btype]['archivetypes']}"
 
     # Build the dockerfile and packages
-    os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=osx --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=osx --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
 def build_portable(jvers, btype, _barch, _bvers):
@@ -172,8 +176,8 @@ def build_portable(jvers, btype, _barch, _bvers):
     archivetypes = f"{configurations[btype]['archivetypes']}"
 
     # Build the dockerfile and packages
-    os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
 def build_docker(jvers, btype, _barch, _bvers):
@@ -217,11 +221,11 @@ def build_docker(jvers, btype, _barch, _bvers):
             imagename = f"{configurations['docker']['imagename']}:{jvers}-{_barch}"
 
         # Clean up any existing qemu static image
-        os.system(f"docker run --rm --privileged multiarch/qemu-user-static:register --reset")
+        os.system(f"{docker_run_cmd} --privileged multiarch/qemu-user-static:register --reset")
         print()
 
         # Build the dockerfile
-        os.system(f"docker build --no-cache --progress=plain --build-arg PARCH={PARCH} --build-arg DARCH={DARCH} --build-arg QARCH={QARCH} --build-arg BARCH={BARCH} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+        os.system(f"{docker_build_cmd} --build-arg PARCH={PARCH} --build-arg DARCH={DARCH} --build-arg QARCH={QARCH} --build-arg BARCH={BARCH} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
 
         images.append(imagename)
         print()
