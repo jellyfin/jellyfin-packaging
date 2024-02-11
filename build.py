@@ -106,7 +106,31 @@ def build_linux(jvers, btype, barch, _bvers):
 
 
 def build_windows(jvers, btype, _barch, _bvers):
-    pass
+    try:
+        PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
+        if PARCH is None:
+            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
+        DARCH = configurations[btype]['archmaps'][barch]['DARCH']
+    except Exception as e:
+        print(f"Invalid/unsupported arguments: {e}")
+        exit(1)
+
+    jvers = jvers.replace('v', '')
+
+    # Set the dockerfile
+    dockerfile = configurations[btype]["dockerfile"]
+
+    # Use a unique docker image name for consistency
+    imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}"
+
+    # Set the archive type (tar-gz or zip)
+    archivetypes = f"{configurations[btype]['archivetypes']}"
+
+    # Build the dockerfile and packages
+    os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=win --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+
+
 
 
 def build_macos(jvers, btype, barch, _bvers):
@@ -233,7 +257,10 @@ configurations = {
                 "PARCH": "armhf",
             },
         },
-        "releases": [ "11", "12" ],
+        "releases": [
+            "11",
+            "12",
+        ],
         "cross-gcc": {
             "11": "10",
             "12": "12",
@@ -254,7 +281,10 @@ configurations = {
                 "PARCH": "armhf",
             },
         },
-        "releases": [ "20.04", "22.04" ],
+        "releases": [
+            "20.04",
+            "22.04",
+        ],
         "cross-gcc": {
             "20.04": "10",
             "22.04": "12",
@@ -297,6 +327,19 @@ configurations = {
     },
     "windows": {
         "def": build_windows,
+        "dockerfile": "portable/Dockerfile",
+        "imagename": "jellyfin-builder",
+        "archivetypes": "zip",
+        "archmaps": {
+            "amd64": {
+                "PARCH": "amd64",
+                "DARCH": "x64",
+            },
+            "arm64": {
+                "PARCH": "arm64",
+                "DARCH": "arm64",
+            },
+        },
     },
     "macos": {
         "def": build_macos,
@@ -325,7 +368,6 @@ configurations = {
         "dockerfile": "docker/Dockerfile",
         "imagename": "jellyfin/jellyfin",
         "archmaps": {
-            # This insanity is needed because no one can agree on how to name architectures :-(
             "amd64": {
                 "PARCH": "amd64",
                 "DARCH": "x64",
@@ -350,9 +392,9 @@ configurations = {
 
 def usage():
     print(f"{sys.argv[0]} JVERS BTYPE [BARCH] [BVERS]")
-    print(f" JVERS: The Jellyfin version being built")
-    print(f" BTYPE: A valid build OS type")
-    print(f" BARCH: A valid build OS CPU architecture (packaged OS types only)")
+    print(f" JVERS: The Jellyfin version being built; stable releases should be tag names with a 'v' e.g. v10.9.0")
+    print(f" BTYPE: A valid build OS type (debian, ubuntu, fedora, centos, docker, portable, linux, windows, macos)")
+    print(f" BARCH: A valid build OS CPU architecture (empty [portable/docker], amd64, arm64, or armhf)")
     print(f" BVERS: A valid build OS version (packaged OS types only)")
 
 try:
