@@ -78,6 +78,27 @@ def build_package(jvers, btype, barch, bvers):
     pass
 
 
+def build_linux(jvers, btype, barch, _bvers):
+    try:
+        PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
+        if PARCH is None:
+            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
+        DARCH = configurations[btype]['archmaps'][barch]['DARCH']
+    except Exception as e:
+        print(f"Invalid/unsupported arguments: {e}")
+        exit(1)
+
+    # Set the dockerfile
+    dockerfile = configurations[btype]["dockerfile"]
+
+    # Use a unique docker image name for consistency
+    imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}"
+
+    # Build the dockerfile and packages
+    os.system(f"docker build --progress=plain --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"docker run --rm --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env PARCH={PARCH} --env DARCH={DARCH} --name {imagename} {imagename}")
+
+
 def build_portable(jvers, btype, _barch, _bvers):
     # Set the dockerfile
     dockerfile = configurations[btype]["dockerfile"]
@@ -207,7 +228,31 @@ configurations = {
         "def": build_package,
     },
     "linux": {
-        "def": build_package,
+        "def": build_linux,
+        "dockerfile": "linux/Dockerfile",
+        "imagename": "jellyfin-builder",
+        "archmaps": {
+            "amd64": {
+                "PARCH": "amd64",
+                "DARCH": "x64",
+            },
+            "amd64-musl": {
+                "PARCH": "amd64-musl",
+                "DARCH": "musl-x64",
+            },
+            "arm64": {
+                "PARCH": "arm64",
+                "DARCH": "arm64",
+            },
+            "arm64-musl": {
+                "PARCH": "arm64-musl",
+                "DARCH": "musl-arm64",
+            },
+            "armhf": {
+                "PARCH": "armhf",
+                "DARCH": "arm",
+            },
+        },
     },
     "windows": {
         "def": build_package,
