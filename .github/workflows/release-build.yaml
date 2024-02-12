@@ -12,8 +12,17 @@ permissions:
   contents: read
 
 jobs:
-  checkoutRepository:
+  buildDebianPackages:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        version:
+          - 11
+          - 12
+        arch:
+          - amd64
+          - arm64
+          - armhf
     steps:
       - name: "Install dependencies"
         run: |-
@@ -26,20 +35,6 @@ jobs:
         run: |-
           ./checkout.py ${{ github.event.client_payload.version }}
 
-  buildDebianPackages:
-    runs-on: ubuntu-22.04
-    needs:
-      - checkoutRepository
-    strategy:
-      matrix:
-        version:
-          - 11
-          - 12
-        arch:
-          - amd64
-          - arm64
-          - armhf
-    steps:
       - name: "Run builder for Debian ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
           sudo ./build.py ${{ github.event.client_payload.version }} debian ${{ matrix.arch }} ${{ matrix.version }}
