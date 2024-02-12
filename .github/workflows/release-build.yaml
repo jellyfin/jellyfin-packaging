@@ -42,7 +42,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ github.event.client_payload.version }}
+          ./checkout.py ${{ inputs.version }}
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
@@ -118,7 +118,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ github.event.client_payload.version }}
+          ./checkout.py ${{ inputs.version }}
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
