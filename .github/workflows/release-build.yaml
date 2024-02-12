@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  buildDebianPackages:
+  Debian:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
