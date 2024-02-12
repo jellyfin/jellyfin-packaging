@@ -58,7 +58,7 @@ jobs:
           script: |
             set -o xtrace
             if [[ ${{ inputs.version }} == "master" ]]; then
-                COMPONENT="unstable"
+                COMPONENT="main"
             else
                 COMPONENT="unstable"
             fi
