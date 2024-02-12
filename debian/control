@@ -21,7 +21,7 @@ Description: Jellyfin is the Free Software Media System.
  This package provides the Jellyfin server backend and API.
 
 Package: jellyfin-web
-Architecture: any
+Architecture: all
 Recommends: jellyfin-server
 Description: Jellyfin is the Free Software Media System.
  This package provides the Jellyfin web client.
