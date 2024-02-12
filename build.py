@@ -14,11 +14,6 @@ import sys
 
 from git import Repo
 
-try:
-    target_release = sys.argv[1]
-except IndexError:
-    target_release = "master"
-
 # Determine top level directory of this repository ("jellyfin-packaging")
 revparse = run(["git", "rev-parse", "--show-toplevel"], stdout=PIPE)
 repo_root_dir = revparse.stdout.decode().strip()
@@ -32,9 +27,9 @@ def build_package_deb(jvers, btype, barch, bvers):
         ostype = btype if btype in configurations.keys() else None
         if ostype is None:
             raise ValueError(f"{btype} is not a valid OS type in {configurations.keys()}")
-        osversion = bvers if bvers in configurations[btype]['releases'] else None
+        osversion = configurations[btype]['releases'][bvers] if bvers in configurations[btype]['releases'].keys() else None
         if osversion is None:
-            raise ValueError(f"{bvers} is not a valid {btype} version in {configurations[btype]['releases']}")
+            raise ValueError(f"{bvers} is not a valid {btype} version in {configurations[btype]['releases'].keys()}")
         PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
         if PARCH is None:
             raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
@@ -261,13 +256,13 @@ configurations = {
                 "PARCH": "armhf",
             },
         },
-        "releases": [
-            "11",
-            "12",
-        ],
+        "releases": {
+            "bullseye": "11",
+            "bookworm": "12",
+        },
         "cross-gcc": {
-            "11": "10",
-            "12": "12",
+            "bullseye": "10",
+            "bookworm": "12",
         },
     },
     "ubuntu": {
@@ -285,14 +280,15 @@ configurations = {
                 "PARCH": "armhf",
             },
         },
-        "releases": [
-            "20.04",
-            "22.04",
-        ],
+        "releases": {
+            "focal": "20.04",
+            "jammy": "22.04",
+            "noble": "24.04",
+        },
         "cross-gcc": {
-            "20.04": "10",
-            "22.04": "12",
-            "24.04": "12",
+            "focal": "10",
+            "jammy": "12",
+            "noble": "12",
         },
     },
     "fedora": {
