@@ -28,14 +28,14 @@ jobs:
         run: |-
           sudo apt-get install --yes python3-git
 
-      - name: "Checkout Repository"
+      - name: "Checkout repository"
         uses: actions/checkout@v3
 
-      - name: "Prepare Repository"
+      - name: "Prepare repository"
         run: |-
           ./checkout.py ${{ github.event.client_payload.version }}
 
-      - name: "Run builder for Debian ${{ matrix.version }} ${{ matrix.arch }}"
+      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
           sudo ./build.py ${{ inputs.version }} debian ${{ matrix.arch }} ${{ matrix.release }}
 
