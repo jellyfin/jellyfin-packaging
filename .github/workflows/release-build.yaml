@@ -53,7 +53,7 @@ jobs:
         uses: nekiro/ssh-job@main
         with:
           host: "${{ secrets.REPO_HOST }}"
-          username: "${{ secrets.REPO_USER }}"
+          user: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           command: |-
             if [[ ${{ inputs.version }} == "master" ]]; then
@@ -68,7 +68,7 @@ jobs:
         uses: nekiro/ssh-job@main
         with:
           host: "${{ secrets.REPO_HOST }}"
-          username: "${{ secrets.REPO_USER }}"
+          user: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           command: |-
             sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${{ inputs.version }}/${{ matrix.arch }}
