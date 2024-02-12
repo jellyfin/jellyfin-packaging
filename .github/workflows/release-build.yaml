@@ -65,6 +65,8 @@ jobs:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
           script: |
             set -o xtrace
             echo ${{ env.JELLYFIN_VERSION }}
@@ -88,6 +90,8 @@ jobs:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
           script: |
             sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
             sudo mv -t /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*
@@ -149,6 +153,8 @@ jobs:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
           script: |
             set -o xtrace
             echo ${{ env.JELLYFIN_VERSION }}
@@ -172,6 +178,8 @@ jobs:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
           script: |
             sudo mkdir -p /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
             sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*
