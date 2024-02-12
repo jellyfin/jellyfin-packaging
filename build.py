@@ -58,7 +58,7 @@ def build_package_deb(jvers, btype, barch, bvers):
 
     changelog = changelog.format(
         package_version=jvers,
-        package_build=f"{btype[:3]}{bvers.replace('.', '')}",
+        package_build=f"{btype[:3]}{osversion.replace('.', '')}",
         release_comment=comment,
         release_date=format_datetime(localtime())
     )
