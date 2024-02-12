@@ -28,9 +28,9 @@ jobs:
         id: version
         run: |-
           if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "BUILD_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
           else
-            echo "BUILD_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -46,7 +46,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          sudo ./build.py ${BUILD_VERSION} debian ${{ matrix.arch }} ${{ matrix.release }}
+          sudo ./build.py ${JELLYFIN_VERSION} debian ${{ matrix.arch }} ${{ matrix.release }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@v0.1.7
@@ -56,7 +56,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           source: "out/debian/*"
           strip_components: 2
-          target: "/srv/incoming/${BUILD_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}"
+          target: "/srv/incoming/${JELLYFIN_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}"
 
       - name: "Import artifacts into reprepro"
         uses: appleboy/ssh-action@v1.0.3
@@ -66,15 +66,19 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           script: |
             set -o xtrace
+            echo ${JELLYFIN_VERSION}
             if [[ ${{ inputs.version }} != "master" ]]; then
                 COMPONENT="main"
             else
                 COMPONENT="unstable"
             fi
-            flock /run/lock/github-reprepro-debian.lock sudo reprepro --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.deb
+            # Only include the architecture-dependent deb here, as the others are done only for amd64
+            flock /run/lock/github-reprepro-debian.lock sudo reprepro --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${JELLYFIN_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
-                # Only include a source DSC for amd64; the other architectures are the same and conflict
-                flock /run/lock/github-reprepro-debian.lock sudo reprepro --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+                # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
+                flock /run/lock/github-reprepro-debian.lock sudo reprepro --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${JELLYFIN_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb
+                # Only include the source DSC for amd64; the other architectures are the same and conflict
+                flock /run/lock/github-reprepro-debian.lock sudo reprepro --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${JELLYFIN_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
             fi
 
       - name: "Move artifacts into repository"
@@ -84,10 +88,10 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${BUILD_VERSION}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/mirror/releases/server/debian/versions/${BUILD_VERSION}/${{ matrix.arch }}/ /srv/incoming/${BUILD_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*
+            sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${JELLYFIN_VERSION}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/mirror/releases/server/debian/versions/${JELLYFIN_VERSION}/${{ matrix.arch }}/ /srv/incoming/${JELLYFIN_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/debian/versions/${BUILD_VERSION}/${{ matrix.arch }} /srv/repository/mirror/releases/server/debian/latest-server
+                sudo ln -s /srv/repository/mirror/releases/server/debian/versions/${JELLYFIN_VERSION}/${{ matrix.arch }} /srv/repository/mirror/releases/server/debian/latest-server
             fi
 
   Ubuntu:
@@ -107,9 +111,9 @@ jobs:
         id: version
         run: |-
           if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "BUILD_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
           else
-            echo "BUILD_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -125,7 +129,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          sudo ./build.py ${BUILD_VERSION} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
+          sudo ./build.py ${JELLYFIN_VERSION} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@v0.1.7
@@ -135,7 +139,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           source: "out/ubuntu/*"
           strip_components: 2
-          target: "/srv/incoming/${BUILD_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}"
+          target: "/srv/incoming/${JELLYFIN_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}"
 
       - name: "Import artifacts into reprepro"
         uses: appleboy/ssh-action@v1.0.3
@@ -145,15 +149,19 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           script: |
             set -o xtrace
+            echo ${JELLYFIN_VERSION}
             if [[ ${{ inputs.version }} != "master" ]]; then
                 COMPONENT="main"
             else
                 COMPONENT="unstable"
             fi
-            flock /run/lock/github-reprepro-ubuntu.lock sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.deb
+            # Only include the architecture-dependent deb here, as the others are done only for amd64
+            flock /run/lock/github-reprepro-ubuntu.lock sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${JELLYFIN_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
-                # Only include a source DSC for amd64; the other architectures are the same and conflict
-                flock /run/lock/github-reprepro-ubuntu.lock sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+                # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
+                flock /run/lock/github-reprepro-ubuntu.lock sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${JELLYFIN_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb
+                # Only include the source DSC for amd64; the other architectures are the same and conflict
+                flock /run/lock/github-reprepro-ubuntu.lock sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${JELLYFIN_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
             fi
 
       - name: "Move artifacts into repository"
@@ -163,9 +171,9 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/ubuntu/versions/${BUILD_VERSION}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${BUILD_VERSION}/${{ matrix.arch }} /srv/incoming/${BUILD_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*
+            sudo mkdir -p /srv/repository/mirror/releases/server/ubuntu/versions/${JELLYFIN_VERSION}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${JELLYFIN_VERSION}/${{ matrix.arch }} /srv/incoming/${JELLYFIN_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/ubuntu/versions/${BUILD_VERSION}/${{ matrix.arch }} /srv/repository/mirror/releases/server/ubuntu/latest-server
+                sudo ln -s /srv/repository/mirror/releases/server/ubuntu/versions/${JELLYFIN_VERSION}/${{ matrix.arch }} /srv/repository/mirror/releases/server/ubuntu/latest-server
             fi
 
