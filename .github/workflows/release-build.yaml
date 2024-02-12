@@ -38,3 +38,12 @@ jobs:
       - name: "Run builder for Debian ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
           sudo ./build.py ${{ inputs.version }} debian ${{ matrix.arch }} ${{ matrix.release }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/debian/*"
+          target: "/srv/incoming/${{ inputs.version }}/debian/${{ matrix.arch }}/${{ matrix.release }}"
