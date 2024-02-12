@@ -72,7 +72,10 @@ jobs:
                 COMPONENT="unstable"
             fi
             flock /run/lock/github-reprepro-debian.lock sudo reprepro --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.deb
-            flock /run/lock/github-reprepro-debian.lock sudo reprepro --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+            if [[ ${{ matrix.arch }} == "amd64" ]]; then
+                # Only include a source DSC for amd64; the other architectures are the same and conflict
+                flock /run/lock/github-reprepro-debian.lock sudo reprepro --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+            fi
 
       - name: "Move artifacts into repository"
         uses: appleboy/ssh-action@v1.0.3
@@ -148,7 +151,10 @@ jobs:
                 COMPONENT="unstable"
             fi
             flock /run/lock/github-reprepro-ubuntu.lock sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.deb
-            flock /run/lock/github-reprepro-ubuntu.lock sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+            if [[ ${{ matrix.arch }} == "amd64" ]]; then
+                # Only include a source DSC for amd64; the other architectures are the same and conflict
+                flock /run/lock/github-reprepro-ubuntu.lock sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${BUILD_VERSION}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+            fi
 
       - name: "Move artifacts into repository"
         uses: appleboy/ssh-action@v1.0.3
