@@ -78,3 +78,70 @@ jobs:
                 sudo ln -s /srv/repository/mirror/releases/server/debian/versions/${{ inputs.version }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/debian/latest-server
             fi
 
+  Ubuntu:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        release:
+          - focal
+          - jammy
+        # - noble
+        arch:
+          - amd64
+          - arm64
+          - armhf
+    steps:
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ github.event.client_payload.version }}
+
+      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ inputs.version }} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/ubuntu/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ inputs.version }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}"
+
+      - name: "Import artifacts into reprepro"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          script: |
+            set -o xtrace
+            if [[ ${{ inputs.version }} == "master" ]]; then
+                COMPONENT="main"
+            else
+                COMPONENT="unstable"
+            fi
+            sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ inputs.version }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.deb
+            sudo reprepro --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ inputs.version }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          script: |
+            sudo mkdir -p /srv/repository/mirror/releases/server/ubuntu/versions/${{ inputs.version }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${{ inputs.version }}/${{ matrix.arch }} /srv/incoming/${{ inputs.version }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.deb
+            if [[ ${{ inputs.version }} != "master" ]]; then
+                sudo ln -s /srv/repository/mirror/releases/server/ubuntu/versions/${{ inputs.version }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/ubuntu/latest-server
+            fi
+
