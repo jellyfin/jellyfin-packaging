@@ -61,7 +61,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           script: |
             set -o xtrace
-            if [[ ${{ steps.version.outputs.version }} != "master" ]]; then
+            if [[ ${{ inputs.version }} != "master" ]]; then
                 COMPONENT="main"
             else
                 COMPONENT="unstable"
@@ -78,7 +78,7 @@ jobs:
           script: |
             sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${{ steps.version.outputs.version }}/${{ matrix.arch }}
             sudo mv -t /srv/repository/mirror/releases/server/debian/versions/${{ steps.version.outputs.version }}/${{ matrix.arch }}/ /srv/incoming/${{ steps.version.outputs.version }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*
-            if [[ ${{ steps.version.outputs.version }} != "master" ]]; then
+            if [[ ${{ inputs.version }} != "master" ]]; then
                 sudo ln -s /srv/repository/mirror/releases/server/debian/versions/${{ steps.version.outputs.version }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/debian/latest-server
             fi
 
@@ -132,7 +132,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           script: |
             set -o xtrace
-            if [[ ${{ steps.version.outputs.version }} != "master" ]]; then
+            if [[ ${{ inputs.version }} != "master" ]]; then
                 COMPONENT="main"
             else
                 COMPONENT="unstable"
@@ -149,7 +149,7 @@ jobs:
           script: |
             sudo mkdir -p /srv/repository/mirror/releases/server/ubuntu/versions/${{ steps.version.outputs.version }}/${{ matrix.arch }}
             sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${{ steps.version.outputs.version }}/${{ matrix.arch }} /srv/incoming/${{ steps.version.outputs.version }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*
-            if [[ ${{ steps.version.outputs.version }} != "master" ]]; then
+            if [[ ${{ inputs.version }} != "master" ]]; then
                 sudo ln -s /srv/repository/mirror/releases/server/ubuntu/versions/${{ steps.version.outputs.version }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/ubuntu/latest-server
             fi
 
