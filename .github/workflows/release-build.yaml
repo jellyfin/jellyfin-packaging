@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: "Install dependencies"
         run: |-
-          apt-get install --yes python3-git
+          sudo apt-get install --yes python3-git
 
       - name: "Checkout Repository"
         uses: actions/checkout@v3
@@ -42,4 +42,4 @@ jobs:
     steps:
       - name: "Run builder for Debian ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          ./build.py ${{ github.event.client_payload.version }} debian ${{ matrix.arch }} ${{ matrix.version }}
+          sudo ./build.py ${{ github.event.client_payload.version }} debian ${{ matrix.arch }} ${{ matrix.version }}
