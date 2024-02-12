@@ -130,8 +130,6 @@ def build_windows(jvers, btype, _barch, _bvers):
     os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=win --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
-
-
 def build_macos(jvers, btype, barch, _bvers):
     try:
         PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
