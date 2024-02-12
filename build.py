@@ -416,4 +416,7 @@ try:
 except IndexError:
     bvers = None
 
+if jvers == "master":
+    jvers = datetime.now().strftime("%Y%m%d%H%M%S")
+
 configurations[btype]['def'](jvers, btype, barch, bvers)
