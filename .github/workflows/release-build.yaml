@@ -21,8 +21,8 @@ jobs:
           - bookworm
         arch:
           - amd64
-          - arm64
-          - armhf
+#          - arm64
+#          - armhf
     steps:
       - name: "Install dependencies"
         run: |-
