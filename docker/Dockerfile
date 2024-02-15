@@ -15,13 +15,13 @@ ARG NEO_VERSION=23.30.26918.9
 ARG LEVEL_ZERO_VERSION=1.3.26918.9
 
 # Debian architecture (amd64, arm64, armhf), set by build script
-ARG PARCH
+ARG PACKAGE_ARCH
 # Dotnet architeture (x64, arm64, arm), set by build script
-ARG DARCH
+ARG DOTNET_ARCH
 # QEMU architecture (x86_64, aarch64, arm), set by build script
-ARG QARCH
+ARG QEMU_ARCH
 # Base Image archiecture (amd64, arm64v8, arm32v7), set by build script
-ARG BARCH
+ARG IMAGE_ARCH
 
 #
 # Build the web artifacts
@@ -58,7 +58,7 @@ RUN npm ci --no-audit --unsafe-perm \
 #
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-${OS_VERSION}-slim as server
 
-ARG DARCH
+ARG DOTNET_ARCH
 
 ARG SOURCE_DIR=/src
 ARG ARTIFACT_DIR=/server
@@ -69,13 +69,13 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 RUN dotnet publish Jellyfin.Server --configuration Release \
     --output="${ARTIFACT_DIR}" --self-contained \
-    --runtime linux-${DARCH} -p:DebugSymbols=false -p:DebugType=none
+    --runtime linux-${DOTNET_ARCH} -p:DebugSymbols=false -p:DebugType=none
 
 #
 # Build the final combined image
 #
-FROM multiarch/qemu-user-static:x86_64-${QARCH} as qemu
-FROM ${BARCH}/debian:${OS_VERSION}-slim as combined
+FROM multiarch/qemu-user-static:x86_64-${QEMU_ARCH} as qemu
+FROM ${IMAGE_ARCH}/debian:${OS_VERSION}-slim as combined
 
 ARG OS_VERSION
 ARG FFMPEG_PACKAGE
@@ -85,9 +85,9 @@ ARG IGC_VERSION
 ARG NEO_VERSION
 ARG LEVEL_ZERO_VERSION
 
-ARG PARCH
-ARG DARCH
-ARG QARCH
+ARG PACKAGE_ARCH
+ARG DOTNET_ARCH
+ARG QEMU_ARCH
 
 # Copy the QEMU runtime
 COPY --from=qemu /usr/bin/* /usr/bin
@@ -126,7 +126,7 @@ RUN apt-get update \
     apt-transport-https \
  && curl -fsSL https://repo.jellyfin.org/jellyfin_team.gpg.key \
   | gpg --dearmor -o /etc/apt/trusted.gpg.d/debian-jellyfin.gpg \
- && echo "deb [arch=${PARCH}] https://repo.jellyfin.org/debian ${OS_VERSION} main" > /etc/apt/sources.list.d/jellyfin.list \
+ && echo "deb [arch=${PACKAGE_ARCH}] https://repo.jellyfin.org/debian ${OS_VERSION} main" > /etc/apt/sources.list.d/jellyfin.list \
  && apt-get update \
  && apt-get install --no-install-recommends --no-install-suggests --yes \
     ${FFMPEG_PACKAGE} \
@@ -144,7 +144,7 @@ RUN apt-get update \
 # Prefer NEO to Beignet since the latter one doesn't support Comet Lake or newer for now.
 # Do not use the intel-opencl-icd package from repo since they will not build with RELEASE_WITH_REGKEYS enabled.
 # https://github.com/intel/compute-runtime/releases
-RUN if [[ ${PARCH} == "amd64" ]]; then \
+RUN if [[ ${PACKAGE_ARCH} == "amd64" ]]; then \
     mkdir intel-compute-runtime \
  && pushd intel-compute-runtime \
  && wget https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/libigdgmm12_${GMMLIB_VERSION}_amd64.deb \

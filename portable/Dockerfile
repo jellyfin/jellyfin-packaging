@@ -2,23 +2,23 @@
 ARG DOTNET_VERSION=8.0
 ARG NODEJS_VERSION=20
 
-ARG PTYPE=debian
-ARG PVERSION=12
+ARG PACKAGE_TYPE=debian
+ARG PACKAGE_VERSION=12
 
-FROM ${PTYPE}:${PVERSION}
+FROM ${PACKAGE_TYPE}:${PACKAGE_VERSION}
 
 ARG SOURCE_DIR=/jellyfin
 ARG ARTIFACT_DIR=/dist
 ARG DOTNET_VERSION
 ARG NODEJS_VERSION
-ARG PTYPE
-ARG PVERSION
+ARG PACKAGE_TYPE
+ARG PACKAGE_VERSION
 
 # Docker run environment
 ENV SOURCE_DIR=/jellyfin
 ENV ARTIFACT_DIR=/dist
-ENV TYPE=${PTYPE}
-ENV VERSION=${PVERSION}
+ENV TYPE=${PACKAGE_TYPE}
+ENV VERSION=${PACKAGE_VERSION}
 ENV ARCHIVE_TYPES=tar
 
 # Prepare Debian build environment
@@ -33,7 +33,7 @@ RUN apt-get update -y \
  && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Prepare dotnet SDK
-RUN wget https://packages.microsoft.com/config/${PTYPE}/${PVERSION}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
+RUN wget https://packages.microsoft.com/config/${PACKAGE_TYPE}/${PACKAGE_VERSION}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
  && dpkg -i packages-microsoft-prod.deb \
  && apt-get -f install \
  && apt-get update \

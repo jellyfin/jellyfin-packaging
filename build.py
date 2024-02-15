@@ -22,26 +22,26 @@ repo_root_dir = revparse.stdout.decode().strip()
 docker_build_cmd = "docker build --progress=plain --no-cache"
 docker_run_cmd = "docker run --rm"
 
-def build_package_deb(jvers, btype, barch, bvers):
+def build_package_deb(jellyfin_version, build_type, build_arch, build_version):
     try:
-        ostype = btype if btype in configurations.keys() else None
-        if ostype is None:
-            raise ValueError(f"{btype} is not a valid OS type in {configurations.keys()}")
-        osversion = configurations[btype]['releases'][bvers] if bvers in configurations[btype]['releases'].keys() else None
-        if osversion is None:
-            raise ValueError(f"{bvers} is not a valid {btype} version in {configurations[btype]['releases'].keys()}")
-        PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
-        if PARCH is None:
-            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
+        os_type = build_type if build_type in configurations.keys() else None
+        if os_type is None:
+            raise ValueError(f"{build_type} is not a valid OS type in {configurations.keys()}")
+        os_version = configurations[build_type]['releases'][build_version] if build_version in configurations[build_type]['releases'].keys() else None
+        if os_version is None:
+            raise ValueError(f"{build_version} is not a valid {build_type} version in {configurations[build_type]['releases'].keys()}")
+        PACKAGE_ARCH = configurations[build_type]['archmaps'][build_arch]['PACKAGE_ARCH'] if build_arch in configurations[build_type]['archmaps'].keys() else None
+        if PACKAGE_ARCH is None:
+            raise ValueError(f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}")
     except Exception as e:
         print(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
     # Set the dockerfile
-    dockerfile = configurations[btype]["dockerfile"]
+    dockerfile = configurations[build_type]["dockerfile"]
 
     # Set the cross-gcc version
-    crossgccvers = configurations[btype]['cross-gcc'][bvers]
+    crossgccvers = configurations[build_type]['cross-gcc'][build_version]
 
     # Prepare the debian changelog file
     changelog_src = f"{repo_root_dir}/debian/changelog.in"
@@ -50,15 +50,15 @@ def build_package_deb(jvers, btype, barch, bvers):
     with open(changelog_src) as fh:
         changelog = fh.read()
 
-    if "v" in jvers:
-        comment = f"Jellyfin release {jvers}, see https://github.com/jellyfin/jellyfin/releases/{jvers} for details."
+    if "v" in jellyfin_version:
+        comment = f"Jellyfin release {jellyfin_version}, see https://github.com/jellyfin/jellyfin/releases/{jellyfin_version} for details."
     else:
-        comment = f"Jellyin unstable release {jvers}."
-    jvers = jvers.replace('v', '')
+        comment = f"Jellyin unstable release {jellyfin_version}."
+    jellyfin_version = jellyfin_version.replace('v', '')
 
     changelog = changelog.format(
-        package_version=jvers,
-        package_build=f"{btype[:3]}{osversion.replace('.', '')}",
+        package_version=jellyfin_version,
+        package_build=f"{build_type[:3]}{os_version.replace('.', '')}",
         release_comment=comment,
         release_date=format_datetime(localtime())
     )
@@ -67,113 +67,113 @@ def build_package_deb(jvers, btype, barch, bvers):
         fh.write(changelog)
 
     # Use a unique docker image name for consistency
-    imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}-{bvers}"
+    imagename = f"{configurations[build_type]['imagename']}-{jellyfin_version}_{build_arch}-{build_type}-{build_version}"
 
     # Build the dockerfile and packages
-    os.system(f"{docker_build_cmd} --build-arg PTYPE={ostype} --build-arg PVERSION={osversion} --build-arg PARCH={PARCH} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --name {imagename} {imagename}")
+    os.system(f"{docker_build_cmd} --build-arg PACKAGE_TYPE={os_type} --build-arg PACKAGE_VERSION={os_version} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --name {imagename} {imagename}")
 
 
-def build_package_rpm(jvers, btype, barch, bvers):
+def build_package_rpm(jellyfin_version, build_type, build_arch, build_version):
     pass
 
 
-def build_linux(jvers, btype, barch, _bvers):
+def build_linux(jellyfin_version, build_type, build_arch, _build_version):
     try:
-        PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
-        if PARCH is None:
-            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
-        DARCH = configurations[btype]['archmaps'][barch]['DARCH']
+        PACKAGE_ARCH = configurations[build_type]['archmaps'][build_arch]['PACKAGE_ARCH'] if build_arch in configurations[build_type]['archmaps'].keys() else None
+        if PACKAGE_ARCH is None:
+            raise ValueError(f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}")
+        DOTNET_ARCH = configurations[build_type]['archmaps'][build_arch]['DOTNET_ARCH']
     except Exception as e:
         print(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
-    jvers = jvers.replace('v', '')
+    jellyfin_version = jellyfin_version.replace('v', '')
 
     # Set the dockerfile
-    dockerfile = configurations[btype]["dockerfile"]
+    dockerfile = configurations[build_type]["dockerfile"]
 
     # Use a unique docker image name for consistency
-    imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}"
+    imagename = f"{configurations[build_type]['imagename']}-{jellyfin_version}_{build_arch}-{build_type}"
 
     # Set the archive type (tar-gz or zip)
-    archivetypes = f"{configurations[btype]['archivetypes']}"
+    archivetypes = f"{configurations[build_type]['archivetypes']}"
 
     # Build the dockerfile and packages
     os.system(f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=linux --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=linux --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
-def build_windows(jvers, btype, _barch, _bvers):
+def build_windows(jellyfin_version, build_type, _build_arch, _build_version):
     try:
-        PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
-        if PARCH is None:
-            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
-        DARCH = configurations[btype]['archmaps'][barch]['DARCH']
+        PACKAGE_ARCH = configurations[build_type]['archmaps'][build_arch]['PACKAGE_ARCH'] if build_arch in configurations[build_type]['archmaps'].keys() else None
+        if PACKAGE_ARCH is None:
+            raise ValueError(f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}")
+        DOTNET_ARCH = configurations[build_type]['archmaps'][build_arch]['DOTNET_ARCH']
     except Exception as e:
         print(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
-    jvers = jvers.replace('v', '')
+    jellyfin_version = jellyfin_version.replace('v', '')
 
     # Set the dockerfile
-    dockerfile = configurations[btype]["dockerfile"]
+    dockerfile = configurations[build_type]["dockerfile"]
 
     # Use a unique docker image name for consistency
-    imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}"
+    imagename = f"{configurations[build_type]['imagename']}-{jellyfin_version}_{build_arch}-{build_type}"
 
     # Set the archive type (tar-gz or zip)
-    archivetypes = f"{configurations[btype]['archivetypes']}"
+    archivetypes = f"{configurations[build_type]['archivetypes']}"
 
     # Build the dockerfile and packages
     os.system(f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=win --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=win --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
-def build_macos(jvers, btype, barch, _bvers):
+def build_macos(jellyfin_version, build_type, build_arch, _build_version):
     try:
-        PARCH = configurations[btype]['archmaps'][barch]['PARCH'] if barch in configurations[btype]['archmaps'].keys() else None
-        if PARCH is None:
-            raise ValueError(f"{barch} is not a valid {btype} {bvers} architecture in {configurations[btype]['archmaps'].keys()}")
-        DARCH = configurations[btype]['archmaps'][barch]['DARCH']
+        PACKAGE_ARCH = configurations[build_type]['archmaps'][build_arch]['PACKAGE_ARCH'] if build_arch in configurations[build_type]['archmaps'].keys() else None
+        if PACKAGE_ARCH is None:
+            raise ValueError(f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}")
+        DOTNET_ARCH = configurations[build_type]['archmaps'][build_arch]['DOTNET_ARCH']
     except Exception as e:
         print(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
-    jvers = jvers.replace('v', '')
+    jellyfin_version = jellyfin_version.replace('v', '')
 
     # Set the dockerfile
-    dockerfile = configurations[btype]["dockerfile"]
+    dockerfile = configurations[build_type]["dockerfile"]
 
     # Use a unique docker image name for consistency
-    imagename = f"{configurations[btype]['imagename']}-{jvers}_{barch}-{btype}"
+    imagename = f"{configurations[build_type]['imagename']}-{jellyfin_version}_{build_arch}-{build_type}"
 
     # Set the archive type (tar-gz or zip)
-    archivetypes = f"{configurations[btype]['archivetypes']}"
+    archivetypes = f"{configurations[build_type]['archivetypes']}"
 
     # Build the dockerfile and packages
     os.system(f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env PARCH={PARCH} --env DTYPE=osx --env DARCH={DARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=osx --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
-def build_portable(jvers, btype, _barch, _bvers):
-    jvers = jvers.replace('v', '')
+def build_portable(jellyfin_version, build_type, _build_arch, _build_version):
+    jellyfin_version = jellyfin_version.replace('v', '')
 
     # Set the dockerfile
-    dockerfile = configurations[btype]["dockerfile"]
+    dockerfile = configurations[build_type]["dockerfile"]
 
     # Use a unique docker image name for consistency
-    imagename = f"{configurations[btype]['imagename']}-{jvers}_{btype}"
+    imagename = f"{configurations[build_type]['imagename']}-{jellyfin_version}_{build_type}"
 
     # Set the archive type (tar-gz or zip)
-    archivetypes = f"{configurations[btype]['archivetypes']}"
+    archivetypes = f"{configurations[build_type]['archivetypes']}"
 
     # Build the dockerfile and packages
     os.system(f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{btype}:/dist --env JVERS={jvers} --env BTYPE={btype} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}")
 
 
-def build_docker(jvers, btype, _barch, _bvers):
+def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     print("> Building Docker images...")
     print()
 
@@ -181,60 +181,77 @@ def build_docker(jvers, btype, _barch, _bvers):
     architectures = configurations['docker']['archmaps'].keys()
 
     # Set the dockerfile
-    dockerfile = configurations[btype]["dockerfile"]
+    dockerfile = configurations[build_type]["dockerfile"]
 
-    # Determine if this is a "latest"-type image (v in jvers) or not
-    if "v" in jvers:
+    # Determine if this is a "latest"-type image (v in jellyfin_version) or not
+    if "v" in jellyfin_version:
         is_latest = True
         version_suffix = True
     else:
         is_latest = False
         version_suffix = False
 
-    jvers = jvers.replace('v', '')
+    jellyfin_version = jellyfin_version.replace('v', '')
 
     # Set today's date in a convenient format for use as an image suffix
     date = datetime.now().strftime("%Y%m%d-%H%M%S")
 
     images = list()
-    for _barch in architectures:
-        print(f">> Building Docker image for {_barch}...")
+    for _build_arch in architectures:
+        print(f">> Building Docker image for {_build_arch}...")
         print()
 
         # Get our ARCH variables from the archmaps
-        PARCH = configurations['docker']['archmaps'][_barch]['PARCH']
-        DARCH = configurations['docker']['archmaps'][_barch]['DARCH']
-        QARCH = configurations['docker']['archmaps'][_barch]['QARCH']
-        BARCH = configurations['docker']['archmaps'][_barch]['BARCH']
+        PACKAGE_ARCH = configurations['docker']['archmaps'][_build_arch]['PACKAGE_ARCH']
+        DOTNET_ARCH = configurations['docker']['archmaps'][_build_arch]['DOTNET_ARCH']
+        QEMU_ARCH = configurations['docker']['archmaps'][_build_arch]['QEMU_ARCH']
+        IMAGE_ARCH = configurations['docker']['archmaps'][_build_arch]['IMAGE_ARCH']
 
         # Use a unique docker image name for consistency
         if version_suffix:
-            imagename = f"{configurations['docker']['imagename']}:{jvers}-{_barch}.{date}"
+            imagename = f"{configurations['docker']['imagename']}:{jellyfin_version}-{_build_arch}.{date}"
         else:
-            imagename = f"{configurations['docker']['imagename']}:{jvers}-{_barch}"
+            imagename = f"{configurations['docker']['imagename']}:{jellyfin_version}-{_build_arch}"
 
         # Clean up any existing qemu static image
         os.system(f"{docker_run_cmd} --privileged multiarch/qemu-user-static:register --reset")
         print()
 
         # Build the dockerfile
-        os.system(f"{docker_build_cmd} --build-arg PARCH={PARCH} --build-arg DARCH={DARCH} --build-arg QARCH={QARCH} --build-arg BARCH={BARCH} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+        os.system(f"{docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
 
         images.append(imagename)
         print()
 
     # Build the manifests
     print(f">> Building Docker manifests...")
+    manifests = list()
 
     if version_suffix:
         print(f">>> Building dated version manifest...")
-        os.system(f"docker manifest create --amend {configurations['docker']['imagename']}:{jvers}.{date} {' '.join(images)}") 
+        os.system(f"docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}") 
+        manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}.{date}")
 
     print(f">>> Building version manifest...")
-    os.system(f"docker manifest create --amend {configurations['docker']['imagename']}:{jvers} {' '.join(images)}") 
+    os.system(f"docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}") 
+    manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}")
+
     if is_latest:
         print(f">>> Building latest manifest...")
         os.system(f"docker manifest create --amend {configurations['docker']['imagename']}:latest {' '.join(images)}") 
+        manifests.append(f"{configurations['docker']['imagename']}:latest")
+
+    # Push the images and manifests to DockerHub (we are already logged in from GH Actions)
+    for image in images:
+        os.system(f"docker push {image}")
+    for manifest in manifests:
+        os.system(f"docker manifest push --purge {manifest}")
+
+    # Push the images and manifests to GHCR (we are already logged in from GH Actions)
+    for image in images:
+        os.system(f"docker push ghcr.io/{image}")
+    for manifest in manifests:
+        os.system(f"docker manifest push --purge ghcr.io/{manifest}")
 
 
 # Define a map of possible configurations
@@ -245,13 +262,13 @@ configurations = {
         "imagename": "jellyfin-builder",
         "archmaps": {
             "amd64": {
-                "PARCH": "amd64",
+                "PACKAGE_ARCH": "amd64",
             },
             "arm64": {
-                "PARCH": "arm64",
+                "PACKAGE_ARCH": "arm64",
             },
             "armhf": {
-                "PARCH": "armhf",
+                "PACKAGE_ARCH": "armhf",
             },
         },
         "releases": {
@@ -269,13 +286,13 @@ configurations = {
         "imagename": "jellyfin-builder",
         "archmaps": {
             "amd64": {
-                "PARCH": "amd64",
+                "PACKAGE_ARCH": "amd64",
             },
             "arm64": {
-                "PARCH": "arm64",
+                "PACKAGE_ARCH": "arm64",
             },
             "armhf": {
-                "PARCH": "armhf",
+                "PACKAGE_ARCH": "armhf",
             },
         },
         "releases": {
@@ -302,24 +319,24 @@ configurations = {
         "archivetypes": "tar",
         "archmaps": {
             "amd64": {
-                "PARCH": "amd64",
-                "DARCH": "x64",
+                "PACKAGE_ARCH": "amd64",
+                "DOTNET_ARCH": "x64",
             },
             "amd64-musl": {
-                "PARCH": "amd64-musl",
-                "DARCH": "musl-x64",
+                "PACKAGE_ARCH": "amd64-musl",
+                "DOTNET_ARCH": "musl-x64",
             },
             "arm64": {
-                "PARCH": "arm64",
-                "DARCH": "arm64",
+                "PACKAGE_ARCH": "arm64",
+                "DOTNET_ARCH": "arm64",
             },
             "arm64-musl": {
-                "PARCH": "arm64-musl",
-                "DARCH": "musl-arm64",
+                "PACKAGE_ARCH": "arm64-musl",
+                "DOTNET_ARCH": "musl-arm64",
             },
             "armhf": {
-                "PARCH": "armhf",
-                "DARCH": "arm",
+                "PACKAGE_ARCH": "armhf",
+                "DOTNET_ARCH": "arm",
             },
         },
     },
@@ -330,12 +347,12 @@ configurations = {
         "archivetypes": "zip",
         "archmaps": {
             "amd64": {
-                "PARCH": "amd64",
-                "DARCH": "x64",
+                "PACKAGE_ARCH": "amd64",
+                "DOTNET_ARCH": "x64",
             },
             "arm64": {
-                "PARCH": "arm64",
-                "DARCH": "arm64",
+                "PACKAGE_ARCH": "arm64",
+                "DOTNET_ARCH": "arm64",
             },
         },
     },
@@ -346,12 +363,12 @@ configurations = {
         "archivetypes": "tar",
         "archmaps": {
             "amd64": {
-                "PARCH": "amd64",
-                "DARCH": "x64",
+                "PACKAGE_ARCH": "amd64",
+                "DOTNET_ARCH": "x64",
             },
             "arm64": {
-                "PARCH": "arm64",
-                "DARCH": "arm64",
+                "PACKAGE_ARCH": "arm64",
+                "DOTNET_ARCH": "arm64",
             },
         },
     },
@@ -367,50 +384,50 @@ configurations = {
         "imagename": "jellyfin/jellyfin",
         "archmaps": {
             "amd64": {
-                "PARCH": "amd64",
-                "DARCH": "x64",
-                "QARCH": "x86_64",
-                "BARCH": "amd64",
+                "PACKAGE_ARCH": "amd64",
+                "DOTNET_ARCH": "x64",
+                "QEMU_ARCH": "x86_64",
+                "IMAGE_ARCH": "amd64",
             },
             "arm64": {
-                "PARCH": "arm64",
-                "DARCH": "arm64",
-                "QARCH": "aarch64",
-                "BARCH": "arm64v8",
+                "PACKAGE_ARCH": "arm64",
+                "DOTNET_ARCH": "arm64",
+                "QEMU_ARCH": "aarch64",
+                "IMAGE_ARCH": "arm64v8",
             },
             "armhf": {
-                "PARCH": "armhf",
-                "DARCH": "arm",
-                "QARCH": "arm",
-                "BARCH": "arm32v7",
+                "PACKAGE_ARCH": "armhf",
+                "DOTNET_ARCH": "arm",
+                "QEMU_ARCH": "arm",
+                "IMAGE_ARCH": "arm32v7",
             },
         }
     },
 }
 
 def usage():
-    print(f"{sys.argv[0]} JVERS BTYPE [BARCH] [BVERS]")
-    print(f" JVERS: The Jellyfin version being built; stable releases should be tag names with a 'v' e.g. v10.9.0")
-    print(f" BTYPE: A valid build OS type (debian, ubuntu, fedora, centos, docker, portable, linux, windows, macos)")
-    print(f" BARCH: A valid build OS CPU architecture (empty [portable/docker], amd64, arm64, or armhf)")
-    print(f" BVERS: A valid build OS version (packaged OS types only)")
+    print(f"{sys.argv[0]} JELLYFIN_VERSION BUILD_TYPE [BUILD_ARCH] [BUILD_VERSION]")
+    print(f" JELLYFIN_VERSION: The Jellyfin version being built; stable releases should be tag names with a 'v' e.g. v10.9.0")
+    print(f" BUILD_TYPE: A valid build OS type (debian, ubuntu, fedora, centos, docker, portable, linux, windows, macos)")
+    print(f" BUILD_ARCH: A valid build OS CPU architecture (empty [portable/docker], amd64, arm64, or armhf)")
+    print(f" BUILD_VERSION: A valid build OS version (packaged OS types only)")
 
 try:
-    jvers = sys.argv[1]
-    btype = sys.argv[2]
+    jellyfin_version = sys.argv[1]
+    build_type = sys.argv[2]
 except IndexError:
     usage()
     exit(1)
 try:
-    barch = sys.argv[3]
+    build_arch = sys.argv[3]
 except IndexError:
-    barch = None
+    build_arch = None
 try:
-    bvers = sys.argv[4]
+    build_version = sys.argv[4]
 except IndexError:
-    bvers = None
+    build_version = None
 
-if jvers == "master":
-    jvers = datetime.now().strftime("%Y%m%d%H")
+if jellyfin_version == "master":
+    jellyfin_version = datetime.now().strftime("%Y%m%d%H")
 
-configurations[btype]['def'](jvers, btype, barch, bvers)
+configurations[build_type]['def'](jellyfin_version, build_type, build_arch, build_version)

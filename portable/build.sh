@@ -20,7 +20,7 @@ case ${BTYPE} in
         APPHOST="-p:UseAppHost=false"
     ;;
     *)
-        RUNTIME="--self-contained --runtime ${DTYPE}-${DARCH}"
+        RUNTIME="--self-contained --runtime ${DOTNET_TYPE}-${DOTNET_ARCH}"
         APPHOST="-p:UseAppHost=true"
     ;;
 esac
@@ -36,8 +36,8 @@ popd
 
 mkdir -p "${ARTIFACT_DIR}/"
 
-if [[ -n ${PARCH} ]]; then
-    VERSION_SUFFIX="${JVERS}-${PARCH}"
+if [[ -n ${PACKAGE_ARCH} ]]; then
+    VERSION_SUFFIX="${JVERS}-${PACKAGE_ARCH}"
 else
     VERSION_SUFFIX="${JVERS}"
 fi
