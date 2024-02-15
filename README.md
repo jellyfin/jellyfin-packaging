@@ -92,6 +92,14 @@ Inside this repository are 7 major components:
 
    This was chosen to ensure a clean slate for every build, as well as enable release-specific builds due to the complexities of our shared dependencies (e.g. `libssl`).
 
+* Per-release/version builds: package versions contain the specific OS version (e.g. `-deb11`, `-ubu2204`)
+
+   This enables support for different builds and packages for each OS release, simplifying shared dependency handling as mentioned above.
+
+* Ubuntu LTS-only support: non-LTS Ubuntu versions have been dropped
+
+   This simplifies our builds as we do not need to then track many 9-month-only releases of Ubuntu, and also reduces the build burden. Users of non-LTS Ubuntu releases can use either the closest Ubuntu LTS version, or use Docker containers instead.
+
 ### Fedora/CentOS Packages
 
 TODO - these have not yet been implemented.
