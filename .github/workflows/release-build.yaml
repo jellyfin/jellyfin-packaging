@@ -109,7 +109,7 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
+          script_stop: false
           script: |
             set -o xtrace
             if [[ ${{ inputs.version }} != "master" ]]; then
@@ -118,12 +118,12 @@ jobs:
                 COMPONENT="unstable"
             fi
             # Only include the architecture-dependent deb here, as the others are done only for amd64
-            sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb
+            sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
                 # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb
+                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
                 # Only include the source DSC for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
             fi
 
       - name: "Move artifacts into repository"
@@ -133,12 +133,12 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
+          script_stop: false
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*
+            sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/debian/latest-server
+                sudo ln -s /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/debian/latest-server || exit 1
             fi
 
   Ubuntu:
@@ -196,7 +196,7 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
+          script_stop: false
           script: |
             set -o xtrace
             if [[ ${{ inputs.version }} != "master" ]]; then
@@ -205,12 +205,12 @@ jobs:
                 COMPONENT="unstable"
             fi
             # Only include the architecture-dependent deb here, as the others are done only for amd64
-            sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb
+            sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
                 # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb
+                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
                 # Only include the source DSC for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc
+                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
             fi
 
       - name: "Move artifacts into repository"
@@ -220,12 +220,12 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
+          script_stop: false
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*
+            sudo mkdir -p /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/ubuntu/latest-server
+                sudo ln -s /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/ubuntu/latest-server || exit 1
             fi
 
   Linux:
