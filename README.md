@@ -82,6 +82,10 @@ Inside this repository are 7 major components:
 
   This ensures that the code checked out is consistent to both repositories, and allows for the unified builds described below without extra steps to combine.
 
+* Remote manual-only triggers: CI workers are triggered by a remote bot
+
+  This reduces the complexity of triggering builds; while it can be done manually in this repo, using an external bot allows for more release wrapper actions to occur before triggering builds.
+
 ### Debian/Ubuntu Packages
 
 * Unified package build: this entire repo is the "source" and the source package is named "jellyfin".
