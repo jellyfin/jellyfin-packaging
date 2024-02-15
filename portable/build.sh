@@ -36,14 +36,20 @@ popd
 
 mkdir -p "${ARTIFACT_DIR}/"
 
+if [[ -n ${PARCH} ]]; then
+    VERSION_SUFFIX="${JVERS}-${PARCH}"
+else
+    VERSION_SUFFIX="${JVERS}"
+fi
+
 pushd ${BUILD_DIR}
 for ARCHIVE_TYPE in $( tr ',' '\n' <<<"${ARCHIVE_TYPES}" ); do
     case ${ARCHIVE_TYPE} in
         tar)
-            tar -czf "${ARTIFACT_DIR}"/jellyfin_${JVERS}-${PARCH}.tar.gz .
+            tar -czf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.gz .
         ;;
         zip)
-            zip -qr "${ARTIFACT_DIR}"/jellyfin_${JVERS}-${PARCH}.zip .
+            zip -qr "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.zip .
         ;;
     esac
 done
