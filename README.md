@@ -30,7 +30,7 @@
 <img alt="Chat on Matrix" src="https://img.shields.io/matrix/jellyfin:matrix.org.svg?logo=matrix"/>
 </a>
 <a href="https://forum.jellyfin.org">
-<img alt="Join our Forum" src="https://img.shields.io/badge/Forum_forum.jellyfin.org-blue"/>
+<img alt="Join our Forum" src="https://img.shields.io/badge/Forum-forum.jellyfin.org-blue"/>
 </a>
 <a href="https://github.com/jellyfin/jellyfin/releases.atom">
 <img alt="Release RSS Feed" src="https://img.shields.io/badge/rss-releases-ffa500?logo=rss" />
