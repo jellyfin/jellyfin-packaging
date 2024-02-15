@@ -122,4 +122,4 @@ TODO - these have not yet been implemented.
 
 * Single unified build: the entirety of the output package is built in one container from one Dockerfile, with the output archive type (`.tar.gz` or `.zip`) chosen based on the target.
 
-   This was chosen to keep the portable builds as simple as possible without requiring complex archivec combining (as was the case with our previous CI).
+   This was chosen to keep the portable builds as simple as possible without requiring complex archive combining (as was the case with our previous CI).
