@@ -105,6 +105,10 @@ TODO - these have not yet been implemented.
 
    This was chosen to keep our Docker builds as simple as possible without requiring 2 intervening images (as was the case with our previous CI).
 
+* Push to both DockerHub and GHCR (GitHub Packages)
+
+   This ensures flexibility for container users to fetch the containers from whatever repository they choose.
+
 ### Portable Builds (Portable .NET, Linux, MacOS, Windows)
 
 * Single unified build: the entirety of the output package is built in one container from one Dockerfile, with the output archive type (`.tar.gz` or `.zip`) chosen based on the target.
