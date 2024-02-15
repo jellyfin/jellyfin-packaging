@@ -49,21 +49,41 @@ Jellyfin is a Free Software Media System that puts you in control of managing an
 
 This repository contains packaging for Jellyfin 10.9.0 and above, for use by manual builders or the CI system with GitHub workflows.
 
-Inside this repository are 6 major components:
+Inside this repository are 7 major components:
 
-1. Submodules for the `jellyfin` and `jellyfin-web` repositories. These are dynamic submodules; while the repo has them committed at a given version, this is only updated on an official release build. Note that for simplicity, the `jellyfin` repo is in a folder here called `jellyfin-server`.
+1. Submodules for the `jellyfin` (as `jellyfin-server`) and `jellyfin-web` repositories. These are dynamic submodules; the `checkout.py` script will check them out to the required `HEAD` on each build, and thus their actual committed value is irrelevant. Nonetheless, they should be bumped occasionally just to avoid excessive checkout times later.
 
 2. Debian/Ubuntu packaging configurations (under `debian`). These will build the 3 Jellyfin packages (`jellyfin` metapackage, `jellyfin-server` core server, and `jellyfin-web` web client). Future packages (e.g. Vue) may be added here if and when they are promoted to a production build alongside the others.
 
-3. Fedora/CentOS packaging configurations (under `fedora`). These will build the same packages as Debian.
+3. Fedora/CentOS packaging configurations (under `fedora`). These will build the same packages as Debian. This is still a TODO.
 
-4. Docker image builders. Like the above two as well, only building the combined Docker images.
+4. Docker image builder (under `docker`). Like the above two as well, only building the combined Docker images with a single Dockerfile.
 
-5. Script infrastructure to handle coordinating builds from the main repos on a release trigger.
+5. Script infrastructure to handle coordinating builds (`build.py`). This script takes basic arguments and, using its internal logic, fires the correct Dockerized builds for the given build type.
 
-6. The GitHub Actions CI to build all the above.
+6. The GitHub Actions CI to build all the above for every supported version and architecture.
 
 ## Design Decisions
+
+### General
+
+* Unified packaging: all packaging is in this repository (vs. within the `jellyfin-server` and `jellyfin-web` repositories)
+
+  This helps ensure two things:
+    1. There is a single source of truth for packaging. Previously, there were at least 3 sources of truth and this became very confusing to update.
+    2. Packaging can be run and managed independently of actual code, simplifying the release and build process.
+
+* GitHub Actions for CI: all builds use the GitHub Actions system instead of Azure DevOps
+
+  This helps ensure that CI is visible in a "single pane of glass" (GitHub) and is easier to manage long-term.
+
+* Python script-based builds: Building actually happens via the `build.py` script
+
+  This helps reduce the complexity of the builds by ensuring that the logic to actually generate specific builds is handled in one place in a consistent, well-known language, instead of the CI definitions.
+
+* Git Submodules to handle code (vs. cross-repo builds)
+
+  This ensures that the code checked out is consistent to both repositories, and allows for the unified builds described below without extra steps to combine.
 
 ### Debian/Ubuntu Packages
 
@@ -71,9 +91,22 @@ Inside this repository are 6 major components:
 
    This was chosen to simplify the source package system and simplify building. Now, there is only a single "jellyfin" source package rather than 2. There may be more in the future as other repos might be included (e.g. "jellyfin-ffmpeg", "jellyfin-vue", etc.)
 
-   We believe this setup provides better flexibility long-term, for instance allowing rebuilds of a Debian package for configuration changes or build errors, even if the underlying code versions haven't changed.
+* Dockerized build (`debian/docker/`): the build is run inside a Docker container.
 
-   We believe this setup provides easier manageability *vis-a-vis* CI, as only a single CI repo is required for both (or all) source repos.
+   This was chosen to ensure a clean slate for every build, as well as enable release-specific builds due to the complexities of our shared dependencies (e.g. `libssl`).
+
+### Fedora/CentOS Packages
+
+TODO - these have not yet been implemented.
 
 ### Docker
 
+* Single unified Docker build: the entirety of our Docker images are built as one container from one Dockerfile.
+
+   This was chosen to keep our Docker builds as simple as possible without requiring 2 intervening images (as was the case with our previous CI).
+
+### Portable Builds (Portable .NET, Linux, MacOS, Windows)
+
+* Single unified build: the entirety of the output package is built in one container from one Dockerfile, with the output archive type (`.tar.gz` or `.zip`) chosen based on the target.
+
+   This was chosen to keep the portable builds as simple as possible without requiring complex archivec combining (as was the case with our previous CI).
