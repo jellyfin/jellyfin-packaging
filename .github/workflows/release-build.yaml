@@ -12,6 +12,49 @@ permissions:
   contents: read
 
 jobs:
+  Docker:
+    runs-on: ubuntu-22.04
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if [[ ${{ inputs.version }} == "master" ]]; then
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for Docker containers"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} docker
+
+#      - name: "Push containers and manifests to DockerHub"
+#        uses: appleboy/ssh-action@v1.0.3
+#        with:
+#          host: "${{ secrets.REPO_HOST }}"
+#          username: "${{ secrets.REPO_USER }}"
+#          key: "${{ secrets.REPO_KEY }}"
+#          debug: false
+#          script_stop: true
+#          script: |
+#            sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+#            sudo mv -t /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*
+#            if [[ ${{ inputs.version }} != "master" ]]; then
+#                sudo ln -s /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/debian/latest-server
+#            fi
+
   Debian:
     runs-on: ubuntu-22.04
     strategy:
@@ -185,5 +228,235 @@ jobs:
             sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*
             if [[ ${{ inputs.version }} != "master" ]]; then
                 sudo ln -s /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/ubuntu/latest-server
+            fi
+
+  Linux:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - amd64-musl
+          - arm64
+          - arm64-musl
+          - armhf
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if [[ ${{ inputs.version }} == "master" ]]; then
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} linux ${{ matrix.arch }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/linux/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            sudo mkdir -p /srv/repository/mirror/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/mirror/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/*
+            if [[ ${{ inputs.version }} != "master" ]]; then
+                sudo ln -s /srv/repository/mirror/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/linux/latest-server
+            fi
+
+  Windows:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - arm64
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if [[ ${{ inputs.version }} == "master" ]]; then
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/windows/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            sudo mkdir -p /srv/repository/mirror/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/mirror/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/*
+            if [[ ${{ inputs.version }} != "master" ]]; then
+                sudo ln -s /srv/repository/mirror/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/windows/latest-server
+            fi
+
+  MacOS:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - arm64
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if [[ ${{ inputs.version }} == "master" ]]; then
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} macos ${{ matrix.arch }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/macos/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            sudo mkdir -p /srv/repository/mirror/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/mirror/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/*
+            if [[ ${{ inputs.version }} != "master" ]]; then
+                sudo ln -s /srv/repository/mirror/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/macos/latest-server
+            fi
+
+  Portable:
+    runs-on: ubuntu-22.04
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if [[ ${{ inputs.version }} == "master" ]]; then
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for Portable" 
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} portable
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/portable/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/portable"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            sudo mkdir -p /srv/repository/mirror/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }}
+            sudo mv -t /srv/repository/mirror/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/*
+            if [[ ${{ inputs.version }} != "master" ]]; then
+                sudo ln -s /srv/repository/mirror/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }} /srv/repository/mirror/releases/server/portable/latest-server
             fi
 
