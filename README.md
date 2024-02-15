@@ -88,7 +88,7 @@ Inside this repository are 7 major components:
 
    This was chosen to simplify the source package system and simplify building. Now, there is only a single "jellyfin" source package rather than 2. There may be more in the future as other repos might be included (e.g. "jellyfin-ffmpeg", "jellyfin-vue", etc.)
 
-* Dockerized build (`debian/docker/`): the build is run inside a Docker container.
+* Dockerized build (`debian/docker/`): the build is run inside a Docker container that matches the target OS release
 
    This was chosen to ensure a clean slate for every build, as well as enable release-specific builds due to the complexities of our shared dependencies (e.g. `libssl`).
 
