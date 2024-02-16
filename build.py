@@ -71,7 +71,7 @@ def build_package_deb(jellyfin_version, build_type, build_arch, build_version):
 
     # Build the dockerfile and packages
     os.system(f"{docker_build_cmd} --build-arg PACKAGE_TYPE={os_type} --build-arg PACKAGE_VERSION={os_version} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
-    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --name {imagename} {imagename}")
+    os.system(f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --name {imagename} {imagename}")
 
 
 def build_package_rpm(jellyfin_version, build_type, build_arch, build_version):
@@ -218,7 +218,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         print()
 
         # Build the dockerfile
-        os.system(f"{docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
+        os.system(f"{docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --build-arg JELLYFIN_VERSION={jellyfin_version} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}")
 
         images.append(imagename)
         print()

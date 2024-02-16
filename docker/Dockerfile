@@ -23,6 +23,9 @@ ARG QEMU_ARCH
 # Base Image archiecture (amd64, arm64v8, arm32v7), set by build script
 ARG IMAGE_ARCH
 
+# Jellyfin version
+ARG JELLYFIN_VERSION
+
 #
 # Build the web artifacts
 #
@@ -30,6 +33,9 @@ FROM node:${NODEJS_VERSION}-alpine as web
 
 ARG SOURCE_DIR=/src
 ARG ARTIFACT_DIR=/web
+
+ARG JELLYFIN_VERSION
+ENV JELLYFIN_VERSION=${JELLYFIN_VERSION}
 
 RUN apk add \
     autoconf \
