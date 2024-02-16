@@ -25,7 +25,13 @@ revparse_dir = revparse.stdout.decode().strip()
 this_repo = Repo(revparse_dir)
 
 # Update all the submodules
-this_repo.submodule_update(recursive=True)
+while True:
+    try:
+        this_repo.submodule_update(init=True, recursive=True)
+        break
+    except Exception as e:
+        print(e)
+        pass
 
 # Prepare a dictionary form of the submodules so we can reference them by name
 submodules = dict()
