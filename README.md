@@ -137,3 +137,7 @@ TODO - these have not yet been implemented.
 * Multiple archive type support (`.tar.gz` vs. `.zip`)
 
    The output archive type (`.tar.gz` or `.zip`) is chosen based on the build target, with Portable providing both for maximum compatibility, Windows providing `.zip`, and Linux and MacOS providing `.tar.gz`. This can be changed later, for example to add more formats (e.g. `.tar.xz`) or change what produces what, without major complications.
+
+* Full architecture support
+
+   The portable builds support all major architectures now, specifically adding `arm64` Windows builds (I'm certain that _someone_ out there uses it), and making it quite trivial to add new architectures in the future if needed.
