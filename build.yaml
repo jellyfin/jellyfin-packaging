@@ -12,13 +12,13 @@ debian:
     armhf:
       PACKAGE_ARCH: armhf
   cross-gcc:
-    bookworm: '12'
     bullseye: '10'
+    bookworm: '12'
   dockerfile: debian/docker/Dockerfile
   imagename: jellyfin-builder-debian
   releases:
-    bookworm: '12'
     bullseye: '11'
+    bookworm: '12'
 ubuntu:
   build_function: build_package_deb
   archmaps:
