@@ -120,6 +120,14 @@ TODO - these have not yet been implemented.
 
    This ensures flexibility for container users to fetch the containers from whatever repository they choose.
 
+* Seamless rebuilds: The root images are appended with the build date to keep them unique
+
+  This ensures we can trigger rebuilds of the Docker containers arbitrarily, in response to things like base OS updates or packaging changes (e.g. a new version of the Intel compute engine for instance).
+
+* Based on Debian 12 ("Bookworm"): the latest base Debian release
+
+  While possibly not as "up-to-date" as Ubuntu, this release is quite current and should cover all major compatibility issues we had with the old images based on Debian 11.
+
 ### Portable Builds (Portable .NET, Linux, MacOS, Windows)
 
 * Single unified build: the entirety of the output package is built in one container from one Dockerfile, with the output archive type (`.tar.gz` or `.zip`) chosen based on the target.
