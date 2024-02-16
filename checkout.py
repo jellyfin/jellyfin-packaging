@@ -5,7 +5,6 @@
 # Part of the Jellyfin CI system
 ###############################################################################
 
-import os.path
 from subprocess import run, PIPE
 import sys
 
@@ -36,10 +35,12 @@ for submodule in this_repo.submodules:
 # Validate that the provided tag is valid; if not, fall back to "master"
 if target_release != "master":
     if (
-         target_release not in submodules["jellyfin-server"].tags or
-         target_release not in submodules["jellyfin-web"].tags
-       ):
-        print(f"WARNING: Provided tag {target_release} is not a valid tag for both jellyfin-server and jellyfin-web; using master instead")
+        target_release not in submodules["jellyfin-server"].tags
+        or target_release not in submodules["jellyfin-web"].tags
+    ):
+        print(
+            f"WARNING: Provided tag {target_release} is not a valid tag for both jellyfin-server and jellyfin-web; using master instead"
+        )
         target_release = "master"
 
 for submodule in submodules.keys():
