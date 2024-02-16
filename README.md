@@ -56,9 +56,11 @@ Inside this repository are 7 major components:
 
 4. Docker image builder (under `docker`). Like the above two as well, only building the combined Docker images with a single Dockerfile.
 
-5. Script infrastructure to handle coordinating builds (`build.py`). This script takes basic arguments and, using its internal logic, fires the correct Dockerized builds for the given build type.
+5. Portable image build (under `portable`), which covers all the "archive" builds (.NET portable, Linux, Windows, and MacOS) again from a single Dockerfile.
 
-6. The GitHub Actions CI to build all the above for every supported version and architecture.
+6. Script infrastructure to handle coordinating builds (`build.py`). This script takes basic arguments and, using its internal logic, fires the correct Dockerized builds for the given build type.
+
+7. The GitHub Actions CI to build all the above for every supported version and architecture.
 
 ## Design Decisions
 
