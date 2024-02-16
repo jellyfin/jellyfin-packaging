@@ -11,6 +11,7 @@ from os import system
 import os.path
 from subprocess import run, PIPE
 import sys
+from yaml import load, SafeLoader
 
 from git import Repo
 
@@ -255,154 +256,15 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
 
 
 # Define a map of possible configurations
-configurations = {
-    "debian": {
-        "def": build_package_deb,
-        "dockerfile": "debian/docker/Dockerfile",
-        "imagename": "jellyfin-builder",
-        "archmaps": {
-            "amd64": {
-                "PACKAGE_ARCH": "amd64",
-            },
-            "arm64": {
-                "PACKAGE_ARCH": "arm64",
-            },
-            "armhf": {
-                "PACKAGE_ARCH": "armhf",
-            },
-        },
-        "releases": {
-            "bullseye": "11",
-            "bookworm": "12",
-        },
-        "cross-gcc": {
-            "bullseye": "10",
-            "bookworm": "12",
-        },
-    },
-    "ubuntu": {
-        "def": build_package_deb,
-        "dockerfile": "debian/docker/Dockerfile",
-        "imagename": "jellyfin-builder",
-        "archmaps": {
-            "amd64": {
-                "PACKAGE_ARCH": "amd64",
-            },
-            "arm64": {
-                "PACKAGE_ARCH": "arm64",
-            },
-            "armhf": {
-                "PACKAGE_ARCH": "armhf",
-            },
-        },
-        "releases": {
-            "focal": "20.04",
-            "jammy": "22.04",
-            "noble": "24.04",
-        },
-        "cross-gcc": {
-            "focal": "10",
-            "jammy": "12",
-            "noble": "12",
-        },
-    },
-    "fedora": {
-        "def": build_package_rpm,
-    },
-    "centos": {
-        "def": build_package_rpm,
-    },
-    "linux": {
-        "def": build_linux,
-        "dockerfile": "portable/Dockerfile",
-        "imagename": "jellyfin-builder",
-        "archivetypes": "tar",
-        "archmaps": {
-            "amd64": {
-                "PACKAGE_ARCH": "amd64",
-                "DOTNET_ARCH": "x64",
-            },
-            "amd64-musl": {
-                "PACKAGE_ARCH": "amd64-musl",
-                "DOTNET_ARCH": "musl-x64",
-            },
-            "arm64": {
-                "PACKAGE_ARCH": "arm64",
-                "DOTNET_ARCH": "arm64",
-            },
-            "arm64-musl": {
-                "PACKAGE_ARCH": "arm64-musl",
-                "DOTNET_ARCH": "musl-arm64",
-            },
-            "armhf": {
-                "PACKAGE_ARCH": "armhf",
-                "DOTNET_ARCH": "arm",
-            },
-        },
-    },
-    "windows": {
-        "def": build_windows,
-        "dockerfile": "portable/Dockerfile",
-        "imagename": "jellyfin-builder",
-        "archivetypes": "zip",
-        "archmaps": {
-            "amd64": {
-                "PACKAGE_ARCH": "amd64",
-                "DOTNET_ARCH": "x64",
-            },
-            "arm64": {
-                "PACKAGE_ARCH": "arm64",
-                "DOTNET_ARCH": "arm64",
-            },
-        },
-    },
-    "macos": {
-        "def": build_macos,
-        "dockerfile": "portable/Dockerfile",
-        "imagename": "jellyfin-builder",
-        "archivetypes": "tar",
-        "archmaps": {
-            "amd64": {
-                "PACKAGE_ARCH": "amd64",
-                "DOTNET_ARCH": "x64",
-            },
-            "arm64": {
-                "PACKAGE_ARCH": "arm64",
-                "DOTNET_ARCH": "arm64",
-            },
-        },
-    },
-    "portable": {
-        "def": build_portable,
-        "dockerfile": "portable/Dockerfile",
-        "imagename": "jellyfin-builder",
-        "archivetypes": "tar,zip",
-    },
-    "docker": {
-        "def": build_docker,
-        "dockerfile": "docker/Dockerfile",
-        "imagename": "jellyfin/jellyfin",
-        "archmaps": {
-            "amd64": {
-                "PACKAGE_ARCH": "amd64",
-                "DOTNET_ARCH": "x64",
-                "QEMU_ARCH": "x86_64",
-                "IMAGE_ARCH": "amd64",
-            },
-            "arm64": {
-                "PACKAGE_ARCH": "arm64",
-                "DOTNET_ARCH": "arm64",
-                "QEMU_ARCH": "aarch64",
-                "IMAGE_ARCH": "arm64v8",
-            },
-            "armhf": {
-                "PACKAGE_ARCH": "armhf",
-                "DOTNET_ARCH": "arm",
-                "QEMU_ARCH": "arm",
-                "IMAGE_ARCH": "arm32v7",
-            },
-        }
-    },
+function_definitions = {
+    "build_package_deb": build_package_deb,
+    "build_package_rpm": build_package_rpm,
+    "build_portable": build_portable,
+    "build_linux": build_linux,
+    "build_windows": build_windows,
+    "build_macos": build_macos,
+    "build_portable": build_portable,
+    "build_docker": build_docker,
 }
 
 def usage():
@@ -413,15 +275,35 @@ def usage():
     print(f" BUILD_VERSION: A valid build OS version (packaged OS types only)")
 
 try:
+    with open("build.yaml") as fh:
+        configurations = load(fh, Loader=SafeLoader)
+except Exception as e:
+    print(f"Error: Failed to find 'build.yaml' configuration: {e}")
+    exit(1)
+
+try:
     jellyfin_version = sys.argv[1]
     build_type = sys.argv[2]
 except IndexError:
     usage()
     exit(1)
+
+if build_type not in configurations.keys():
+    print(f"Error: The specified build type {build_type} is not valid: choices are: {', '.join(configurations.keys())}")
+    exit(1)
+
+try:
+    if configurations[build_type]['build_function'] not in function_definitions.keys():
+        raise ValueError
+except Exception:
+    print(f"Error: The specified build type {build_type} does not define a valid build function in this script.")
+    exit(1)
+
 try:
     build_arch = sys.argv[3]
 except IndexError:
     build_arch = None
+
 try:
     build_version = sys.argv[4]
 except IndexError:
@@ -429,5 +311,6 @@ except IndexError:
 
 if jellyfin_version == "master":
     jellyfin_version = datetime.now().strftime("%Y%m%d%H")
+    print(f"Autocorrecting 'master' version to {jellyfin_version}")
 
-configurations[build_type]['def'](jellyfin_version, build_type, build_arch, build_version)
+function_definitions[configurations[build_type]['build_function']](jellyfin_version, build_type, build_arch, build_version)

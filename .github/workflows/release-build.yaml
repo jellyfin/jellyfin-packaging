@@ -27,7 +27,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
-          sudo apt-get install --yes python3-git
+          sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -77,7 +77,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
-          sudo apt-get install --yes python3-git
+          sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -164,7 +164,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
-          sudo apt-get install --yes python3-git
+          sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -249,7 +249,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
-          sudo apt-get install --yes python3-git
+          sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -307,7 +307,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
-          sudo apt-get install --yes python3-git
+          sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -365,7 +365,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
-          sudo apt-get install --yes python3-git
+          sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -418,7 +418,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
-          sudo apt-get install --yes python3-git
+          sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
         uses: actions/checkout@v3

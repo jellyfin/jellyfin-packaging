@@ -1,0 +1,120 @@
+---
+# Build definitions for `build.py`
+
+# DEB packages
+debian:
+  build_function: build_package_deb
+  archmaps:
+    amd64:
+      PACKAGE_ARCH: amd64
+    arm64:
+      PACKAGE_ARCH: arm64
+    armhf:
+      PACKAGE_ARCH: armhf
+  cross-gcc:
+    bookworm: '12'
+    bullseye: '10'
+  dockerfile: debian/docker/Dockerfile
+  imagename: jellyfin-builder-debian
+  releases:
+    bookworm: '12'
+    bullseye: '11'
+ubuntu:
+  build_function: build_package_deb
+  archmaps:
+    amd64:
+      PACKAGE_ARCH: amd64
+    arm64:
+      PACKAGE_ARCH: arm64
+    armhf:
+      PACKAGE_ARCH: armhf
+  cross-gcc:
+    focal: '10'
+    jammy: '12'
+    noble: '12'
+  dockerfile: debian/docker/Dockerfile
+  imagename: jellyfin-builder-ubuntu
+  releases:
+    focal: '20.04'
+    jammy: '22.04'
+    noble: '24.04'
+
+# RPM packages (TODO)
+centos:
+  build_function: build_package_rpm
+fedora:
+  build_function: build_package_rpm
+
+# Portable archives
+linux:
+  build_function: build_linux
+  archivetypes: tar
+  archmaps:
+    amd64:
+      DOTNET_ARCH: x64
+      PACKAGE_ARCH: amd64
+    amd64-musl:
+      DOTNET_ARCH: musl-x64
+      PACKAGE_ARCH: amd64-musl
+    arm64:
+      DOTNET_ARCH: arm64
+      PACKAGE_ARCH: arm64
+    arm64-musl:
+      DOTNET_ARCH: musl-arm64
+      PACKAGE_ARCH: arm64-musl
+    armhf:
+      DOTNET_ARCH: arm
+      PACKAGE_ARCH: armhf
+  dockerfile: portable/Dockerfile
+  imagename: jellyfin-builder-linux
+windows:
+  build_function: build_windows
+  archivetypes: zip
+  archmaps:
+    amd64:
+      DOTNET_ARCH: x64
+      PACKAGE_ARCH: amd64
+    arm64:
+      DOTNET_ARCH: arm64
+      PACKAGE_ARCH: arm64
+  dockerfile: portable/Dockerfile
+  imagename: jellyfin-builder-windows
+macos:
+  build_function: build_macos
+  archivetypes: tar
+  archmaps:
+    amd64:
+      DOTNET_ARCH: x64
+      PACKAGE_ARCH: amd64
+    arm64:
+      DOTNET_ARCH: arm64
+      PACKAGE_ARCH: arm64
+  dockerfile: portable/Dockerfile
+  imagename: jellyfin-builder-macos
+portable:
+  build_function: build_portable
+  archivetypes: tar-gz,zip
+  dockerfile: portable/Dockerfile
+  imagename: jellyfin-builder-portable
+
+# Docker images
+docker:
+  build_function: build_docker
+  archmaps:
+    amd64:
+      DOTNET_ARCH: x64
+      IMAGE_ARCH: amd64
+      PACKAGE_ARCH: amd64
+      QEMU_ARCH: x86_64
+    arm64:
+      DOTNET_ARCH: arm64
+      IMAGE_ARCH: arm64v8
+      PACKAGE_ARCH: arm64
+      QEMU_ARCH: aarch64
+    armhf:
+      DOTNET_ARCH: arm
+      IMAGE_ARCH: arm32v7
+      PACKAGE_ARCH: armhf
+      QEMU_ARCH: arm
+  dockerfile: docker/Dockerfile
+  imagename: jellyfin/jellyfin
