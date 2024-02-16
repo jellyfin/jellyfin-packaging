@@ -51,7 +51,7 @@ if target_release != "master":
 
 for submodule in submodules.keys():
     if target_release == "master":
-        target_head = "refs/heads/master"
+        target_head = "origin/master"
     else:
         target_head = f"refs/tags/{target_release}"
     # Checkout the given head and reset the working tree
