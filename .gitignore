@@ -1,3 +1,6 @@
+# Ignore temporary build files
 build/
+# Ignore the output artifact directory
 out/
+# Ignore the generated Debian changelog
 debian/changelog
