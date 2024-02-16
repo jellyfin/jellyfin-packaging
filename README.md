@@ -130,6 +130,10 @@ TODO - these have not yet been implemented.
 
 ### Portable Builds (Portable .NET, Linux, MacOS, Windows)
 
-* Single unified build: the entirety of the output package is built in one container from one Dockerfile, with the output archive type (`.tar.gz` or `.zip`) chosen based on the target.
+* Single unified build: the entirety of the output package is built in one container from one Dockerfile
 
    This was chosen to keep the portable builds as simple as possible without requiring complex archive combining (as was the case with our previous CI).
+
+* Multiple archive type support (`.tar.gz` vs. `.zip`)
+
+   The output archive type (`.tar.gz` or `.zip`) is chosen based on the build target, with Portable providing both for maximum compatibility, Windows providing `.zip`, and Linux and MacOS providing `.tar.gz`. This can be changed later, for example to add more formats (e.g. `.tar.xz`) or change what produces what, without major complications.
