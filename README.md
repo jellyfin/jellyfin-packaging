@@ -50,13 +50,13 @@ Inside this repository are 7 major components:
 
 1. Submodules for the `jellyfin` (as `jellyfin-server`) and `jellyfin-web` repositories. These are dynamic submodules; the `checkout.py` script will check them out to the required `HEAD` on each build, and thus their actual committed value is irrelevant. Nonetheless, they should be bumped occasionally just to avoid excessive checkout times later.
 
-2. Debian/Ubuntu packaging configurations (under `debian`). These will build the 3 Jellyfin packages (`jellyfin` metapackage, `jellyfin-server` core server, and `jellyfin-web` web client). Future packages (e.g. Vue) may be added here if and when they are promoted to a production build alongside the others.
+2. Debian/Ubuntu packaging configurations (under `debian`). These will build the 3 Jellyfin packages (`jellyfin` metapackage, `jellyfin-server` core server, and `jellyfin-web` web client) from a single Dockerfile and helper script (`build.sh`) under `debian/docker/`. Future packages (e.g. Vue) may be added here as well if and when they are promoted to a production build alongside the others, following one consistent versioning scheme.
 
 3. Fedora/CentOS packaging configurations (under `fedora`). These will build the same packages as Debian. This is still a TODO.
 
-4. Docker image builder (under `docker`). Like the above two as well, only building the combined Docker images with a single Dockerfile.
+4. Docker image builder (under `docker`). Like the above two as well, only building the combined Docker images with a single Dockerfile as well as preparing the various manifests needed to push these to the container repos.
 
-5. Portable image build (under `portable`), which covers all the "archive" builds (.NET portable, Linux, Windows, and MacOS) again from a single Dockerfile.
+5. Portable image builder (under `portable`), which covers all the "archive" builds (.NET portable, Linux, Windows, and MacOS) again from a single Dockerfile.
 
 6. Script infrastructure to handle coordinating builds (`build.py`). This script takes basic arguments and, using its internal logic, fires the correct Dockerized builds for the given build type.
 
