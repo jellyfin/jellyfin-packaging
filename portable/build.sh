@@ -45,7 +45,7 @@ fi
 pushd ${BUILD_DIR}
 for ARCHIVE_TYPE in $( tr ',' '\n' <<<"${ARCHIVE_TYPES}" ); do
     case ${ARCHIVE_TYPE} in
-        tar)
+        targz)
             tar -czf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.gz .
         ;;
         zip)

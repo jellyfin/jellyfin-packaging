@@ -19,7 +19,7 @@ ENV SOURCE_DIR=/jellyfin
 ENV ARTIFACT_DIR=/dist
 ENV TYPE=${PACKAGE_TYPE}
 ENV VERSION=${PACKAGE_VERSION}
-ENV ARCHIVE_TYPES=tar
+ENV ARCHIVE_TYPES=targz
 
 # Prepare Debian build environment
 RUN apt-get update -y \
