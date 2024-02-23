@@ -9,10 +9,10 @@ ARG OS_VERSION=bookworm
 ARG FFMPEG_PACKAGE=jellyfin-ffmpeg6
 
 # https://github.com/intel/compute-runtime/releases
-ARG GMMLIB_VERSION=22.3.0
-ARG IGC_VERSION=1.0.14828.8
-ARG NEO_VERSION=23.30.26918.9
-ARG LEVEL_ZERO_VERSION=1.3.26918.9
+ARG GMMLIB_VERSION=22.3.11
+ARG IGC_VERSION=1.0.15985.7
+ARG NEO_VERSION=24.05.28454.6
+ARG LEVEL_ZERO_VERSION=1.3.28454.6
 
 # Debian architecture (amd64, arm64, armhf), set by build script
 ARG PACKAGE_ARCH
@@ -38,19 +38,9 @@ ARG JELLYFIN_VERSION
 ENV JELLYFIN_VERSION=${JELLYFIN_VERSION}
 
 RUN apk add \
-    autoconf \
-    g++ \
-    make \
-    libpng-dev \
-    gifsicle \
-    alpine-sdk \
-    automake \
-    libtool \
-    make \
-    gcc \
-    musl-dev \
-    nasm \
-    python3
+    autoconf g++ make libpng-dev \
+    gifsicle alpine-sdk automake \
+    libtool gcc musl-dev nasm python3 
 
 WORKDIR ${SOURCE_DIR}
 COPY jellyfin-web .
@@ -122,26 +112,17 @@ ENV NVIDIA_VISIBLE_DEVICES="all"
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 # Install dependencies:
-# curl: healthcheck
 RUN apt-get update \
  && apt-get install --no-install-recommends --no-install-suggests --yes \
-    ca-certificates \
-    gnupg \
-    curl \
-    wget \
-    apt-transport-https \
+    ca-certificates gnupg curl \
  && curl -fsSL https://repo.jellyfin.org/jellyfin_team.gpg.key \
   | gpg --dearmor -o /etc/apt/trusted.gpg.d/debian-jellyfin.gpg \
  && echo "deb [arch=${PACKAGE_ARCH}] https://repo.jellyfin.org/debian ${OS_VERSION} main" > /etc/apt/sources.list.d/jellyfin.list \
  && apt-get update \
  && apt-get install --no-install-recommends --no-install-suggests --yes \
-    ${FFMPEG_PACKAGE} \
-    openssl \
-    locales \
-    libfontconfig1 \
-    libfreetype6 \
+    ${FFMPEG_PACKAGE} openssl locales libfontconfig1 libfreetype6 \
  && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen \
- && apt-get remove gnupg apt-transport-https --yes \
+ && apt-get remove gnupg --yes \
  && apt-get clean autoclean --yes \
  && apt-get autoremove --yes \
  && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
@@ -153,16 +134,15 @@ RUN apt-get update \
 RUN if [[ ${PACKAGE_ARCH} == "amd64" ]]; then \
     mkdir intel-compute-runtime \
  && pushd intel-compute-runtime \
- && wget https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/libigdgmm12_${GMMLIB_VERSION}_amd64.deb \
- && wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-${IGC_VERSION}/intel-igc-core_${IGC_VERSION}_amd64.deb \
- && wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-${IGC_VERSION}/intel-igc-opencl_${IGC_VERSION}_amd64.deb \
- && wget https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/intel-opencl-icd_${NEO_VERSION}_amd64.deb \
- && wget https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/intel-level-zero-gpu_${LEVEL_ZERO_VERSION}_amd64.deb \
+ && curl -LO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${IGC_VERSION}/intel-igc-core_${IGC_VERSION}_amd64.deb \
+         -LO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${IGC_VERSION}/intel-igc-opencl_${IGC_VERSION}_amd64.deb \
+         -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/intel-opencl-icd_${NEO_VERSION}_amd64.deb \
+         -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/intel-level-zero-gpu_${LEVEL_ZERO_VERSION}_amd64.deb \
+         -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/libigdgmm12_${GMMLIB_VERSION}_amd64.deb \
  && dpkg -i *.deb \
  && popd \
  && rm -rf intel-compute-runtime \
  ; fi \
- && apt-get remove wget --yes \
  && apt-get clean autoclean --yes \
  && apt-get autoremove --yes \
  && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
@@ -175,7 +155,8 @@ COPY --from=web /web /jellyfin/jellyfin-web
 
 EXPOSE 8096
 VOLUME ${JELLYFIN_DATA_DIR} ${JELLYFIN_CACHE_DIR}
-ENTRYPOINT [ "/jellyfin/jellyfin" ]
+ENTRYPOINT [ "/jellyfin/jellyfin", \
+             "--ffmpeg", "/usr/lib/jellyfin-ffmpeg/ffmpeg" ]
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
      CMD curl -Lk -fsS "${HEALTHCHECK_URL}" || exit 1

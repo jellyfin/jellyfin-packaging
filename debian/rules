@@ -42,7 +42,7 @@ override_dh_auto_build:
 	cd jellyfin-server && dotnet publish -maxcpucount:1 --configuration $(CONFIG) \
         --output='$(CURDIR)/build/usr/lib/jellyfin/bin' --self-contained --runtime $(DOTNETRUNTIME) \
 		-p:DebugSymbols=false -p:DebugType=none Jellyfin.Server
-	rm $(CURDIR)/build/usr/lib/jellyfin/bin/libcoreclrtraceptprovider.so
+	rm -f $(CURDIR)/build/usr/lib/jellyfin/bin/libcoreclrtraceptprovider.so
 	cd jellyfin-web && npm ci --no-audit --unsafe-perm && \
         npm run build:production && mv $(CURDIR)/jellyfin-web/dist $(CURDIR)/build/web
 

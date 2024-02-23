@@ -50,7 +50,7 @@ Inside this repository are 7 major components:
 
 1. Submodules for the `jellyfin` (as `jellyfin-server`) and `jellyfin-web` repositories. These are dynamic submodules; the `checkout.py` script will check them out to the required `HEAD` on each build, and thus their actual committed value is irrelevant. Nonetheless, they should be bumped occasionally just to avoid excessive checkout times later.
 
-2. Debian/Ubuntu packaging configurations (under `debian`). These will build the 3 Jellyfin packages (`jellyfin` metapackage, `jellyfin-server` core server, and `jellyfin-web` web client) from a single Dockerfile and helper script (`build.sh`) under `debian/docker/`. Future packages (e.g. Vue) may be added here as well if and when they are promoted to a production build alongside the others, following one consistent versioning scheme.
+2. Debian/Ubuntu packaging configurations (under `debian`). These will build the 3 Jellyfin packages (`jellyfin` metapackage, `jellyfin-server` core server, and `jellyfin-web` web client) from a single Dockerfile and helper script (`build.sh`) under `debian/docker/`. Future packages (e.g. Vue) may be added here as well as if and when they are promoted to a production build alongside the others, following one consistent versioning scheme.
 
 3. Fedora/CentOS packaging configurations (under `fedora`). These will build the same packages as Debian. This is still a TODO.
 
@@ -69,7 +69,7 @@ Inside this repository are 7 major components:
 * Unified packaging: all packaging is in this repository (vs. within the `jellyfin-server` and `jellyfin-web` repositories)
 
   This helps ensure two things:
-    1. There is a single source of truth for packaging. Previously, there were at least 3 sources of truth and this became very confusing to update.
+    1. There is a single source of truth for packaging. Previously, there were at least 3 sources of truth, and this became very confusing to update.
     2. Packaging can be run and managed independently of actual code, simplifying the release and build process.
 
 * GitHub Actions for CI: all builds use the GitHub Actions system instead of Azure DevOps
@@ -82,7 +82,7 @@ Inside this repository are 7 major components:
 
 * Git Submodules to handle code (vs. cross-repo builds)
 
-  This ensures that the code checked out is consistent to both repositories, and allows for the unified builds described below without extra steps to combine.
+  This ensures that the code checked out is consistent to both repositories and allows for the unified builds described below without extra steps to combine.
 
 * Remote manual-only triggers: CI workers are triggered by a remote bot
 
@@ -90,7 +90,7 @@ Inside this repository are 7 major components:
 
 ### Debian/Ubuntu Packages
 
-* Unified package build: this entire repo is the "source" and the source package is named "jellyfin".
+* Unified packages build: this entire repo is the "source" and the source package is named "jellyfin".
 
    This was chosen to simplify the source package system and simplify building. Now, there is only a single "jellyfin" source package rather than 2. There may be more in the future as other repos might be included (e.g. "jellyfin-ffmpeg", "jellyfin-vue", etc.)
 
@@ -104,7 +104,7 @@ Inside this repository are 7 major components:
 
 * Ubuntu LTS-only support: non-LTS Ubuntu versions have been dropped
 
-   This simplifies our builds as we do not need to then track many 9-month-only releases of Ubuntu, and also reduces the build burden. Users of non-LTS Ubuntu releases can use either the closest Ubuntu LTS version, or use Docker containers instead.
+   This simplifies our builds as we do not need to then track many 9-month-only releases of Ubuntu, and also reduces the build burden. Users of non-LTS Ubuntu releases can use either the closest Ubuntu LTS version or use Docker containers instead.
 
 ### Fedora/CentOS Packages
 
@@ -112,7 +112,7 @@ TODO - these have not yet been implemented.
 
 ### Docker
 
-* Single unified Docker build: the entirety of our Docker images are built as one container from one Dockerfile.
+* Single unified Docker build: the entirety of our Docker images is built as one container from one Dockerfile.
 
    This was chosen to keep our Docker builds as simple as possible without requiring 2 intervening images (as was the case with our previous CI).
 
@@ -132,11 +132,11 @@ TODO - these have not yet been implemented.
 
 * Single unified build: the entirety of the output package is built in one container from one Dockerfile
 
-   This was chosen to keep the portable builds as simple as possible without requiring complex archive combining (as was the case with our previous CI).
+   This was chosen to keep the portable builds as simple as possible without requiring complex archives combining (as was the case with our previous CI).
 
 * Multiple archive type support (`.tar.gz` vs. `.zip`)
 
-   The output archive type (`.tar.gz` or `.zip`) is chosen based on the build target, with Portable providing both for maximum compatibility, Windows providing `.zip`, and Linux and MacOS providing `.tar.gz`. This can be changed later, for example to add more formats (e.g. `.tar.xz`) or change what produces what, without major complications.
+   The output archive type (`.tar.gz` or `.zip`) is chosen based on the build target, with Portable providing both for maximum compatibility, Windows providing `.zip`, Linux and MacOS provide `.tar.gz`. This can be changed later, for example to add more formats (e.g. `.tar.xz`) or change what produces what, without major complications.
 
 * Full architecture support
 

@@ -26,11 +26,8 @@ RUN apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install --no-install-recommends -y \
     wget debhelper gnupg devscripts build-essential mmv lsb-release zip \
-    libssl*.* liblttng-ust* \
-    libfontconfig*-dev libcurl*openssl-dev libfreetype*-dev libssl-dev \
- && apt-get clean autoclean -y \
- && apt-get autoremove -y \
- && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
+    libssl*.* liblttng-ust* libssl-dev \
+    libfontconfig*-dev libcurl*openssl-dev libfreetype*-dev
 
 # Prepare dotnet SDK
 RUN wget https://packages.microsoft.com/config/${PACKAGE_TYPE}/${PACKAGE_VERSION}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
@@ -45,6 +42,12 @@ RUN wget https://deb.nodesource.com/setup_${NODEJS_VERSION}.x -O nodejs-install.
  && ./nodejs-install.sh \
  && apt-get install -y \
     nodejs
+
+# Clean up dependencies
+RUN apt-get remove wget -y \
+ && apt-get clean autoclean -y \
+ && apt-get autoremove -y \
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Link to build script
 RUN ln -sf ${SOURCE_DIR}/portable/build.sh /build.sh
