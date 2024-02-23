@@ -133,10 +133,10 @@ jobs:
           debug: false
           script_stop: false
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo mkdir -p /srv/repository/main/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t /srv/repository/main/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/debian/latest-server || exit 1
+                sudo ln -s /srv/repository/main/releases/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/releases/server/debian/latest-server || exit 1
             fi
 
   Ubuntu:
@@ -220,10 +220,10 @@ jobs:
           debug: false
           script_stop: false
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo mkdir -p /srv/repository/main/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t /srv/repository/main/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/ubuntu/latest-server || exit 1
+                sudo ln -s /srv/repository/main/releases/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/releases/server/ubuntu/latest-server || exit 1
             fi
 
   Linux:
@@ -281,10 +281,10 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/mirror/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/*
+            sudo mkdir -p /srv/repository/main/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/main/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/*
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/linux/latest-server
+                sudo ln -s /srv/repository/main/releases/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/releases/server/linux/latest-server
             fi
 
   Windows:
@@ -339,10 +339,10 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/mirror/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/*
+            sudo mkdir -p /srv/repository/main/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/main/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/*
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/windows/latest-server
+                sudo ln -s /srv/repository/main/releases/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/releases/server/windows/latest-server
             fi
 
   MacOS:
@@ -397,10 +397,10 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/mirror/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/*
+            sudo mkdir -p /srv/repository/main/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/main/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/*
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/mirror/releases/server/macos/latest-server
+                sudo ln -s /srv/repository/main/releases/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/releases/server/macos/latest-server
             fi
 
   Portable:
@@ -450,9 +450,9 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/mirror/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }}
-            sudo mv -t /srv/repository/mirror/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/*
+            sudo mkdir -p /srv/repository/main/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }}
+            sudo mv -t /srv/repository/main/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/*
             if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/mirror/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }} /srv/repository/mirror/releases/server/portable/latest-server
+                sudo ln -s /srv/repository/main/releases/server/portable/versions/${{ env.JELLYFIN_VERSION }} /srv/repository/main/releases/server/portable/latest-server
             fi
 
