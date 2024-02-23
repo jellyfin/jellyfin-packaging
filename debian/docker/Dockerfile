@@ -31,12 +31,22 @@ ENV ARCH=${PACKAGE_ARCH}
 RUN apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install --no-install-recommends -y \
-    wget debhelper gnupg devscripts build-essential mmv lsb-release \
-    libssl*.* liblttng-ust* \
-    libfontconfig*-dev libcurl*openssl-dev libfreetype*-dev libssl-dev \
+    wget \
+    debhelper \
+    gnupg \
+    devscripts \
+    build-essential \
+    mmv \
+    lsb-release \
+    libssl*.* \
+    liblttng-ust* \
+    libfontconfig*-dev \
+    libcurl*openssl-dev \
+    libfreetype*-dev \
+    libssl-dev \
  && apt-get clean autoclean -y \
  && apt-get autoremove -y \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Prepare the cross-toolchain
 RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
@@ -60,16 +70,38 @@ RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
  && cd cross-gcc-packages-amd64/cross-gcc-${GCC_VERSION}-${PACKAGE_ARCH} \
  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get -f install --no-install-recommends -o Dpkg::Options::="--force-overwrite" -y \
-    bison flex libtool gdb sharutils netbase libmpc-dev libmpfr-dev libgmp-dev \
-    systemtap-sdt-dev autogen expect chrpath zlib1g-dev zip \
-    binutils-aarch64-linux-gnu binutils-arm-linux-gnueabihf \
-    gcc-${GCC_VERSION}-source libstdc++-${GCC_VERSION}-dev-${PACKAGE_ARCH}-cross \
-    libc6-dev:${PACKAGE_ARCH} linux-libc-dev:${PACKAGE_ARCH} libgcc1:${PACKAGE_ARCH} libstdc++-${GCC_VERSION}-dev:${PACKAGE_ARCH} \
-    libfontconfig*-dev:${PACKAGE_ARCH} libcurl*openssl-dev:${PACKAGE_ARCH} libfreetype*-dev:${PACKAGE_ARCH} libssl-dev:${PACKAGE_ARCH} \
-    libssl[13].*:${PACKAGE_ARCH} liblttng-ust*:${PACKAGE_ARCH} \
+    bison \
+    flex \
+    libtool \
+    gdb \
+    sharutils \
+    netbase \
+    libmpc-dev \
+    libmpfr-dev \
+    libgmp-dev \
+    systemtap-sdt-dev \
+    autogen \
+    expect \
+    chrpath \
+    zlib1g-dev \
+    zip \
+    binutils-aarch64-linux-gnu \
+    binutils-arm-linux-gnueabihf \
+    gcc-${GCC_VERSION}-source \
+    libstdc++-${GCC_VERSION}-dev-${PACKAGE_ARCH}-cross \
+    libc6-dev:${PACKAGE_ARCH} \
+    linux-libc-dev:${PACKAGE_ARCH} \
+    libgcc1:${PACKAGE_ARCH} \
+    libstdc++-${GCC_VERSION}-dev:${PACKAGE_ARCH} \
+    libfontconfig*-dev:${PACKAGE_ARCH} \
+    libcurl*openssl-dev:${PACKAGE_ARCH} \
+    libfreetype*-dev:${PACKAGE_ARCH} \
+    libssl-dev:${PACKAGE_ARCH} \
+    libssl[13].*:${PACKAGE_ARCH} \
+    liblttng-ust*:${PACKAGE_ARCH} \
  && apt-get clean autoclean -y \
  && apt-get autoremove -y \
- && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
  ; fi
 
 # Prepare dotnet SDK
@@ -85,6 +117,12 @@ RUN wget https://deb.nodesource.com/setup_${NODEJS_VERSION}.x -O nodejs-install.
  && ./nodejs-install.sh \
  && apt-get install -y \
     nodejs
+
+# Clean up dependencies
+RUN apt-get remove wget -y \
+ && apt-get clean autoclean -y \
+ && apt-get autoremove -y \
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Link to build script
 RUN ln -sf ${SOURCE_DIR}/debian/docker/build.sh /build.sh

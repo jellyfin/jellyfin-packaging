@@ -69,7 +69,7 @@ Inside this repository are 7 major components:
 * Unified packaging: all packaging is in this repository (vs. within the `jellyfin-server` and `jellyfin-web` repositories)
 
   This helps ensure two things:
-    1. There is a single source of truth for packaging. Previously, there were at least 3 sources of truth and this became very confusing to update.
+    1. There is a single source of truth for packaging. Previously, there were at least 3 sources of truth, and this became very confusing to update.
     2. Packaging can be run and managed independently of actual code, simplifying the release and build process.
 
 * GitHub Actions for CI: all builds use the GitHub Actions system instead of Azure DevOps
@@ -104,7 +104,7 @@ Inside this repository are 7 major components:
 
 * Ubuntu LTS-only support: non-LTS Ubuntu versions have been dropped
 
-   This simplifies our builds as we do not need to then track many 9-month-only releases of Ubuntu, and also reduces the build burden. Users of non-LTS Ubuntu releases can use either the closest Ubuntu LTS version, or use Docker containers instead.
+   This simplifies our builds as we do not need to then track many 9-month-only releases of Ubuntu, and also reduces the build burden. Users of non-LTS Ubuntu releases can use either the closest Ubuntu LTS version or use Docker containers instead.
 
 ### Fedora/CentOS Packages
 
