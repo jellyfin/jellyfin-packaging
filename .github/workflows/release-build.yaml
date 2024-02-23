@@ -6,7 +6,7 @@ on:
       version:
         required: true
         type: string
-        description: 'The server and web release tag ("vX.Y.Z") or "master"'
+        description: 'The server and web stable release tag ("vX.Y.Z") or "master"'
 
 permissions:
   contents: read
@@ -19,10 +19,12 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-          else
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -69,10 +71,12 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-          else
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -110,7 +114,7 @@ jobs:
           script_stop: false
           script: |
             set -o xtrace
-            if [[ ${{ inputs.version }} != "master" ]]; then
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
                 COMPONENT="main"
             else
                 COMPONENT="unstable"
@@ -133,10 +137,13 @@ jobs:
           debug: false
           script_stop: false
           script: |
-            sudo mkdir -p /srv/repository/main/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t /srv/repository/main/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-            if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/main/server/debian/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/debian/latest-server || exit 1
+            sudo mkdir -p /srv/repository/main/server/debian/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t /srv/repository/main/server/debian/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm /srv/repository/main/server/debian/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf /srv/repository/main/server/debian/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/debian/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm /srv/repository/main/server/debian/latest || true
+                sudo ln -sf /srv/repository/main/server/debian/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/debian/latest || exit 1
             fi
 
   Ubuntu:
@@ -156,10 +163,12 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-          else
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -197,7 +206,7 @@ jobs:
           script_stop: false
           script: |
             set -o xtrace
-            if [[ ${{ inputs.version }} != "master" ]]; then
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
                 COMPONENT="main"
             else
                 COMPONENT="unstable"
@@ -220,10 +229,13 @@ jobs:
           debug: false
           script_stop: false
           script: |
-            sudo mkdir -p /srv/repository/main/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t /srv/repository/main/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-            if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/main/server/ubuntu/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/ubuntu/latest-server || exit 1
+            sudo mkdir -p /srv/repository/main/server/ubuntu/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t /srv/repository/main/server/ubuntu/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm /srv/repository/main/server/ubuntu/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf /srv/repository/main/server/ubuntu/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/ubuntu/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm /srv/repository/main/server/ubuntu/latest || true
+                sudo ln -sf /srv/repository/main/server/ubuntu/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/ubuntu/latest || exit 1
             fi
 
   Linux:
@@ -241,10 +253,12 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-          else
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -281,10 +295,13 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/main/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/main/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/*
-            if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/main/server/linux/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/linux/latest-server
+            sudo mkdir -p /srv/repository/main/server/linux/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/main/server/linux/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/*
+            sudo rm /srv/repository/main/server/linux/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf /srv/repository/main/server/linux/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/linux/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm /srv/repository/main/server/linux/latest || true
+                sudo ln -sf /srv/repository/main/server/linux/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/linux/latest || exit 1
             fi
 
   Windows:
@@ -299,10 +316,12 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-          else
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -339,10 +358,13 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/main/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/main/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/*
-            if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/main/server/windows/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/windows/latest-server
+            sudo mkdir -p /srv/repository/main/server/windows/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/main/server/windows/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/*
+            sudo rm /srv/repository/main/server/windows/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf /srv/repository/main/server/windows/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/windows/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm /srv/repository/main/server/windows/latest || true
+                sudo ln -sf /srv/repository/main/server/windows/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/windows/latest || exit 1
             fi
 
   MacOS:
@@ -357,10 +379,12 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-          else
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -397,10 +421,13 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/main/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/main/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/*
-            if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/main/server/macos/versions/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/macos/latest-server
+            sudo mkdir -p /srv/repository/main/server/macos/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
+            sudo mv -t /srv/repository/main/server/macos/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/*
+            sudo rm /srv/repository/main/server/macos/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf /srv/repository/main/server/macos/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/macos/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm /srv/repository/main/server/macos/latest || true
+                sudo ln -sf /srv/repository/main/server/macos/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/macos/latest || exit 1
             fi
 
   Portable:
@@ -410,10 +437,12 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if [[ ${{ inputs.version }} == "master" ]]; then
-            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-          else
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -450,9 +479,11 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/main/server/portable/versions/${{ env.JELLYFIN_VERSION }}
-            sudo mv -t /srv/repository/main/server/portable/versions/${{ env.JELLYFIN_VERSION }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/*
-            if [[ ${{ inputs.version }} != "master" ]]; then
-                sudo ln -s /srv/repository/main/server/portable/versions/${{ env.JELLYFIN_VERSION }} /srv/repository/main/server/portable/latest-server
+            sudo mkdir -p /srv/repository/main/server/portable/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}
+            sudo mv -t /srv/repository/main/server/portable/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/*
+            sudo rm /srv/repository/main/server/portable/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf /srv/repository/main/server/portable/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/portable/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm /srv/repository/main/server/portable/latest || true
+                sudo ln -sf /srv/repository/main/server/portable/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/portable/latest || exit 1
             fi
-
