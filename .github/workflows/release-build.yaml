@@ -137,13 +137,14 @@ jobs:
           debug: false
           script_stop: false
           script: |
-            sudo mkdir -p /srv/repository/main/server/debian/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t /srv/repository/main/server/debian/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-            sudo rm /srv/repository/main/server/debian/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-            sudo ln -sf /srv/repository/main/server/debian/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/debian/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            export BASEDIR="/srv/repository/main/server/debian"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-                sudo rm /srv/repository/main/server/debian/latest || true
-                sudo ln -sf /srv/repository/main/server/debian/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/debian/latest || exit 1
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest || exit 1
             fi
 
   Ubuntu:
@@ -229,13 +230,14 @@ jobs:
           debug: false
           script_stop: false
           script: |
-            sudo mkdir -p /srv/repository/main/server/ubuntu/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t /srv/repository/main/server/ubuntu/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-            sudo rm /srv/repository/main/server/ubuntu/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-            sudo ln -sf /srv/repository/main/server/ubuntu/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/ubuntu/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            export BASEDIR="/srv/repository/main/server/ubuntu"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-                sudo rm /srv/repository/main/server/ubuntu/latest || true
-                sudo ln -sf /srv/repository/main/server/ubuntu/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/ubuntu/latest || exit 1
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest || exit 1
             fi
 
   Linux:
@@ -295,13 +297,14 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/main/server/linux/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/main/server/linux/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/*
-            sudo rm /srv/repository/main/server/linux/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-            sudo ln -sf /srv/repository/main/server/linux/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/linux/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            export BASEDIR="/srv/repository/main/server/linux"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-                sudo rm /srv/repository/main/server/linux/latest || true
-                sudo ln -sf /srv/repository/main/server/linux/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/linux/latest || exit 1
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest || exit 1
             fi
 
   Windows:
@@ -358,13 +361,14 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/main/server/windows/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/main/server/windows/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/*
-            sudo rm /srv/repository/main/server/windows/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-            sudo ln -sf /srv/repository/main/server/windows/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/windows/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            export BASEDIR="/srv/repository/main/server/windows"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-                sudo rm /srv/repository/main/server/windows/latest || true
-                sudo ln -sf /srv/repository/main/server/windows/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/windows/latest || exit 1
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest || exit 1
             fi
 
   MacOS:
@@ -421,13 +425,14 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/main/server/macos/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}
-            sudo mv -t /srv/repository/main/server/macos/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/*
-            sudo rm /srv/repository/main/server/macos/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-            sudo ln -sf /srv/repository/main/server/macos/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/macos/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            export BASEDIR="/srv/repository/main/server/macos"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-                sudo rm /srv/repository/main/server/macos/latest || true
-                sudo ln -sf /srv/repository/main/server/macos/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/macos/latest || exit 1
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest || exit 1
             fi
 
   Portable:
@@ -479,11 +484,12 @@ jobs:
           debug: false
           script_stop: true
           script: |
-            sudo mkdir -p /srv/repository/main/server/portable/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}
-            sudo mv -t /srv/repository/main/server/portable/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/*
-            sudo rm /srv/repository/main/server/portable/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-            sudo ln -sf /srv/repository/main/server/portable/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/portable/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            export BASEDIR="/srv/repository/main/server/portable"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-                sudo rm /srv/repository/main/server/portable/latest || true
-                sudo ln -sf /srv/repository/main/server/portable/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} /srv/repository/main/server/portable/latest || exit 1
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} ${BASEDIR}/latest || exit 1
             fi
