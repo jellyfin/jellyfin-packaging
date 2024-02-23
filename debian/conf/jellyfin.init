@@ -19,7 +19,7 @@ fi
 
 . /lib/lsb/init-functions
 
-JELLYFIN_HOME="/var/lib/jellyfin/"
+JELLYFIN_HOME="/etc/default/jellyfin"
 PIDFILE="/run/jellyfin.pid"
 
 case "$1" in

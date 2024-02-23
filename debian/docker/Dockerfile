@@ -31,9 +31,22 @@ ENV ARCH=${PACKAGE_ARCH}
 RUN apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install --no-install-recommends -y \
-    wget debhelper gnupg devscripts build-essential mmv lsb-release \
-    libssl*.* liblttng-ust* libfontconfig*-dev libcurl*openssl-dev \
-    libfreetype*-dev libssl-dev
+    wget \
+    debhelper \
+    gnupg \
+    devscripts \
+    build-essential \
+    mmv \
+    lsb-release \
+    libssl*.* \
+    liblttng-ust* \
+    libfontconfig*-dev \
+    libcurl*openssl-dev \
+    libfreetype*-dev \
+    libssl-dev \
+ && apt-get clean autoclean -y \
+ && apt-get autoremove -y \
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Prepare the cross-toolchain
 RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
@@ -64,6 +77,9 @@ RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
     libc6-dev:${PACKAGE_ARCH} linux-libc-dev:${PACKAGE_ARCH} libgcc1:${PACKAGE_ARCH} libstdc++-${GCC_VERSION}-dev:${PACKAGE_ARCH} \
     libfontconfig*-dev:${PACKAGE_ARCH} libcurl*openssl-dev:${PACKAGE_ARCH} libfreetype*-dev:${PACKAGE_ARCH} libssl-dev:${PACKAGE_ARCH} \
     libssl[13].*:${PACKAGE_ARCH} liblttng-ust*:${PACKAGE_ARCH} \
+ && apt-get clean autoclean -y \
+ && apt-get autoremove -y \
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
  ; fi
 
 # Prepare dotnet SDK

@@ -38,9 +38,18 @@ ARG JELLYFIN_VERSION
 ENV JELLYFIN_VERSION=${JELLYFIN_VERSION}
 
 RUN apk add \
-    autoconf g++ make libpng-dev \
-    gifsicle alpine-sdk automake \
-    libtool gcc musl-dev nasm python3 
+    autoconf \
+    g++ \
+    make \
+    libpng-dev \
+    gifsicle \
+    alpine-sdk\
+    automake \
+    libtool \
+    gcc \
+    musl-dev \
+    nasm \
+    python3 
 
 WORKDIR ${SOURCE_DIR}
 COPY jellyfin-web .
@@ -114,15 +123,22 @@ ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 # Install dependencies:
 RUN apt-get update \
  && apt-get install --no-install-recommends --no-install-suggests --yes \
-    ca-certificates gnupg curl \
+    ca-certificates \
+    gnupg \
+    curl \
+    apt-transport-https \
  && curl -fsSL https://repo.jellyfin.org/jellyfin_team.gpg.key \
   | gpg --dearmor -o /etc/apt/trusted.gpg.d/debian-jellyfin.gpg \
  && echo "deb [arch=${PACKAGE_ARCH}] https://repo.jellyfin.org/debian ${OS_VERSION} main" > /etc/apt/sources.list.d/jellyfin.list \
  && apt-get update \
  && apt-get install --no-install-recommends --no-install-suggests --yes \
-    ${FFMPEG_PACKAGE} openssl locales libfontconfig1 libfreetype6 \
+    ${FFMPEG_PACKAGE} \
+    openssl \
+    locales \
+    libfontconfig1 \
+    libfreetype6 \
  && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen \
- && apt-get remove gnupg --yes \
+ && apt-get remove gnupg apt-transport-https  --yes \
  && apt-get clean autoclean --yes \
  && apt-get autoremove --yes \
  && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*

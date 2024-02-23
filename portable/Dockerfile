@@ -25,9 +25,23 @@ ENV ARCHIVE_TYPES=targz
 RUN apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install --no-install-recommends -y \
-    wget debhelper gnupg devscripts build-essential mmv lsb-release zip \
-    libssl*.* liblttng-ust* libssl-dev \
-    libfontconfig*-dev libcurl*openssl-dev libfreetype*-dev
+    wget \
+    debhelper \
+    gnupg \
+    devscripts \
+    build-essential \
+    mmv \
+    lsb-release\
+    zip \
+    libssl*.* \
+    liblttng-ust*\
+    libssl-dev \
+    libfontconfig*-dev \
+    libcurl*openssl-dev \
+    libfreetype*-dev \
+ && apt-get clean autoclean -y \
+ && apt-get autoremove -y \
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Prepare dotnet SDK
 RUN wget https://packages.microsoft.com/config/${PACKAGE_TYPE}/${PACKAGE_VERSION}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
