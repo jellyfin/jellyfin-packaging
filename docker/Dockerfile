@@ -43,13 +43,13 @@ RUN apk add \
     make \
     libpng-dev \
     gifsicle \
-    alpine-sdk\
+    alpine-sdk \
     automake \
     libtool \
     gcc \
     musl-dev \
     nasm \
-    python3 
+    python3
 
 WORKDIR ${SOURCE_DIR}
 COPY jellyfin-web .
@@ -138,7 +138,7 @@ RUN apt-get update \
     libfontconfig1 \
     libfreetype6 \
  && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen \
- && apt-get remove gnupg apt-transport-https  --yes \
+ && apt-get remove gnupg apt-transport-https --yes \
  && apt-get clean autoclean --yes \
  && apt-get autoremove --yes \
  && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
