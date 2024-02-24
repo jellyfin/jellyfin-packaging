@@ -14,6 +14,11 @@ ARG IGC_VERSION=1.0.15985.7
 ARG NEO_VERSION=24.05.28454.6
 ARG LEVEL_ZERO_VERSION=1.3.28454.6
 
+# https://github.com/tsukumijima/libmali-rockchip
+ARG MALI_PKG_VER=1.9-1_arm64
+ARG MALI_PKG_TAG=v1.9-1-b5d7972
+ARG MALI_PKG_CFG=valhall-g610-g13p0-wayland-gbm
+
 # Debian architecture (amd64, arm64, armhf), set by build script
 ARG PACKAGE_ARCH
 # Dotnet architeture (x64, arm64, arm), set by build script
@@ -90,6 +95,10 @@ ARG IGC_VERSION
 ARG NEO_VERSION
 ARG LEVEL_ZERO_VERSION
 
+ARG MALI_PKG_VER
+ARG MALI_PKG_TAG
+ARG MALI_PKG_CFG
+
 ARG PACKAGE_ARCH
 ARG DOTNET_ARCH
 ARG QEMU_ARCH
@@ -158,6 +167,19 @@ RUN if [[ ${PACKAGE_ARCH} == "amd64" ]]; then \
  && dpkg -i *.deb \
  && popd \
  && rm -rf intel-compute-runtime \
+ ; fi \
+ && apt-get clean autoclean --yes \
+ && apt-get autoremove --yes \
+ && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
+
+# Rockchip RK3588 libmali OpenCL dependencies:
+RUN if [[ ${PACKAGE_ARCH} == "arm64" ]]; then \
+    mkdir libmali-rockchip \
+ && cd libmali-rockchip \
+ && curl -LO https://github.com/tsukumijima/libmali-rockchip/releases/download/${MALI_PKG_TAG}/libmali-${MALI_PKG_CFG}_${MALI_PKG_VER}.deb \
+ && apt-get install --no-install-recommends --no-install-suggests -y ./*.deb \
+ && cd .. \
+ && rm -rf libmali-rockchip \
  ; fi \
  && apt-get clean autoclean --yes \
  && apt-get autoremove --yes \
