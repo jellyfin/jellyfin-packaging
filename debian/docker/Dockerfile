@@ -101,7 +101,7 @@ RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
     liblttng-ust*:${PACKAGE_ARCH} \
  && apt-get clean autoclean -y \
  && apt-get autoremove -y \
- && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/* \
  ; fi
 
 # Prepare dotnet SDK
