@@ -304,7 +304,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     date = datetime.now().strftime("%Y%m%d-%H%M%S")
 
     images = list()
-    images_hub = list()
+    images_ghcr = list()
     for _build_arch in architectures:
         log(f">> Building Docker image for {_build_arch}...")
         log("")
@@ -340,7 +340,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         images.append(imagename)
 
         os.system(f"docker image tag {imagename} ghcr.io/{imagename}")
-        images_hub.append(f"ghcr.io/{imagename}")
+        images_ghcr.append(f"ghcr.io/{imagename}")
 
         log("")
 
