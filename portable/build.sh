@@ -49,7 +49,7 @@ for ARCHIVE_TYPE in $( tr ',' '\n' <<<"${ARCHIVE_TYPES}" ); do
             tar -czf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.gz .
         ;;
         tarxz)
-            tar -czf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.xz .
+            tar -cJf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.xz .
         ;;
         zip)
             zip -qr "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.zip .
