@@ -485,8 +485,8 @@ jobs:
           script_stop: true
           script: |
             export BASEDIR="/srv/repository/main/server/portable"
-            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
