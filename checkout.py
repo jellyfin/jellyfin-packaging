@@ -5,6 +5,7 @@
 # Part of the Jellyfin CI system
 ###############################################################################
 
+from datetime import datetime
 from subprocess import run, PIPE
 import sys
 
@@ -57,5 +58,8 @@ for submodule in submodules.keys():
     # Checkout the given head and reset the working tree
     submodules[submodule].head.reference = target_head
     submodules[submodule].head.reset(index=True, working_tree=True)
+    sha = submodules[submodule].head.object.hexsha
+    date = datetime.fromtimestamp(submodules[submodule].head.object.committed_date)
+    print(f"Submodule {submodule} now at commit {sha} ({date})")
 
 print(f"Successfully checked out submodules to ref {target_release}")
