@@ -21,10 +21,10 @@ jobs:
         run: |-
           if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -73,10 +73,10 @@ jobs:
         run: |-
           if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -166,10 +166,10 @@ jobs:
         run: |-
           if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -257,10 +257,10 @@ jobs:
         run: |-
           if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -321,10 +321,10 @@ jobs:
         run: |-
           if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -385,10 +385,10 @@ jobs:
         run: |-
           if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -444,10 +444,10 @@ jobs:
         run: |-
           if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-            echo "JeLLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
       - name: "Install dependencies"
