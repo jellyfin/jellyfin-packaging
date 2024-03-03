@@ -43,7 +43,7 @@ jobs:
         with:
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: "Log in to the GHCR Container registry"
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
