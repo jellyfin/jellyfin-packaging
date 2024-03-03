@@ -355,14 +355,18 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
 
     # Push the images and manifests to DockerHub (we are already logged in from GH Actions)
     for image in images:
+        print(f">>> Pushing image {image} to DockerHub")
         os.system(f"docker push {image}")
     for manifest in manifests:
+        print(f">>> Pushing manifest {manifest} to DockerHub")
         os.system(f"docker manifest push --purge {manifest}")
 
     # Push the images and manifests to GHCR (we are already logged in from GH Actions)
     for image in images:
+        print(f">>> Pushing image {image} to GHCR")
         os.system(f"docker push ghcr.io/{image}")
     for manifest in manifests:
+        print(f">>> Pushing manifest {manifest} to GHCR")
         os.system(f"docker manifest push --purge ghcr.io/{manifest}")
 
 
