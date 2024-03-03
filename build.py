@@ -37,7 +37,7 @@ def build_package_deb(jellyfin_version, build_type, build_arch, build_version):
     Build a .deb package (Debian or Ubuntu) within a Docker container that matches the requested distribution version
     """
     log(f"> Building an {build_arch} {build_type} .deb package...")
-    log()
+    log("")
 
     try:
         os_type = build_type if build_type in configurations.keys() else None
@@ -113,7 +113,7 @@ def build_package_rpm(jellyfin_version, build_type, build_arch, build_version):
     Build a .rpm package (Fedora or CentOS) within a Docker container that matches the requested distribution version
     """
     log(f"> Building an {build_arch} {build_type} .rpm package...")
-    log()
+    log("")
 
     pass
 
@@ -123,7 +123,7 @@ def build_linux(jellyfin_version, build_type, build_arch, _build_version):
     Build a portable Linux archive
     """
     log(f"> Building a portable {build_arch} Linux archive...")
-    log()
+    log("")
 
     try:
         PACKAGE_ARCH = (
@@ -165,7 +165,7 @@ def build_windows(jellyfin_version, build_type, _build_arch, _build_version):
     Build a portable Windows archive
     """
     log(f"> Building a portable {build_arch} Windows archive...")
-    log()
+    log("")
 
     try:
         PACKAGE_ARCH = (
@@ -207,7 +207,7 @@ def build_macos(jellyfin_version, build_type, build_arch, _build_version):
     Build a portable MacOS archive
     """
     log(f"> Building a portable {build_arch} MacOS archive...")
-    log()
+    log("")
 
     try:
         PACKAGE_ARCH = (
@@ -249,7 +249,7 @@ def build_portable(jellyfin_version, build_type, _build_arch, _build_version):
     Build a portable .NET archive
     """
     log("> Building a portable .NET archive...")
-    log()
+    log("")
 
     jellyfin_version = jellyfin_version.replace("v", "")
 
@@ -278,7 +278,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     Build Docker images for all architectures and combining manifests
     """
     log("> Building Docker images...")
-    log()
+    log("")
 
     # We build all architectures simultaneously to push a single tag, so no conditional checks
     architectures = configurations["docker"]["archmaps"].keys()
@@ -304,7 +304,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     images = list()
     for _build_arch in architectures:
         log(f">> Building Docker image for {_build_arch}...")
-        log()
+        log("")
 
         # Get our ARCH variables from the archmaps
         PACKAGE_ARCH = configurations["docker"]["archmaps"][_build_arch]["PACKAGE_ARCH"]
@@ -322,7 +322,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         os.system(
             f"{docker_run_cmd} --privileged multiarch/qemu-user-static:register --reset"
         )
-        log()
+        log("")
 
         # Build the dockerfile
         os.system(
@@ -330,7 +330,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         )
 
         images.append(imagename)
-        log()
+        log("")
 
     # Build the manifests
     log(">> Building Docker manifests...")
@@ -419,13 +419,13 @@ try:
     build_type = sys.argv[2]
 except IndexError:
     log("Error: Missing required arguments ('JELLYFIN_VERSION' and/or 'BUILD_TYPE')")
-    log()
+    log("")
     usage()
     exit(1)
 
 if build_type not in configurations.keys():
     log(f"Error: The specified build type '{build_type}' is not valid")
-    log()
+    log("")
     usage()
     exit(1)
 
