@@ -48,7 +48,7 @@ fedora:
 # Portable archives
 linux:
   build_function: build_linux
-  archivetypes: targz
+  archivetypes: targz,tarxz
   archmaps:
     amd64:
       DOTNET_ARCH: x64
@@ -81,7 +81,7 @@ windows:
   imagename: jellyfin-builder-windows
 macos:
   build_function: build_macos
-  archivetypes: targz
+  archivetypes: targz,tarxz
   archmaps:
     amd64:
       DOTNET_ARCH: x64
@@ -93,7 +93,7 @@ macos:
   imagename: jellyfin-builder-macos
 portable:
   build_function: build_portable
-  archivetypes: targz,zip
+  archivetypes: targz,tarxz,zip
   dockerfile: portable/Dockerfile
   imagename: jellyfin-builder-portable
 
