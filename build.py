@@ -293,7 +293,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         version_suffix = True
     else:
         is_latest = False
-        is unstable = True
+        is_unstable = True
         version_suffix = False
 
     jellyfin_version = jellyfin_version.replace("v", "")
