@@ -14,7 +14,7 @@ pushd "${SOURCE_DIR}"
 
 # Build server
 pushd jellyfin-server
-case ${BTYPE} in
+case ${BUILD_TYPE} in
     portable)
         RUNTIME=""
         APPHOST="-p:UseAppHost=false"
