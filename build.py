@@ -20,12 +20,15 @@ repo_root_dir = revparse.stdout.decode().strip()
 docker_build_cmd = "docker build --progress=plain --no-cache"
 docker_run_cmd = "docker run --rm"
 
+def log(message):
+    print(message, flush=True)
+
 # Configuration loader
 try:
     with open("build.yaml", encoding="utf-8") as fh:
         configurations = load(fh, Loader=SafeLoader)
 except Exception as e:
-    print(f"Error: Failed to find 'build.yaml' configuration: {e}")
+    log(f"Error: Failed to find 'build.yaml' configuration: {e}")
     exit(1)
 
 
@@ -33,8 +36,8 @@ def build_package_deb(jellyfin_version, build_type, build_arch, build_version):
     """
     Build a .deb package (Debian or Ubuntu) within a Docker container that matches the requested distribution version
     """
-    print(f"> Building an {build_arch} {build_type} .deb package...")
-    print()
+    log(f"> Building an {build_arch} {build_type} .deb package...")
+    log()
 
     try:
         os_type = build_type if build_type in configurations.keys() else None
@@ -61,7 +64,7 @@ def build_package_deb(jellyfin_version, build_type, build_arch, build_version):
                 f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}"
             )
     except Exception as e:
-        print(f"Invalid/unsupported arguments: {e}")
+        log(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
     # Set the dockerfile
@@ -109,8 +112,8 @@ def build_package_rpm(jellyfin_version, build_type, build_arch, build_version):
     """
     Build a .rpm package (Fedora or CentOS) within a Docker container that matches the requested distribution version
     """
-    print(f"> Building an {build_arch} {build_type} .rpm package...")
-    print()
+    log(f"> Building an {build_arch} {build_type} .rpm package...")
+    log()
 
     pass
 
@@ -119,8 +122,8 @@ def build_linux(jellyfin_version, build_type, build_arch, _build_version):
     """
     Build a portable Linux archive
     """
-    print(f"> Building a portable {build_arch} Linux archive...")
-    print()
+    log(f"> Building a portable {build_arch} Linux archive...")
+    log()
 
     try:
         PACKAGE_ARCH = (
@@ -134,7 +137,7 @@ def build_linux(jellyfin_version, build_type, build_arch, _build_version):
             )
         DOTNET_ARCH = configurations[build_type]["archmaps"][build_arch]["DOTNET_ARCH"]
     except Exception as e:
-        print(f"Invalid/unsupported arguments: {e}")
+        log(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
     jellyfin_version = jellyfin_version.replace("v", "")
@@ -161,8 +164,8 @@ def build_windows(jellyfin_version, build_type, _build_arch, _build_version):
     """
     Build a portable Windows archive
     """
-    print(f"> Building a portable {build_arch} Windows archive...")
-    print()
+    log(f"> Building a portable {build_arch} Windows archive...")
+    log()
 
     try:
         PACKAGE_ARCH = (
@@ -176,7 +179,7 @@ def build_windows(jellyfin_version, build_type, _build_arch, _build_version):
             )
         DOTNET_ARCH = configurations[build_type]["archmaps"][build_arch]["DOTNET_ARCH"]
     except Exception as e:
-        print(f"Invalid/unsupported arguments: {e}")
+        log(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
     jellyfin_version = jellyfin_version.replace("v", "")
@@ -203,8 +206,8 @@ def build_macos(jellyfin_version, build_type, build_arch, _build_version):
     """
     Build a portable MacOS archive
     """
-    print(f"> Building a portable {build_arch} MacOS archive...")
-    print()
+    log(f"> Building a portable {build_arch} MacOS archive...")
+    log()
 
     try:
         PACKAGE_ARCH = (
@@ -218,7 +221,7 @@ def build_macos(jellyfin_version, build_type, build_arch, _build_version):
             )
         DOTNET_ARCH = configurations[build_type]["archmaps"][build_arch]["DOTNET_ARCH"]
     except Exception as e:
-        print(f"Invalid/unsupported arguments: {e}")
+        log(f"Invalid/unsupported arguments: {e}")
         exit(1)
 
     jellyfin_version = jellyfin_version.replace("v", "")
@@ -245,8 +248,8 @@ def build_portable(jellyfin_version, build_type, _build_arch, _build_version):
     """
     Build a portable .NET archive
     """
-    print("> Building a portable .NET archive...")
-    print()
+    log("> Building a portable .NET archive...")
+    log()
 
     jellyfin_version = jellyfin_version.replace("v", "")
 
@@ -274,8 +277,8 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     """
     Build Docker images for all architectures and combining manifests
     """
-    print("> Building Docker images...")
-    print()
+    log("> Building Docker images...")
+    log()
 
     # We build all architectures simultaneously to push a single tag, so no conditional checks
     architectures = configurations["docker"]["archmaps"].keys()
@@ -298,8 +301,8 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
 
     images = list()
     for _build_arch in architectures:
-        print(f">> Building Docker image for {_build_arch}...")
-        print()
+        log(f">> Building Docker image for {_build_arch}...")
+        log()
 
         # Get our ARCH variables from the archmaps
         PACKAGE_ARCH = configurations["docker"]["archmaps"][_build_arch]["PACKAGE_ARCH"]
@@ -317,7 +320,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         os.system(
             f"{docker_run_cmd} --privileged multiarch/qemu-user-static:register --reset"
         )
-        print()
+        log()
 
         # Build the dockerfile
         os.system(
@@ -325,14 +328,14 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         )
 
         images.append(imagename)
-        print()
+        log()
 
     # Build the manifests
-    print(">> Building Docker manifests...")
+    log(">> Building Docker manifests...")
     manifests = list()
 
     if version_suffix:
-        print(">>> Building dated version manifest...")
+        log(">>> Building dated version manifest...")
         os.system(
             f"docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
         )
@@ -340,14 +343,14 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
             f"{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
         )
 
-    print(">>> Building version manifest...")
+    log(">>> Building version manifest...")
     os.system(
         f"docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
     )
     manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}")
 
     if is_latest:
-        print(">>> Building latest manifest...")
+        log(">>> Building latest manifest...")
         os.system(
             f"docker manifest create --amend {configurations['docker']['imagename']}:latest {' '.join(images)}"
         )
@@ -355,18 +358,18 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
 
     # Push the images and manifests to DockerHub (we are already logged in from GH Actions)
     for image in images:
-        print(f">>> Pushing image {image} to DockerHub")
+        log(f">>> Pushing image {image} to DockerHub")
         os.system(f"docker push {image} 2>&1") 
     for manifest in manifests:
-        print(f">>> Pushing manifest {manifest} to DockerHub")
+        log(f">>> Pushing manifest {manifest} to DockerHub")
         os.system(f"docker manifest push --purge {manifest} 2>&1")
 
     # Push the images and manifests to GHCR (we are already logged in from GH Actions)
     for image in images:
-        print(f">>> Pushing image {image} to GHCR")
+        log(f">>> Pushing image {image} to GHCR")
         os.system(f"docker push ghcr.io/{image} 2>&1")
     for manifest in manifests:
-        print(f">>> Pushing manifest {manifest} to GHCR")
+        log(f">>> Pushing manifest {manifest} to GHCR")
         os.system(f"docker manifest push --purge ghcr.io/{manifest} 2>&1")
 
 
@@ -374,19 +377,19 @@ def usage():
     """
     Print usage information on error
     """
-    print(f"{sys.argv[0]} JELLYFIN_VERSION BUILD_TYPE [BUILD_ARCH] [BUILD_VERSION]")
-    print("  JELLYFIN_VERSION: The Jellyfin version being built")
-    print("    * Stable releases should be tag names with a 'v' e.g. v10.9.0")
-    print(
+    log(f"{sys.argv[0]} JELLYFIN_VERSION BUILD_TYPE [BUILD_ARCH] [BUILD_VERSION]")
+    log("  JELLYFIN_VERSION: The Jellyfin version being built")
+    log("    * Stable releases should be tag names with a 'v' e.g. v10.9.0")
+    log(
         "    * Unstable releases should be 'master' or a date-to-the-hour version e.g. 2024021600"
     )
-    print("  BUILD_TYPE: The type of build to execute")
-    print(f"    * Valid options are: {', '.join(configurations.keys())}")
-    print("  BUILD_ARCH: The CPU architecture of the build")
-    print(
+    log("  BUILD_TYPE: The type of build to execute")
+    log(f"    * Valid options are: {', '.join(configurations.keys())}")
+    log("  BUILD_ARCH: The CPU architecture of the build")
+    log(
         "    * Valid options are: <empty> [portable/docker only], amd64, arm64, armhf"
     )
-    print(
+    log(
         "  BUILD_VERSION: A valid OS distribution version (.deb/.rpm build types only)"
     )
 
@@ -407,14 +410,14 @@ try:
     jellyfin_version = sys.argv[1]
     build_type = sys.argv[2]
 except IndexError:
-    print("Error: Missing required arguments ('JELLYFIN_VERSION' and/or 'BUILD_TYPE')")
-    print()
+    log("Error: Missing required arguments ('JELLYFIN_VERSION' and/or 'BUILD_TYPE')")
+    log()
     usage()
     exit(1)
 
 if build_type not in configurations.keys():
-    print(f"Error: The specified build type '{build_type}' is not valid")
-    print()
+    log(f"Error: The specified build type '{build_type}' is not valid")
+    log()
     usage()
     exit(1)
 
@@ -422,10 +425,10 @@ try:
     if configurations[build_type]["build_function"] not in function_definitions.keys():
         raise ValueError
 except Exception:
-    print(
+    log(
         f"Error: The specified valid build type '{build_type}' does not define a valid build function"
     )
-    print(
+    log(
         "This is a misconfiguration of the YAML or the build script; please report a bug!"
     )
     exit(1)
@@ -445,7 +448,7 @@ except IndexError:
 # Autocorrect "master" to a dated version string
 if jellyfin_version == "master":
     jellyfin_version = datetime.now().strftime("%Y%m%d%H")
-    print(f"NOTE: Autocorrecting 'master' version to {jellyfin_version}")
+    log(f"NOTE: Autocorrecting 'master' version to {jellyfin_version}")
 
 # Launch the builder function
 function_definitions[configurations[build_type]["build_function"]](
