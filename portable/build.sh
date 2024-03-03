@@ -7,7 +7,7 @@ set -o xtrace
 
 # Create the intermediate build dir
 BUILD_DIR="/build"
-mkdir -p ${BUILD_DIR}
+mkdir -p ${BUILD_DIR}/jellyfin
 
 # Move to source directory
 pushd "${SOURCE_DIR}"
@@ -24,14 +24,14 @@ case ${BUILD_TYPE} in
         APPHOST="-p:UseAppHost=true"
     ;;
 esac
-dotnet publish Jellyfin.Server --configuration Release ${RUNTIME} --output ${BUILD_DIR}/ -p:DebugSymbols=false -p:DebugType=none ${APPHOST}
+dotnet publish Jellyfin.Server --configuration Release ${RUNTIME} --output ${BUILD_DIR}/jellyfin/ -p:DebugSymbols=false -p:DebugType=none ${APPHOST}
 popd
 
 # Build web
 pushd jellyfin-web
 npm ci --no-audit --unsafe-perm
 npm run build:production
-mv dist ${BUILD_DIR}/jellyfin-web
+mv dist ${BUILD_DIR}/jellyfin/jellyfin-web
 popd
 
 mkdir -p "${ARTIFACT_DIR}/"
@@ -46,13 +46,13 @@ pushd ${BUILD_DIR}
 for ARCHIVE_TYPE in $( tr ',' '\n' <<<"${ARCHIVE_TYPES}" ); do
     case ${ARCHIVE_TYPE} in
         targz)
-            tar -czf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.gz .
+            tar -czf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.gz jellyfin/
         ;;
         tarxz)
-            tar -cJf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.xz .
+            tar -cJf "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.tar.xz jellyfin/
         ;;
         zip)
-            zip -qr "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.zip .
+            zip -qr "${ARTIFACT_DIR}"/jellyfin_${VERSION_SUFFIX}.zip jellyfin/
         ;;
     esac
 done
