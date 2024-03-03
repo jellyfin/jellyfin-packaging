@@ -154,7 +154,7 @@ jobs:
         release:
           - focal
           - jammy
-        # - noble
+          - noble
         arch:
           - amd64
           - arm64
