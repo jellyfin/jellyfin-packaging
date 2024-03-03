@@ -20,8 +20,10 @@ repo_root_dir = revparse.stdout.decode().strip()
 docker_build_cmd = "docker build --progress=plain --no-cache"
 docker_run_cmd = "docker run --rm"
 
+
 def log(message):
     print(message, flush=True)
+
 
 # Configuration loader
 try:
@@ -302,6 +304,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     date = datetime.now().strftime("%Y%m%d-%H%M%S")
 
     images = list()
+    images_hub = list()
     for _build_arch in architectures:
         log(f">> Building Docker image for {_build_arch}...")
         log("")
@@ -319,17 +322,26 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
             imagename = f"{configurations['docker']['imagename']}:{jellyfin_version}-{_build_arch}"
 
         # Clean up any existing qemu static image
+        log(
+            f">>> {docker_run_cmd} --privileged multiarch/qemu-user-static:register --reset"
+        )
         os.system(
             f"{docker_run_cmd} --privileged multiarch/qemu-user-static:register --reset"
         )
         log("")
 
         # Build the dockerfile
+        log(
+            f">>> {docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --build-arg JELLYFIN_VERSION={jellyfin_version} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+        )
         os.system(
             f"{docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --build-arg JELLYFIN_VERSION={jellyfin_version} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
         )
-
         images.append(imagename)
+
+        os.system(f"docker image tag {imagename} ghcr.io/{imagename}")
+        images_hub.append(f"ghcr.io/{imagename}")
+
         log("")
 
     # Build the manifests
@@ -338,46 +350,74 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
 
     if version_suffix:
         log(">>> Building dated version manifest...")
+        log(
+            f">>>> docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
+        )
         os.system(
-            f"docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
+            f"docker manifest create --amend docker.io/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
+        )
+        os.system(
+            f"docker manifest create --amend ghcr.io/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images_ghcr)}"
         )
         manifests.append(
             f"{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
         )
 
     log(">>> Building version manifest...")
+    log(
+        f">>>> docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
+    )
     os.system(
-        f"docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
+        f"docker manifest create --amend docker.io/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
+    )
+    os.system(
+        f"docker manifest create --amend ghcr.io/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images_ghcr)}"
     )
     manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}")
 
     if is_latest:
         log(">>> Building latest manifest...")
+        log(
+            f">>>> docker manifest create --amend {configurations['docker']['imagename']}:latest {' '.join(images)}"
+        )
         os.system(
-            f"docker manifest create --amend {configurations['docker']['imagename']}:latest {' '.join(images)}"
+            f"docker manifest create --amend docker.io/{configurations['docker']['imagename']}:latest {' '.join(images)}"
+        )
+        os.system(
+            f"docker manifest create --amend ghcr.io/{configurations['docker']['imagename']}:latest {' '.join(images_ghcr)}"
         )
         manifests.append(f"{configurations['docker']['imagename']}:latest")
     elif is_unstable:
         log(">>> Building unstable manifest...")
+        log(
+            f">>>> docker manifest create --amend {configurations['docker']['imagename']}:unstable {' '.join(images)}"
+        )
         os.system(
-            f"docker manifest create --amend {configurations['docker']['imagename']}:unstable {' '.join(images)}"
+            f"docker manifest create --amend docker.io/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
+        )
+        os.system(
+            f"docker manifest create --amend ghcr.io/{configurations['docker']['imagename']}:unstable {' '.join(images_ghcr)}"
         )
         manifests.append(f"{configurations['docker']['imagename']}:unstable")
 
     # Push the images and manifests to DockerHub (we are already logged in from GH Actions)
     for image in images:
         log(f">>> Pushing image {image} to DockerHub")
-        os.system(f"docker push {image} 2>&1") 
+        log(f">>>> docker push {image} 2>&1")
+        os.system(f"docker push {image} 2>&1")
     for manifest in manifests:
         log(f">>> Pushing manifest {manifest} to DockerHub")
-        os.system(f"docker manifest push --purge {manifest} 2>&1")
+        log(f">>>> docker manifest push --purge docker.io/{manifest} 2>&1")
+        os.system(f"docker manifest push --purge docker.io/{manifest} 2>&1")
 
     # Push the images and manifests to GHCR (we are already logged in from GH Actions)
     for image in images:
         log(f">>> Pushing image {image} to GHCR")
+        log(f">>>> docker push ghcr.io/{image} 2>&1")
         os.system(f"docker push ghcr.io/{image} 2>&1")
     for manifest in manifests:
         log(f">>> Pushing manifest {manifest} to GHCR")
+        log(f">>>> docker manifest push --purge ghcr.io/{manifest} 2>&1")
         os.system(f"docker manifest push --purge ghcr.io/{manifest} 2>&1")
 
 
@@ -394,12 +434,8 @@ def usage():
     log("  BUILD_TYPE: The type of build to execute")
     log(f"    * Valid options are: {', '.join(configurations.keys())}")
     log("  BUILD_ARCH: The CPU architecture of the build")
-    log(
-        "    * Valid options are: <empty> [portable/docker only], amd64, arm64, armhf"
-    )
-    log(
-        "  BUILD_VERSION: A valid OS distribution version (.deb/.rpm build types only)"
-    )
+    log("    * Valid options are: <empty> [portable/docker only], amd64, arm64, armhf")
+    log("  BUILD_VERSION: A valid OS distribution version (.deb/.rpm build types only)")
 
 
 # Define a map of possible build functions from the YAML configuration
