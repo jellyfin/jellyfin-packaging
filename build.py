@@ -289,9 +289,11 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     # Determine if this is a "latest"-type image (v in jellyfin_version) or not
     if "v" in jellyfin_version:
         is_latest = True
+        is_unstable = False
         version_suffix = True
     else:
         is_latest = False
+        is unstable = True
         version_suffix = False
 
     jellyfin_version = jellyfin_version.replace("v", "")
@@ -355,6 +357,12 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
             f"docker manifest create --amend {configurations['docker']['imagename']}:latest {' '.join(images)}"
         )
         manifests.append(f"{configurations['docker']['imagename']}:latest")
+    elif is_unstable:
+        log(">>> Building unstable manifest...")
+        os.system(
+            f"docker manifest create --amend {configurations['docker']['imagename']}:unstable {' '.join(images)}"
+        )
+        manifests.append(f"{configurations['docker']['imagename']}:unstable")
 
     # Push the images and manifests to DockerHub (we are already logged in from GH Actions)
     for image in images:
