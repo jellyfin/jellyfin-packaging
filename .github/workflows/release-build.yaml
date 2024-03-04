@@ -19,7 +19,7 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
@@ -36,7 +36,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version }}
+          ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for Docker containers"
         env:
@@ -63,7 +63,7 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
@@ -80,7 +80,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version }}
+          ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
@@ -156,7 +156,7 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
@@ -173,7 +173,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version }}
+          ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
@@ -247,7 +247,7 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
@@ -264,7 +264,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version }}
+          ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for ${{ matrix.arch }}"
         run: |-
@@ -311,7 +311,7 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
@@ -328,7 +328,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version }}
+          ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for ${{ matrix.arch }}"
         run: |-
@@ -375,7 +375,7 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
@@ -392,7 +392,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version }}
+          ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
@@ -434,7 +434,7 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
           else
@@ -451,7 +451,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version }}
+          ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for Portable" 
         run: |-
