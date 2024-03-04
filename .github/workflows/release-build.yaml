@@ -1,7 +1,11 @@
 name: "Release Build"
 
 on:
+  schedule:
+    # Weekly unstable trigger on Monday at 05:00 GMT
+    - cron: '0 5 * * 1'
   workflow_dispatch:
+    # Manual trigger from bot
     inputs:
       version:
         required: true
