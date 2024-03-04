@@ -27,14 +27,6 @@ jobs:
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
-      - name: "Get DockerHub and GHCR secrets"
-        id: dockercreds
-        run: |-
-          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> $GITHUB_ENV
-          echo "DOCKER_TOKEN=${{ secrets.DOCKER_TOKEN }}" >> $GITHUB_ENV
-          echo "GHCR_USERNAME=${{ secrets.GHCR_USERNAME }}" >> $GITHUB_ENV
-          echo "GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}" >> $GITHUB_ENV
-
       - name: "Install dependencies"
         run: |-
           sudo apt-get install --yes python3-git python3-yaml
@@ -47,8 +39,13 @@ jobs:
           ./checkout.py ${{ inputs.version }}
 
       - name: "Run builder for Docker containers"
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: |-
-          sudo ./build.py ${{ env.JELLYFIN_VERSION }} docker
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} docker
 
 #  Debian:
 #    runs-on: ubuntu-22.04
