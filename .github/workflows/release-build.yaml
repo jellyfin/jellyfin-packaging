@@ -47,441 +47,441 @@ jobs:
         run: |-
           sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} docker
 
-#  Debian:
-#    runs-on: ubuntu-22.04
-#    strategy:
-#      matrix:
-#        release:
-#          - bullseye
-#          - bookworm
-#        arch:
-#          - amd64
-#          - arm64
-#          - armhf
-#    continue-on-error: false  # true in prod, false for testing
-#    steps:
-#      - name: "Set dated version for unstable builds"
-#        id: version
-#        run: |-
-#          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
-#            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
-#          else
-#            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
-#          fi
-#
-#      - name: "Install dependencies"
-#        run: |-
-#          sudo apt-get install --yes python3-git python3-yaml
-#
-#      - name: "Checkout repository"
-#        uses: actions/checkout@v3
-#
-#      - name: "Prepare repository"
-#        run: |-
-#          ./checkout.py ${{ inputs.version }}
-#
-#      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
-#        run: |-
-#          sudo ./build.py ${{ env.JELLYFIN_VERSION }} debian ${{ matrix.arch }} ${{ matrix.release }}
-#
-#      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          source: "out/debian/*"
-#          strip_components: 2
-#          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}"
-#
-#      - name: "Import artifacts into reprepro -V"
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: false
-#          script: |
-#            set -o xtrace
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                COMPONENT="main"
-#            else
-#                COMPONENT="unstable"
-#            fi
-#            # Only include the architecture-dependent deb here, as the others are done only for amd64
-#            sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
-#            if [[ ${{ matrix.arch }} == "amd64" ]]; then
-#                # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
-#                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
-#                # Only include the source DSC for amd64; the other architectures are the same and conflict
-#                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
-#            fi
-#
-#      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: false
-#          script: |
-#            export BASEDIR="/srv/repository/main/server/debian"
-#            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-#            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-#            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-#            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                sudo rm ${BASEDIR}/latest || true
-#                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
-#            fi
-#
-#  Ubuntu:
-#    runs-on: ubuntu-22.04
-#    strategy:
-#      matrix:
-#        release:
-#          - focal
-#          - jammy
-#        # - noble
-#        arch:
-#          - amd64
-#          - arm64
-#          - armhf
-#    continue-on-error: false  # true in prod, false for testing
-#    steps:
-#      - name: "Set dated version for unstable builds"
-#        id: version
-#        run: |-
-#          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
-#            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
-#          else
-#            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
-#          fi
-#
-#      - name: "Install dependencies"
-#        run: |-
-#          sudo apt-get install --yes python3-git python3-yaml
-#
-#      - name: "Checkout repository"
-#        uses: actions/checkout@v3
-#
-#      - name: "Prepare repository"
-#        run: |-
-#          ./checkout.py ${{ inputs.version }}
-#
-#      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
-#        run: |-
-#          sudo ./build.py ${{ env.JELLYFIN_VERSION }} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
-#
-#      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          source: "out/ubuntu/*"
-#          strip_components: 2
-#          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}"
-#
-#      - name: "Import artifacts into reprepro -V"
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: false
-#          script: |
-#            set -o xtrace
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                COMPONENT="main"
-#            else
-#                COMPONENT="unstable"
-#            fi
-#            # Only include the architecture-dependent deb here, as the others are done only for amd64
-#            sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
-#            if [[ ${{ matrix.arch }} == "amd64" ]]; then
-#                # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
-#                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
-#                # Only include the source DSC for amd64; the other architectures are the same and conflict
-#                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
-#            fi
-#
-#      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: false
-#          script: |
-#            export BASEDIR="/srv/repository/main/server/ubuntu"
-#            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-#            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-#            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-#            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                sudo rm ${BASEDIR}/latest || true
-#                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
-#            fi
-#
-#  Linux:
-#    runs-on: ubuntu-22.04
-#    strategy:
-#      matrix:
-#        arch:
-#          - amd64
-#          - amd64-musl
-#          - arm64
-#          - arm64-musl
-#          - armhf
-#    continue-on-error: false  # true in prod, false for testing
-#    steps:
-#      - name: "Set dated version for unstable builds"
-#        id: version
-#        run: |-
-#          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
-#            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
-#          else
-#            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
-#          fi
-#
-#      - name: "Install dependencies"
-#        run: |-
-#          sudo apt-get install --yes python3-git python3-yaml
-#
-#      - name: "Checkout repository"
-#        uses: actions/checkout@v3
-#
-#      - name: "Prepare repository"
-#        run: |-
-#          ./checkout.py ${{ inputs.version }}
-#
-#      - name: "Run builder for ${{ matrix.arch }}"
-#        run: |-
-#          sudo ./build.py ${{ env.JELLYFIN_VERSION }} linux ${{ matrix.arch }}
-#
-#      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          source: "out/linux/*"
-#          strip_components: 2
-#          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}"
-#
-#      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: true
-#          script: |
-#            export BASEDIR="/srv/repository/main/server/linux"
-#            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-#            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-#            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-#            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                sudo rm ${BASEDIR}/latest || true
-#                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
-#            fi
-#
-#  Windows:
-#    runs-on: ubuntu-22.04
-#    strategy:
-#      matrix:
-#        arch:
-#          - amd64
-#          - arm64
-#    continue-on-error: false  # true in prod, false for testing
-#    steps:
-#      - name: "Set dated version for unstable builds"
-#        id: version
-#        run: |-
-#          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
-#            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
-#          else
-#            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
-#          fi
-#
-#      - name: "Install dependencies"
-#        run: |-
-#          sudo apt-get install --yes python3-git python3-yaml
-#
-#      - name: "Checkout repository"
-#        uses: actions/checkout@v3
-#
-#      - name: "Prepare repository"
-#        run: |-
-#          ./checkout.py ${{ inputs.version }}
-#
-#      - name: "Run builder for ${{ matrix.arch }}"
-#        run: |-
-#          sudo ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }}
-#
-#      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          source: "out/windows/*"
-#          strip_components: 2
-#          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
-#
-#      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: true
-#          script: |
-#            export BASEDIR="/srv/repository/main/server/windows"
-#            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-#            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-#            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-#            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                sudo rm ${BASEDIR}/latest || true
-#                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
-#            fi
-#
-#  MacOS:
-#    runs-on: ubuntu-22.04
-#    strategy:
-#      matrix:
-#        arch:
-#          - amd64
-#          - arm64
-#    continue-on-error: false  # true in prod, false for testing
-#    steps:
-#      - name: "Set dated version for unstable builds"
-#        id: version
-#        run: |-
-#          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
-#            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
-#          else
-#            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
-#          fi
-#
-#      - name: "Install dependencies"
-#        run: |-
-#          sudo apt-get install --yes python3-git python3-yaml
-#
-#      - name: "Checkout repository"
-#        uses: actions/checkout@v3
-#
-#      - name: "Prepare repository"
-#        run: |-
-#          ./checkout.py ${{ inputs.version }}
-#
-#      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
-#        run: |-
-#          sudo ./build.py ${{ env.JELLYFIN_VERSION }} macos ${{ matrix.arch }}
-#
-#      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          source: "out/macos/*"
-#          strip_components: 2
-#          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}"
-#
-#      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: true
-#          script: |
-#            export BASEDIR="/srv/repository/main/server/macos"
-#            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-#            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
-#            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-#            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                sudo rm ${BASEDIR}/latest || true
-#                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
-#            fi
-#
-#  Portable:
-#    runs-on: ubuntu-22.04
-#    continue-on-error: false  # true in prod, false for testing
-#    steps:
-#      - name: "Set dated version for unstable builds"
-#        id: version
-#        run: |-
-#          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
-#            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
-#          else
-#            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-#            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
-#          fi
-#
-#      - name: "Install dependencies"
-#        run: |-
-#          sudo apt-get install --yes python3-git python3-yaml
-#
-#      - name: "Checkout repository"
-#        uses: actions/checkout@v3
-#
-#      - name: "Prepare repository"
-#        run: |-
-#          ./checkout.py ${{ inputs.version }}
-#
-#      - name: "Run builder for Portable" 
-#        run: |-
-#          sudo ./build.py ${{ env.JELLYFIN_VERSION }} portable
-#
-#      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          source: "out/portable/*"
-#          strip_components: 2
-#          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/portable"
-#
-#      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: true
-#          script: |
-#            export BASEDIR="/srv/repository/main/server/portable"
-#            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any || exit 1
-#            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.release }}/* || exit 1
-#            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-#            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                sudo rm ${BASEDIR}/latest || true
-#                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
-#            fi
+  Debian:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        release:
+          - bullseye
+          - bookworm
+        arch:
+          - amd64
+          - arm64
+          - armhf
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git python3-yaml
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} debian ${{ matrix.arch }} ${{ matrix.release }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/debian/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}"
+
+      - name: "Import artifacts into reprepro -V"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: false
+          script: |
+            set -o xtrace
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                COMPONENT="main"
+            else
+                COMPONENT="unstable"
+            fi
+            # Only include the architecture-dependent deb here, as the others are done only for amd64
+            sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
+            if [[ ${{ matrix.arch }} == "amd64" ]]; then
+                # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
+                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
+                # Only include the source DSC for amd64; the other architectures are the same and conflict
+                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
+            fi
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: false
+          script: |
+            export BASEDIR="/srv/repository/main/server/debian"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
+
+  Ubuntu:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        release:
+          - focal
+          - jammy
+        # - noble
+        arch:
+          - amd64
+          - arm64
+          - armhf
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git python3-yaml
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/ubuntu/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}"
+
+      - name: "Import artifacts into reprepro -V"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: false
+          script: |
+            set -o xtrace
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                COMPONENT="main"
+            else
+                COMPONENT="unstable"
+            fi
+            # Only include the architecture-dependent deb here, as the others are done only for amd64
+            sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
+            if [[ ${{ matrix.arch }} == "amd64" ]]; then
+                # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
+                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
+                # Only include the source DSC for amd64; the other architectures are the same and conflict
+                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
+            fi
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: false
+          script: |
+            export BASEDIR="/srv/repository/main/server/ubuntu"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
+
+  Linux:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - amd64-musl
+          - arm64
+          - arm64-musl
+          - armhf
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git python3-yaml
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} linux ${{ matrix.arch }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/linux/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            export BASEDIR="/srv/repository/main/server/linux"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
+
+  Windows:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - arm64
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git python3-yaml
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/windows/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            export BASEDIR="/srv/repository/main/server/windows"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
+
+  MacOS:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch:
+          - amd64
+          - arm64
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git python3-yaml
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} macos ${{ matrix.arch }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/macos/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            export BASEDIR="/srv/repository/main/server/macos"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
+
+  Portable:
+    runs-on: ubuntu-22.04
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version }}"; then
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git python3-yaml
+
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}
+
+      - name: "Run builder for Portable" 
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} portable
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/portable/*"
+          strip_components: 2
+          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/portable"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            export BASEDIR="/srv/repository/main/server/portable"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.release }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
