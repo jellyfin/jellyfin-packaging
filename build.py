@@ -344,6 +344,21 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
 
         log("")
 
+    # Log in to docker hub
+    os.system("docker login 2>&1")
+
+    # Push the images to DockerHub
+    for image in images:
+        log(f">>> Pushing image {image} to DockerHub")
+        log(f">>>> docker push {image} 2>&1")
+        os.system(f"docker push {image} 2>&1")
+
+    # Push the images to GHCR
+    for image in ghcr_images:
+        log(f">>> Pushing image {image} to GHCR")
+        log(f">>>> docker push {image} 2>&1")
+        os.system(f"docker push {image} 2>&1")
+
     # Build the manifests
     log(">> Building Docker manifests...")
     manifests = list()
@@ -400,24 +415,13 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         )
         manifests.append(f"{configurations['docker']['imagename']}:unstable")
 
-    # Log in to docker hub
-    os.system("docker login 2>&1")
-
     # Push the images and manifests to DockerHub (we are already logged in from GH Actions)
-    for image in images:
-        log(f">>> Pushing image {image} to DockerHub")
-        log(f">>>> docker push {image} 2>&1")
-        os.system(f"docker push {image} 2>&1")
     for manifest in manifests:
         log(f">>> Pushing manifest {manifest} to DockerHub")
         log(f">>>> docker manifest push --purge docker.io/{manifest} 2>&1")
         os.system(f"docker manifest push --purge docker.io/{manifest} 2>&1")
 
     # Push the images and manifests to GHCR (we are already logged in from GH Actions)
-    for image in images:
-        log(f">>> Pushing image {image} to GHCR")
-        log(f">>>> docker push ghcr.io/{image} 2>&1")
-        os.system(f"docker push ghcr.io/{image} 2>&1")
     for manifest in manifests:
         log(f">>> Pushing manifest {manifest} to GHCR")
         log(f">>>> docker manifest push --purge ghcr.io/{manifest} 2>&1")
