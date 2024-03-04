@@ -400,6 +400,9 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         )
         manifests.append(f"{configurations['docker']['imagename']}:unstable")
 
+    # Log in to docker hub
+    os.system("docker login 2>&1")
+
     # Push the images and manifests to DockerHub (we are already logged in from GH Actions)
     for image in images:
         log(f">>> Pushing image {image} to DockerHub")
