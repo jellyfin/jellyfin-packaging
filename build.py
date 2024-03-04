@@ -394,7 +394,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
 
     # Log in to DockerHub
     os.system(
-        f"docker login -u {getenv('DOCKER_USERNAME')} -p {getenv('DOCKER_TOKEN')} docker.io 2>&1"
+        f"docker login -u {getenv('DOCKER_USERNAME')} -p {getenv('DOCKER_TOKEN')} 2>&1"
     )
 
     # Push the images to DockerHub
