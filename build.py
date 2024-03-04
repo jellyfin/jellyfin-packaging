@@ -35,7 +35,7 @@ except Exception as e:
     exit(1)
 
 
-def build_package_deb(jellyfin_version, build_type, build_arch, build_version):
+def build_package_deb(jellyfin_version, build_type, build_arch, build_version, no_push=False):
     """
     Build a .deb package (Debian or Ubuntu) within a Docker container that matches the requested distribution version
     """
@@ -111,7 +111,7 @@ def build_package_deb(jellyfin_version, build_type, build_arch, build_version):
     )
 
 
-def build_package_rpm(jellyfin_version, build_type, build_arch, build_version):
+def build_package_rpm(jellyfin_version, build_type, build_arch, build_version, no_push=False):
     """
     Build a .rpm package (Fedora or CentOS) within a Docker container that matches the requested distribution version
     """
@@ -121,7 +121,7 @@ def build_package_rpm(jellyfin_version, build_type, build_arch, build_version):
     pass
 
 
-def build_linux(jellyfin_version, build_type, build_arch, _build_version):
+def build_linux(jellyfin_version, build_type, build_arch, _build_version, no_push=False):
     """
     Build a portable Linux archive
     """
@@ -163,7 +163,7 @@ def build_linux(jellyfin_version, build_type, build_arch, _build_version):
     )
 
 
-def build_windows(jellyfin_version, build_type, _build_arch, _build_version):
+def build_windows(jellyfin_version, build_type, _build_arch, _build_version, no_push=False):
     """
     Build a portable Windows archive
     """
@@ -205,7 +205,7 @@ def build_windows(jellyfin_version, build_type, _build_arch, _build_version):
     )
 
 
-def build_macos(jellyfin_version, build_type, build_arch, _build_version):
+def build_macos(jellyfin_version, build_type, build_arch, _build_version, no_push=False):
     """
     Build a portable MacOS archive
     """
@@ -247,7 +247,7 @@ def build_macos(jellyfin_version, build_type, build_arch, _build_version):
     )
 
 
-def build_portable(jellyfin_version, build_type, _build_arch, _build_version):
+def build_portable(jellyfin_version, build_type, _build_arch, _build_version, no_push=False):
     """
     Build a portable .NET archive
     """
@@ -276,7 +276,7 @@ def build_portable(jellyfin_version, build_type, _build_arch, _build_version):
     )
 
 
-def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
+def build_docker(jellyfin_version, build_type, _build_arch, _build_version, no_push=False):
     """
     Build Docker images for all architectures and combining manifests
     """
@@ -344,6 +344,9 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         images_ghcr.append(f"ghcr.io/{imagename}")
 
         log("")
+
+    if no_push:
+        return
 
     def build_manifests(server, images):
         # Build the manifests
@@ -510,7 +513,12 @@ if jellyfin_version == "master":
     jellyfin_version = datetime.now().strftime("%Y%m%d%H")
     log(f"NOTE: Autocorrecting 'master' version to {jellyfin_version}")
 
+if "--no-push" in sys.argv:
+    no_push = True
+else:
+    no_push = False
+
 # Launch the builder function
 function_definitions[configurations[build_type]["build_function"]](
-    jellyfin_version, build_type, build_arch, build_version
+    jellyfin_version, build_type, build_arch, build_version, no_push=no_push
 )
