@@ -7,6 +7,7 @@
 
 from datetime import datetime
 from email.utils import format_datetime, localtime
+from os import getenv
 import os.path
 from subprocess import run, PIPE
 import sys
@@ -303,7 +304,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     # Set today's date in a convenient format for use as an image suffix
     date = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-    images = list()
+    images_hub = list()
     images_ghcr = list()
     for _build_arch in architectures:
         log(f">> Building Docker image for {_build_arch}...")
@@ -337,95 +338,99 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         os.system(
             f"{docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --build-arg JELLYFIN_VERSION={jellyfin_version} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
         )
-        images.append(imagename)
+        images_hub.append(imagename)
 
         os.system(f"docker image tag {imagename} ghcr.io/{imagename}")
         images_ghcr.append(f"ghcr.io/{imagename}")
 
         log("")
 
-#    # Log in to docker hub
-#    os.system("docker login 2>&1")
-#
-#    # Push the images to DockerHub
-#    for image in images:
-#        log(f">>> Pushing image {image} to DockerHub")
-#        log(f">>>> docker push {image} 2>&1")
-#        os.system(f"docker push {image} 2>&1")
-#
-#    # Push the images to GHCR
-#    for image in images_ghcr:
-#        log(f">>> Pushing image {image} to GHCR")
-#        log(f">>>> docker push {image} 2>&1")
-#        os.system(f"docker push {image} 2>&1")
-#
-#    # Build the manifests
-#    log(">> Building Docker manifests...")
-#    manifests = list()
-#
-#    if version_suffix:
-#        log(">>> Building dated version manifest...")
-#        log(
-#            f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
-#        )
-#        os.system(
-#            f"docker manifest create docker.io/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
-#        )
-#        os.system(
-#            f"docker manifest create ghcr.io/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images_ghcr)}"
-#        )
-#        manifests.append(
-#            f"{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
-#        )
-#
-#    log(">>> Building version manifest...")
-#    log(
-#        f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
-#    )
-#    os.system(
-#        f"docker manifest create docker.io/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
-#    )
-#    os.system(
-#        f"docker manifest create ghcr.io/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images_ghcr)}"
-#    )
-#    manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}")
-#
-#    if is_latest:
-#        log(">>> Building latest manifest...")
-#        log(
-#            f">>>> docker manifest create {configurations['docker']['imagename']}:latest {' '.join(images)}"
-#        )
-#        os.system(
-#            f"docker manifest create docker.io/{configurations['docker']['imagename']}:latest {' '.join(images)}"
-#        )
-#        os.system(
-#            f"docker manifest create ghcr.io/{configurations['docker']['imagename']}:latest {' '.join(images_ghcr)}"
-#        )
-#        manifests.append(f"{configurations['docker']['imagename']}:latest")
-#    elif is_unstable:
-#        log(">>> Building unstable manifest...")
-#        log(
-#            f">>>> docker manifest create {configurations['docker']['imagename']}:unstable {' '.join(images)}"
-#        )
-#        os.system(
-#            f"docker manifest create docker.io/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
-#        )
-#        os.system(
-#            f"docker manifest create ghcr.io/{configurations['docker']['imagename']}:unstable {' '.join(images_ghcr)}"
-#        )
-#        manifests.append(f"{configurations['docker']['imagename']}:unstable")
-#
-#    # Push the images and manifests to DockerHub (we are already logged in from GH Actions)
-#    for manifest in manifests:
-#        log(f">>> Pushing manifest {manifest} to DockerHub")
-#        log(f">>>> docker manifest push --purge docker.io/{manifest} 2>&1")
-#        os.system(f"docker manifest push --purge docker.io/{manifest} 2>&1")
-#
-#    # Push the images and manifests to GHCR (we are already logged in from GH Actions)
-#    for manifest in manifests:
-#        log(f">>> Pushing manifest {manifest} to GHCR")
-#        log(f">>>> docker manifest push --purge ghcr.io/{manifest} 2>&1")
-#        os.system(f"docker manifest push --purge ghcr.io/{manifest} 2>&1")
+    def build_manifests(server, images):
+        # Build the manifests
+        log(f">> Building Docker manifests for {server}...")
+        manifests = list()
+    
+        if version_suffix:
+            log(">>> Building dated version manifest...")
+            log(
+                f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
+            )
+            os.system(
+                f"docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
+            )
+            manifests.append(
+                f"{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
+            )
+    
+        log(">>> Building version manifest...")
+        log(
+            f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
+        )
+        os.system(
+            f"docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
+        )
+        manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}")
+    
+        if is_latest:
+            log(">>> Building latest manifest...")
+            log(
+                f">>>> docker manifest create {configurations['docker']['imagename']}:latest {' '.join(images)}"
+            )
+            os.system(
+                f"docker manifest create {server}/{configurations['docker']['imagename']}:latest {' '.join(images)}"
+            )
+            manifests.append(f"{configurations['docker']['imagename']}:latest")
+        elif is_unstable:
+            log(">>> Building unstable manifest...")
+            log(
+                f">>>> docker manifest create {configurations['docker']['imagename']}:unstable {' '.join(images)}"
+            )
+            os.system(
+                f"docker manifest create {server}/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
+            )
+            manifests.append(f"{configurations['docker']['imagename']}:unstable")
+
+        return manifests
+
+    # Log in to DockerHub
+    os.system(f"docker login -u {os.getenv('DOCKER_USERNAME')} -p {os.getenv('DOCKER_TOKEN')} docker.io 2>&1")
+
+    # Push the images to DockerHub
+    for image in images_hub:
+        log(f">>> Pushing image {image} to DockerHub")
+        log(f">>>> docker push {image} 2>&1")
+        os.system(f"docker push {image} 2>&1")
+
+    manifests_hub = build_manifests('docker.io', images_hub)
+
+    # Push the images and manifests to DockerHub
+    for manifest in manifests_hub:
+        log(f">>> Pushing manifest {manifest} to DockerHub")
+        log(f">>>> docker manifest push --purge {manifest} 2>&1")
+        os.system(f"docker manifest push --purge {manifest} 2>&1")
+
+    # Log out of DockerHub
+    os.system("docker logout")
+
+    # Log in to GHCR
+    os.system(f"docker login -u {os.getenv('GHCR_USERNAME')} -p {os.getenv('GHCR_TOKEN')} ghcr.io 2>&1")
+
+    # Push the images to GHCR
+    for image in images_ghcr:
+        log(f">>> Pushing image {image} to GHCR")
+        log(f">>>> docker push {image} 2>&1")
+        os.system(f"docker push {image} 2>&1")
+
+    manifests_ghcr = build_manifests('ghcr.io', images_ghcr)
+
+    # Push the images and manifests to GHCR
+    for manifest in manifests_ghcr:
+        log(f">>> Pushing manifest {manifest} to GHCR")
+        log(f">>>> docker manifest push --purge {manifest} 2>&1")
+        os.system(f"docker manifest push --purge {manifest} 2>&1")
+
+    # Log out of GHCR
+    os.system("docker logout")
 
 
 def usage():
