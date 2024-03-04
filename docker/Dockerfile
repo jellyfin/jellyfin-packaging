@@ -164,7 +164,7 @@ RUN if test "${PACKAGE_ARCH}" = "amd64"; then \
          -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/intel-opencl-icd_${NEO_VERSION}_amd64.deb \
          -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/intel-level-zero-gpu_${LEVEL_ZERO_VERSION}_amd64.deb \
          -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/libigdgmm12_${GMMLIB_VERSION}_amd64.deb \
- && dpkg -i *.deb \
+ && apt-get install --no-install-recommends --no-install-suggests -f -y ./*.deb \
  && cd .. \
  && rm -rf intel-compute-runtime \
  ; fi \
@@ -177,7 +177,7 @@ RUN if test "${PACKAGE_ARCH}" = "arm64"; then \
     mkdir libmali-rockchip \
  && cd libmali-rockchip \
  && curl -LO https://github.com/tsukumijima/libmali-rockchip/releases/download/${MALI_PKG_TAG}/libmali-${MALI_PKG_CFG}_${MALI_PKG_VER}.deb \
- && apt-get install --no-install-recommends --no-install-suggests -y ./*.deb \
+ && apt-get install --no-install-recommends --no-install-suggests -f -y ./*.deb \
  && cd .. \
  && rm -rf libmali-rockchip \
  ; fi \
