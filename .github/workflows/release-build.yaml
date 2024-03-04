@@ -38,12 +38,20 @@ jobs:
         run: |-
           ./checkout.py ${{ inputs.version }}
 
+      - name: "Run builder for Docker containers"
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} docker
+
       - name: "Log in to Docker Hub"
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-        with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+
+      - name: "Push Docker images"
+        run: |-
+          for arch in amd64 arm64 armhf; do
+            docker push jellyfin/jellyfin:${{ env.JELLYFIN_VERSION }}-${arch}
+          done
+        
 
 #      - name: "Log in to the GHCR Container registry"
 #        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
@@ -51,10 +59,6 @@ jobs:
 #          registry: ghcr.io
 #          username: ${{ secrets.GHCR_USERNAME }}
 #          password: ${{ secrets.GHCR_TOKEN }}
-
-      - name: "Run builder for Docker containers"
-        run: |-
-          sudo ./build.py ${{ env.JELLYFIN_VERSION }} docker
 
 #  Debian:
 #    runs-on: ubuntu-22.04
