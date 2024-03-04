@@ -349,7 +349,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         # Build the manifests
         log(f">> Building Docker manifests for {server}...")
         manifests = list()
-    
+
         if version_suffix:
             log(">>> Building dated version manifest...")
             log(
@@ -361,7 +361,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
             manifests.append(
                 f"{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
             )
-    
+
         log(">>> Building version manifest...")
         log(
             f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
@@ -370,7 +370,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
             f"docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
         )
         manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}")
-    
+
         if is_latest:
             log(">>> Building latest manifest...")
             log(
@@ -393,7 +393,9 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         return manifests
 
     # Log in to DockerHub
-    os.system(f"docker login -u {os.getenv('DOCKER_USERNAME')} -p {os.getenv('DOCKER_TOKEN')} docker.io 2>&1")
+    os.system(
+        f"docker login -u {getenv('DOCKER_USERNAME')} -p {getenv('DOCKER_TOKEN')} docker.io 2>&1"
+    )
 
     # Push the images to DockerHub
     for image in images_hub:
@@ -401,7 +403,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         log(f">>>> docker push {image} 2>&1")
         os.system(f"docker push {image} 2>&1")
 
-    manifests_hub = build_manifests('docker.io', images_hub)
+    manifests_hub = build_manifests("docker.io", images_hub)
 
     # Push the images and manifests to DockerHub
     for manifest in manifests_hub:
@@ -413,7 +415,9 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     os.system("docker logout")
 
     # Log in to GHCR
-    os.system(f"docker login -u {os.getenv('GHCR_USERNAME')} -p {os.getenv('GHCR_TOKEN')} ghcr.io 2>&1")
+    os.system(
+        f"docker login -u {getenv('GHCR_USERNAME')} -p {getenv('GHCR_TOKEN')} ghcr.io 2>&1"
+    )
 
     # Push the images to GHCR
     for image in images_ghcr:
@@ -421,7 +425,7 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
         log(f">>>> docker push {image} 2>&1")
         os.system(f"docker push {image} 2>&1")
 
-    manifests_ghcr = build_manifests('ghcr.io', images_ghcr)
+    manifests_ghcr = build_manifests("ghcr.io", images_ghcr)
 
     # Push the images and manifests to GHCR
     for manifest in manifests_ghcr:
