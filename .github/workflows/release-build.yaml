@@ -27,6 +27,14 @@ jobs:
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
           fi
 
+      - name: "Get DockerHub and GHCR secrets"
+        id: dockercreds
+        run: |-
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> $GITHUB_ENV
+          echo "DOCKER_TOKEN=${{ secrets.DOCKER_TOKEN }}" >> $GITHUB_ENV
+          echo "GHCR_USERNAME=${{ secrets.GHCR_USERNAME }}" >> $GITHUB_ENV
+          echo "GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}" >> $GITHUB_ENV
+
       - name: "Install dependencies"
         run: |-
           sudo apt-get install --yes python3-git python3-yaml
@@ -41,24 +49,6 @@ jobs:
       - name: "Run builder for Docker containers"
         run: |-
           sudo ./build.py ${{ env.JELLYFIN_VERSION }} docker
-
-      - name: "Log in to Docker Hub"
-        run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
-
-      - name: "Push Docker images"
-        run: |-
-          for arch in amd64 arm64 armhf; do
-            docker push jellyfin/jellyfin:${{ env.JELLYFIN_VERSION }}-${arch}
-          done
-        
-
-#      - name: "Log in to the GHCR Container registry"
-#        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-#        with:
-#          registry: ghcr.io
-#          username: ${{ secrets.GHCR_USERNAME }}
-#          password: ${{ secrets.GHCR_TOKEN }}
 
 #  Debian:
 #    runs-on: ubuntu-22.04
