@@ -32,21 +32,21 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: "Prepare repository"
         run: |-
           ./checkout.py ${{ inputs.version }}
 
       - name: "Log in to Docker Hub"
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: "Log in to the GHCR Container registry"
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GHCR_USERNAME }}
@@ -85,7 +85,7 @@ jobs:
 #          sudo apt-get install --yes python3-git python3-yaml
 #
 #      - name: "Checkout repository"
-#        uses: actions/checkout@v3
+#        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 #
 #      - name: "Prepare repository"
 #        run: |-
@@ -96,7 +96,7 @@ jobs:
 #          sudo ./build.py ${{ env.JELLYFIN_VERSION }} debian ${{ matrix.arch }} ${{ matrix.release }}
 #
 #      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
+#        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -106,7 +106,7 @@ jobs:
 #          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}"
 #
 #      - name: "Import artifacts into reprepro -V"
-#        uses: appleboy/ssh-action@v1.0.3
+#        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -130,7 +130,7 @@ jobs:
 #            fi
 #
 #      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
+#        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -178,7 +178,7 @@ jobs:
 #          sudo apt-get install --yes python3-git python3-yaml
 #
 #      - name: "Checkout repository"
-#        uses: actions/checkout@v3
+#        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 #
 #      - name: "Prepare repository"
 #        run: |-
@@ -189,7 +189,7 @@ jobs:
 #          sudo ./build.py ${{ env.JELLYFIN_VERSION }} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
 #
 #      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
+#        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -199,7 +199,7 @@ jobs:
 #          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}"
 #
 #      - name: "Import artifacts into reprepro -V"
-#        uses: appleboy/ssh-action@v1.0.3
+#        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -223,7 +223,7 @@ jobs:
 #            fi
 #
 #      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
+#        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -269,7 +269,7 @@ jobs:
 #          sudo apt-get install --yes python3-git python3-yaml
 #
 #      - name: "Checkout repository"
-#        uses: actions/checkout@v3
+#        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 #
 #      - name: "Prepare repository"
 #        run: |-
@@ -280,7 +280,7 @@ jobs:
 #          sudo ./build.py ${{ env.JELLYFIN_VERSION }} linux ${{ matrix.arch }}
 #
 #      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
+#        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -290,7 +290,7 @@ jobs:
 #          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}"
 #
 #      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
+#        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -333,7 +333,7 @@ jobs:
 #          sudo apt-get install --yes python3-git python3-yaml
 #
 #      - name: "Checkout repository"
-#        uses: actions/checkout@v3
+#        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 #
 #      - name: "Prepare repository"
 #        run: |-
@@ -344,7 +344,7 @@ jobs:
 #          sudo ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }}
 #
 #      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
+#        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -354,7 +354,7 @@ jobs:
 #          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
 #
 #      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
+#        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -397,7 +397,7 @@ jobs:
 #          sudo apt-get install --yes python3-git python3-yaml
 #
 #      - name: "Checkout repository"
-#        uses: actions/checkout@v3
+#        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 #
 #      - name: "Prepare repository"
 #        run: |-
@@ -408,7 +408,7 @@ jobs:
 #          sudo ./build.py ${{ env.JELLYFIN_VERSION }} macos ${{ matrix.arch }}
 #
 #      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
+#        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -418,7 +418,7 @@ jobs:
 #          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}"
 #
 #      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
+#        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -456,7 +456,7 @@ jobs:
 #          sudo apt-get install --yes python3-git python3-yaml
 #
 #      - name: "Checkout repository"
-#        uses: actions/checkout@v3
+#        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 #
 #      - name: "Prepare repository"
 #        run: |-
@@ -467,7 +467,7 @@ jobs:
 #          sudo ./build.py ${{ env.JELLYFIN_VERSION }} portable
 #
 #      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@v0.1.7
+#        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
@@ -477,7 +477,7 @@ jobs:
 #          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/portable"
 #
 #      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@v1.0.3
+#        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
 #        with:
 #          host: "${{ secrets.REPO_HOST }}"
 #          username: "${{ secrets.REPO_USER }}"
