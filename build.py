@@ -351,13 +351,13 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
     if version_suffix:
         log(">>> Building dated version manifest...")
         log(
-            f">>>> docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
+            f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
         )
         os.system(
-            f"docker manifest create --amend docker.io/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
+            f"docker manifest create docker.io/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
         )
         os.system(
-            f"docker manifest create --amend ghcr.io/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images_ghcr)}"
+            f"docker manifest create ghcr.io/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images_ghcr)}"
         )
         manifests.append(
             f"{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
@@ -365,38 +365,38 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version):
 
     log(">>> Building version manifest...")
     log(
-        f">>>> docker manifest create --amend {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
+        f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
     )
     os.system(
-        f"docker manifest create --amend docker.io/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
+        f"docker manifest create docker.io/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
     )
     os.system(
-        f"docker manifest create --amend ghcr.io/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images_ghcr)}"
+        f"docker manifest create ghcr.io/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images_ghcr)}"
     )
     manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}")
 
     if is_latest:
         log(">>> Building latest manifest...")
         log(
-            f">>>> docker manifest create --amend {configurations['docker']['imagename']}:latest {' '.join(images)}"
+            f">>>> docker manifest create {configurations['docker']['imagename']}:latest {' '.join(images)}"
         )
         os.system(
-            f"docker manifest create --amend docker.io/{configurations['docker']['imagename']}:latest {' '.join(images)}"
+            f"docker manifest create docker.io/{configurations['docker']['imagename']}:latest {' '.join(images)}"
         )
         os.system(
-            f"docker manifest create --amend ghcr.io/{configurations['docker']['imagename']}:latest {' '.join(images_ghcr)}"
+            f"docker manifest create ghcr.io/{configurations['docker']['imagename']}:latest {' '.join(images_ghcr)}"
         )
         manifests.append(f"{configurations['docker']['imagename']}:latest")
     elif is_unstable:
         log(">>> Building unstable manifest...")
         log(
-            f">>>> docker manifest create --amend {configurations['docker']['imagename']}:unstable {' '.join(images)}"
+            f">>>> docker manifest create {configurations['docker']['imagename']}:unstable {' '.join(images)}"
         )
         os.system(
-            f"docker manifest create --amend docker.io/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
+            f"docker manifest create docker.io/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
         )
         os.system(
-            f"docker manifest create --amend ghcr.io/{configurations['docker']['imagename']}:unstable {' '.join(images_ghcr)}"
+            f"docker manifest create ghcr.io/{configurations['docker']['imagename']}:unstable {' '.join(images_ghcr)}"
         )
         manifests.append(f"{configurations['docker']['imagename']}:unstable")
 
