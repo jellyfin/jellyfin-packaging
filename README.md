@@ -56,9 +56,9 @@ Inside this repository are 7 major components:
 
 1. Portable image builder (under `portable`), which covers all the "archive" builds (.NET portable, Linux, Windows, and MacOS) again from a single Dockerfile.
 
-1. Script infrastructure to handle coordinating builds (`build.py`). This script takes basic arguments and, using its internal logic, fires the correct Dockerized builds for the given build type.
+1. NuGet package builder, to prepare NuGet packages for consumption by plugins and 3rd party clients.
 
-1. NuGet package build infrastructure, to prepare NuGet packages for consumption by plugins and 3rd party clients.
+1. Script infrastructure to handle coordinating builds (`build.py`). This script takes basic arguments and, using its internal logic, fires the correct Dockerized builds for the given build type.
 
 1. The GitHub Actions CI to build all the above for every supported version and architecture.
 
