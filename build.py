@@ -491,6 +491,10 @@ def build_nuget(
         nuget_repo = configurations["nuget"]["feed_urls"]["stable"]
         nuget_key = getenv("NUGET_STABLE_KEY")
 
+    if nuget_key is None:
+        log(f"Error: Failed to get NUGET_*_KEY environment variable")
+        exit(1)
+
     push_command = f"dotnet nuget push out/nuget/*.nupkg -s {nuget_repo} -k {nuget_key}"
     log(f">>>> {push_command}")
     os.system(push_command)
