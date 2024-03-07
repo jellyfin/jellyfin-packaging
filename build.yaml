@@ -118,3 +118,17 @@ docker:
       QEMU_ARCH: arm
   dockerfile: docker/Dockerfile
   imagename: jellyfin/jellyfin
+
+# Nuget packages
+nuget:
+  build_function: build_nuget
+  projects:
+    - Jellyfin.Data/Jellyfin.Data.csproj
+    - MediaBrowser.Common/MediaBrowser.Common.csproj
+    - MediaBrowser.Controller/MediaBrowser.Controller.csproj
+    - MediaBrowser.Model/MediaBrowser.Model.csproj
+    - Emby.Naming/Emby.Naming.csproj
+    - src/Jellyfin.Extensions/Jellyfin.Extensions.csproj
+  feed_urls:
+    stable: https://api.nuget.org/v3/index.json
+    unstable: https://nuget.pkg.github.com/jellyfin-sandbox/index.json
