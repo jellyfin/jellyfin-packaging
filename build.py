@@ -113,18 +113,6 @@ def build_package_deb(
     )
 
 
-def build_package_rpm(
-    jellyfin_version, build_type, build_arch, build_version, no_push=False
-):
-    """
-    Build a .rpm package (Fedora or CentOS) within a Docker container that matches the requested distribution version
-    """
-    log(f"> Building an {build_arch} {build_type} .rpm package...")
-    log("")
-
-    pass
-
-
 def build_linux(
     jellyfin_version, build_type, build_arch, _build_version, no_push=False
 ):
@@ -522,13 +510,12 @@ def usage():
     log(f"    * Valid options are: {', '.join(configurations.keys())}")
     log("  BUILD_ARCH: The CPU architecture of the build")
     log("    * Valid options are: <empty> [portable/docker only], amd64, arm64, armhf")
-    log("  BUILD_VERSION: A valid OS distribution version (.deb/.rpm build types only)")
+    log("  BUILD_VERSION: A valid OS distribution version (.deb build types only)")
 
 
 # Define a map of possible build functions from the YAML configuration
 function_definitions = {
     "build_package_deb": build_package_deb,
-    "build_package_rpm": build_package_rpm,
     "build_portable": build_portable,
     "build_linux": build_linux,
     "build_windows": build_windows,

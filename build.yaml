@@ -39,12 +39,6 @@ ubuntu:
     jammy: '22.04'
     noble: '24.04'
 
-# RPM packages (TODO)
-centos:
-  build_function: build_package_rpm
-fedora:
-  build_function: build_package_rpm
-
 # Portable archives
 linux:
   build_function: build_linux
