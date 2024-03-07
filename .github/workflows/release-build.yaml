@@ -489,3 +489,35 @@ jobs:
                 sudo rm ${BASEDIR}/latest || true
                 sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
             fi
+
+  Nuget:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git python3-yaml
+
+      - name: "Checkout repository"
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version || 'master' }}
+
+      - name: "Run builder for Nuget"
+        env:
+          NUGET_STABLE_KEY: ${{ secrets.NUGET_STABLE_KEY }}
+          NUGET_UNSTABLE_KEY: ${{ secrets.NUGET_UNSTABLE_KEY }}
+        run: |-
+          sudo ./build.py ${{ env.JELLYFIN_VERSION }} nuget

@@ -439,6 +439,55 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version, no_p
     # Log out of GHCR
     os.system("docker logout")
 
+def build_nuget(jellyfin_version, build_type, _build_arch, _build_version, no_push=False):
+    """
+    Pack and upload nuget packages
+    """
+    log("> Building Nuget packages...")
+    log("")
+
+    project_files = configurations["nuget"]["projects"]
+    log(project_files)
+
+    # Determine if this is a "latest"-type image (v in jellyfin_version) or not
+    if "v" in jellyfin_version:
+        is_unstable = False
+    else:
+        is_unstable = True
+
+    jellyfin_version = jellyfin_version.replace("v", "")
+
+
+    # Set today's date in a convenient format for use as an image suffix
+    date = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    pack_command = "dotnet pack -o out "
+    if is_unstable:
+        pack_command = pack_command + f"--version-suffix {date} -p:Stability=Unstable "
+    else:
+        pack_command = pack_command + f"-p:Version={jellyfin_version} "
+
+    for project in project_files:
+        log(f">> Packing  {project}...")
+        log("")
+
+        project_pack_command = pack_command + f"jellyfin-server/{project}"
+        log(f">>>> {project_pack_command}")
+        os.system(project_pack_command)
+
+    if no_push:
+        return
+
+    if is_unstable:
+        nuget_repo = configurations["nuget"]["feed_urls"]["unstable"]
+        nuget_key = getenv('NUGET_UNSTABLE_KEY')
+    else:
+        nuget_repo = configurations["nuget"]["feed_urls"]["stable"]
+        nuget_key = getenv('NUGET_STABLE_KEY')
+
+    push_command = f"dotnet nuget push out/*.nupkg -s {nuget_repo} -k {nuget_key}"
+    log(f">>>> {push_command}")
+    os.system(push_command)
 
 def usage():
     """
@@ -467,6 +516,7 @@ function_definitions = {
     "build_macos": build_macos,
     "build_portable": build_portable,
     "build_docker": build_docker,
+    "build_nuget": build_nuget,
 }
 
 try:
