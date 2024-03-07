@@ -358,42 +358,42 @@ def build_docker(
         if version_suffix:
             log(">>> Building dated version manifest...")
             log(
-                f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
+                f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
             )
             os.system(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
             )
             manifests.append(
-                f"{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
+                f"{server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
             )
 
         log(">>> Building version manifest...")
         log(
-            f">>>> docker manifest create {configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
+            f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
         )
         os.system(
             f"docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
         )
-        manifests.append(f"{configurations['docker']['imagename']}:{jellyfin_version}")
+        manifests.append(f"{server}/{configurations['docker']['imagename']}:{jellyfin_version}")
 
         if is_latest:
             log(">>> Building latest manifest...")
             log(
-                f">>>> docker manifest create {configurations['docker']['imagename']}:latest {' '.join(images)}"
+                f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:latest {' '.join(images)}"
             )
             os.system(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:latest {' '.join(images)}"
             )
-            manifests.append(f"{configurations['docker']['imagename']}:latest")
+            manifests.append(f"{server}/{configurations['docker']['imagename']}:latest")
         elif is_unstable:
             log(">>> Building unstable manifest...")
             log(
-                f">>>> docker manifest create {configurations['docker']['imagename']}:unstable {' '.join(images)}"
+                f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
             )
             os.system(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
             )
-            manifests.append(f"{configurations['docker']['imagename']}:unstable")
+            manifests.append(f"{server}/{configurations['docker']['imagename']}:unstable")
 
         return manifests
 
