@@ -131,4 +131,4 @@ nuget:
     - src/Jellyfin.Extensions/Jellyfin.Extensions.csproj
   feed_urls:
     stable: https://api.nuget.org/v3/index.json
-    unstable: https://nuget.pkg.github.com/jellyfin-sandbox/index.json
+    unstable: https://nuget.pkg.github.com/jellyfin/index.json
