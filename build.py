@@ -35,7 +35,9 @@ except Exception as e:
     exit(1)
 
 
-def build_package_deb(jellyfin_version, build_type, build_arch, build_version, no_push=False):
+def build_package_deb(
+    jellyfin_version, build_type, build_arch, build_version, no_push=False
+):
     """
     Build a .deb package (Debian or Ubuntu) within a Docker container that matches the requested distribution version
     """
@@ -111,7 +113,9 @@ def build_package_deb(jellyfin_version, build_type, build_arch, build_version, n
     )
 
 
-def build_package_rpm(jellyfin_version, build_type, build_arch, build_version, no_push=False):
+def build_package_rpm(
+    jellyfin_version, build_type, build_arch, build_version, no_push=False
+):
     """
     Build a .rpm package (Fedora or CentOS) within a Docker container that matches the requested distribution version
     """
@@ -121,7 +125,9 @@ def build_package_rpm(jellyfin_version, build_type, build_arch, build_version, n
     pass
 
 
-def build_linux(jellyfin_version, build_type, build_arch, _build_version, no_push=False):
+def build_linux(
+    jellyfin_version, build_type, build_arch, _build_version, no_push=False
+):
     """
     Build a portable Linux archive
     """
@@ -163,7 +169,9 @@ def build_linux(jellyfin_version, build_type, build_arch, _build_version, no_pus
     )
 
 
-def build_windows(jellyfin_version, build_type, _build_arch, _build_version, no_push=False):
+def build_windows(
+    jellyfin_version, build_type, _build_arch, _build_version, no_push=False
+):
     """
     Build a portable Windows archive
     """
@@ -205,7 +213,9 @@ def build_windows(jellyfin_version, build_type, _build_arch, _build_version, no_
     )
 
 
-def build_macos(jellyfin_version, build_type, build_arch, _build_version, no_push=False):
+def build_macos(
+    jellyfin_version, build_type, build_arch, _build_version, no_push=False
+):
     """
     Build a portable MacOS archive
     """
@@ -247,7 +257,9 @@ def build_macos(jellyfin_version, build_type, build_arch, _build_version, no_pus
     )
 
 
-def build_portable(jellyfin_version, build_type, _build_arch, _build_version, no_push=False):
+def build_portable(
+    jellyfin_version, build_type, _build_arch, _build_version, no_push=False
+):
     """
     Build a portable .NET archive
     """
@@ -276,7 +288,9 @@ def build_portable(jellyfin_version, build_type, _build_arch, _build_version, no
     )
 
 
-def build_docker(jellyfin_version, build_type, _build_arch, _build_version, no_push=False):
+def build_docker(
+    jellyfin_version, build_type, _build_arch, _build_version, no_push=False
+):
     """
     Build Docker images for all architectures and combining manifests
     """
@@ -439,7 +453,10 @@ def build_docker(jellyfin_version, build_type, _build_arch, _build_version, no_p
     # Log out of GHCR
     os.system("docker logout")
 
-def build_nuget(jellyfin_version, build_type, _build_arch, _build_version, no_push=False):
+
+def build_nuget(
+    jellyfin_version, build_type, _build_arch, _build_version, no_push=False
+):
     """
     Pack and upload nuget packages
     """
