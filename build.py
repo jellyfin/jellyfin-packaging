@@ -457,21 +457,22 @@ def build_nuget(jellyfin_version, build_type, _build_arch, _build_version, no_pu
 
     jellyfin_version = jellyfin_version.replace("v", "")
 
-
     # Set today's date in a convenient format for use as an image suffix
     date = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    pack_command = "dotnet pack -o out "
+    pack_command_base = "dotnet pack -o out/nuget/"
     if is_unstable:
-        pack_command = pack_command + f"--version-suffix {date} -p:Stability=Unstable "
+        pack_command = (
+            f"{pack_command_base} --version-suffix {date} -p:Stability=Unstable"
+        )
     else:
-        pack_command = pack_command + f"-p:Version={jellyfin_version} "
+        pack_command = f"{pack_command_base} -pVersion={jellyfin_version}"
 
     for project in project_files:
         log(f">> Packing  {project}...")
         log("")
 
-        project_pack_command = pack_command + f"jellyfin-server/{project}"
+        project_pack_command = f"{pack_command} jellyfin-server/{project}"
         log(f">>>> {project_pack_command}")
         os.system(project_pack_command)
 
@@ -480,14 +481,15 @@ def build_nuget(jellyfin_version, build_type, _build_arch, _build_version, no_pu
 
     if is_unstable:
         nuget_repo = configurations["nuget"]["feed_urls"]["unstable"]
-        nuget_key = getenv('NUGET_UNSTABLE_KEY')
+        nuget_key = getenv("NUGET_UNSTABLE_KEY")
     else:
         nuget_repo = configurations["nuget"]["feed_urls"]["stable"]
-        nuget_key = getenv('NUGET_STABLE_KEY')
+        nuget_key = getenv("NUGET_STABLE_KEY")
 
-    push_command = f"dotnet nuget push out/*.nupkg -s {nuget_repo} -k {nuget_key}"
+    push_command = f"dotnet nuget push out/nuget/*.nupkg -s {nuget_repo} -k {nuget_key}"
     log(f">>>> {push_command}")
     os.system(push_command)
+
 
 def usage():
     """
