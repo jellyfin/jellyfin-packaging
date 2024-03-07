@@ -483,7 +483,7 @@ def build_nuget(
             f"{pack_command_base} --version-suffix {date} -p:Stability=Unstable"
         )
     else:
-        pack_command = f"{pack_command_base} -pVersion={jellyfin_version}"
+        pack_command = f"{pack_command_base} -p:Version={jellyfin_version}"
 
     for project in project_files:
         log(f">> Packing  {project}...")
