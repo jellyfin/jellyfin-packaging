@@ -88,7 +88,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          sudo ./build.py ${{ env.JELLYFIN_VERSION }} debian ${{ matrix.arch }} ${{ matrix.release }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} debian ${{ matrix.arch }} ${{ matrix.release }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -181,7 +181,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          sudo ./build.py ${{ env.JELLYFIN_VERSION }} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -272,7 +272,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.arch }}"
         run: |-
-          sudo ./build.py ${{ env.JELLYFIN_VERSION }} linux ${{ matrix.arch }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} linux ${{ matrix.arch }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -336,7 +336,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.arch }}"
         run: |-
-          sudo ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -400,7 +400,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          sudo ./build.py ${{ env.JELLYFIN_VERSION }} macos ${{ matrix.arch }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} macos ${{ matrix.arch }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -459,7 +459,7 @@ jobs:
 
       - name: "Run builder for Portable" 
         run: |-
-          sudo ./build.py ${{ env.JELLYFIN_VERSION }} portable
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} portable
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
