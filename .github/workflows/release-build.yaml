@@ -98,7 +98,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           source: "out/debian/*"
           strip_components: 2
-          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}"
+          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}"
 
       - name: "Import artifacts into reprepro -V"
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
@@ -116,12 +116,12 @@ jobs:
                 COMPONENT="unstable"
             fi
             # Only include the architecture-dependent deb here, as the others are done only for amd64
-            sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
+            sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
                 # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
+                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
                 # Only include the source DSC for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
+                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
             fi
 
       - name: "Move artifacts into repository"
@@ -135,7 +135,7 @@ jobs:
           script: |
             export BASEDIR="/srv/repository/main/server/debian"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
@@ -191,7 +191,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           source: "out/ubuntu/*"
           strip_components: 2
-          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}"
+          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}"
 
       - name: "Import artifacts into reprepro -V"
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
@@ -209,12 +209,12 @@ jobs:
                 COMPONENT="unstable"
             fi
             # Only include the architecture-dependent deb here, as the others are done only for amd64
-            sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
+            sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_${{ matrix.arch }}.deb || exit 1
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
                 # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
+                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*_all.deb || exit 1
                 # Only include the source DSC for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
+                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/*.dsc || exit 1
             fi
 
       - name: "Move artifacts into repository"
@@ -228,7 +228,7 @@ jobs:
           script: |
             export BASEDIR="/srv/repository/main/server/ubuntu"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
@@ -282,7 +282,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           source: "out/linux/*"
           strip_components: 2
-          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}"
+          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
@@ -295,7 +295,7 @@ jobs:
           script: |
             export BASEDIR="/srv/repository/main/server/linux"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
@@ -346,7 +346,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           source: "out/windows/*"
           strip_components: 2
-          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
+          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
@@ -359,7 +359,7 @@ jobs:
           script: |
             export BASEDIR="/srv/repository/main/server/windows"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
@@ -410,7 +410,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           source: "out/macos/*"
           strip_components: 2
-          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}"
+          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
@@ -423,7 +423,7 @@ jobs:
           script: |
             export BASEDIR="/srv/repository/main/server/macos"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
@@ -469,7 +469,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           source: "out/portable/*"
           strip_components: 2
-          target: "/srv/incoming/${{ env.JELLYFIN_VERSION }}/portable"
+          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/portable"
 
       - name: "Move artifacts into repository"
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
@@ -482,7 +482,7 @@ jobs:
           script: |
             export BASEDIR="/srv/repository/main/server/portable"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any || exit 1
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any/ /srv/incoming/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.release }}/* || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
