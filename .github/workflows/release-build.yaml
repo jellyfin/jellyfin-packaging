@@ -91,7 +91,7 @@ jobs:
           sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} debian ${{ matrix.arch }} ${{ matrix.release }}
 
       - name: "Upload artifacts to repository server"
-        uses: burnett01/rsync-deployments@45d84ad5f6c174f3e0ffc50e9060a9666d09c16e # 6.0.0
+        uses: burnett01/rsync-deployments@93f02b856fbeaf9a8fbfdd8ce1a4adfd0843f849 # 7.0.0
         with:
           switches: -vrptz
           path: out/debian/*
