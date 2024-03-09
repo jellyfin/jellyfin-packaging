@@ -100,7 +100,7 @@ jobs:
           strip_components: 2
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}"
 
-      - name: "Import artifacts into reprepro -V"
+      - name: "Import artifacts into reprepro"
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
         with:
           host: "${{ secrets.REPO_HOST }}"
@@ -116,12 +116,12 @@ jobs:
                 COMPONENT="unstable"
             fi
             # Only include the architecture-dependent deb here, as the others are done only for amd64
-            sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*_${{ matrix.arch }}.deb || exit 1
+            sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*_${{ matrix.arch }}.deb || exit 1
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
                 # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*_all.deb || exit 1
+                sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*_all.deb || exit 1
                 # Only include the source DSC for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
+                sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
             fi
 
       - name: "Move artifacts into repository"
@@ -193,7 +193,7 @@ jobs:
           strip_components: 2
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}"
 
-      - name: "Import artifacts into reprepro -V"
+      - name: "Import artifacts into reprepro"
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
         with:
           host: "${{ secrets.REPO_HOST }}"
@@ -209,12 +209,12 @@ jobs:
                 COMPONENT="unstable"
             fi
             # Only include the architecture-dependent deb here, as the others are done only for amd64
-            sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*_${{ matrix.arch }}.deb || exit 1
+            sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*_${{ matrix.arch }}.deb || exit 1
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
                 # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*_all.deb || exit 1
+                sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*_all.deb || exit 1
                 # Only include the source DSC for amd64; the other architectures are the same and conflict
-                sudo reprepro -V --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
+                sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
             fi
 
       - name: "Move artifacts into repository"
