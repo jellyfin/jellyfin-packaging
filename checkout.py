@@ -54,7 +54,10 @@ for submodule in submodules.keys():
     if target_release == "master":
         target_head = "origin/master"
     else:
-        target_head = f"refs/tags/{target_release}"
+        if submodule == "jellyfin-server-windows":
+            target_head = "origin/master"
+        else:
+            target_head = f"refs/tags/{target_release}"
     # Checkout the given head and reset the working tree
     submodules[submodule].head.reference = target_head
     submodules[submodule].head.reset(index=True, working_tree=True)
