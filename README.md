@@ -56,7 +56,7 @@ To build Jellyfin packages for yourself, follow this quickstart guide. You will 
 
 1. Run `git submodule update --init` to check out the submodules (`jellyfin-server`, `jellyfin-web`).
 
-1. Run `./checkout.py`. This command takes one argument, the tag or branch (i.e. `master`) of the repositories to check out; if nothing is specified, `master` is assumed. For example, `./checkout.py master` checks out the current `master` branch of both `jellyfin-server` and `jellyfin-web`, `./checkout.py v10.8.13` will check out the `v10.8.13` tag of both, etc.
+1. Run `./checkout.py` to update the submodules to the correct `HEAD`s. This command takes one argument, the tag or branch (i.e. `master`) of the repositories to check out; if nothing is specified, `master` is assumed. For example, `./checkout.py master` checks out the current `master` branch of both `jellyfin-server` and `jellyfin-web`, `./checkout.py v10.8.13` checks out the `v10.8.13` tag of both, etc. If a tag is used and one (or more) of the repositories are missing the tag, this command will error out.
 
 ### Non-Docker Platforms
 
