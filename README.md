@@ -76,6 +76,32 @@ If you want a non-Docker image output (`.deb`, `tar`/`zip` archive, etc.) follow
 
 1. The output binaries will be in the `out/` directory, ready for use. The exact format varies depending on the build type, and can be found, for each archive-based platform, as the values to the `archivetypes` key in the `build.yaml` configuration file.
 
+#### Examples
+
+Build `.deb` packages for Debian 12 "Bookworm" amd64:
+
+```
+./build.py auto debian amd64 12
+```
+
+Build Linux `.tar.xx` archives for arm64-musl:
+
+```
+./build.py auto linux arm64-musl
+```
+
+Build Windows `.zip` for `amd64`:
+
+```
+./build.py auto windows amd64
+```
+
+Build a .NET portable `.zip`:
+
+```
+./build.py auto portable
+```
+
 ### Docker Image Platform
 
 If you want a Docker image output follow this process:
@@ -91,6 +117,14 @@ If you want a Docker image output follow this process:
    * The fourth argument is `--local`, which should be provided to prevent the script from trying to generate image manifests and push the resulting images to our repositories.
 
 1. The output container image(s) will be present in your `docker image ls` as `jellyfin/jellyfin` with the tag(s) `<jellyfin_version>-<build_arch>`.
+
+#### Examples
+
+Build an `amd64` Docker image:
+
+```
+./build.py auto docker amd64 --local
+```
 
 ## Design
 
