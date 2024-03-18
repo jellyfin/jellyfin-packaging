@@ -5,6 +5,7 @@
 # Part of the Jellyfin CI system
 ###############################################################################
 
+from argparse import ArgumentParser
 from datetime import datetime
 from email.utils import format_datetime, localtime
 from os import getenv
@@ -544,56 +545,36 @@ function_definitions = {
     "build_nuget": build_nuget,
 }
 
-try:
-    jellyfin_version = sys.argv[1]
-    build_type = sys.argv[2]
-except IndexError:
-    log("Error: Missing required arguments ('JELLYFIN_VERSION' and/or 'BUILD_TYPE')")
-    log("")
-    usage()
+
+parser = ArgumentParser(
+    prog='build.py',
+    description='Jellyfin build automator',
+    epilog='See "README.md" and "build.yaml" for the full details of what this tool can build at this time.',
+)
+
+parser.add_argument('jellyfin_version', help='The output version')
+parser.add_argument('build_type', choices=configurations.keys(), help='The build platform')
+parser.add_argument('build_arch', default=None, nargs='?', help='The build architecture')
+parser.add_argument('build_version', default=None, nargs='?', help='The build release version [debian/ubuntu only]')
+parser.add_argument('--no-push', action='store_true', help='Do not generate Docker manifests or push them [docker only]')
+
+args = parser.parse_args()
+
+jellyfin_version = args.jellyfin_version
+build_type = args.build_type
+build_arch = args.build_arch
+build_version = args.build_version
+
+if build_type not in ["portable", "docker"] and not build_arch:
+    log(f"Error: You must specify an architecture for build platform {build_type}")
     exit(1)
-
-if build_type not in configurations.keys():
-    log(f"Error: The specified build type '{build_type}' is not valid")
-    log("")
-    usage()
-    exit(1)
-
-try:
-    if configurations[build_type]["build_function"] not in function_definitions.keys():
-        raise ValueError
-except Exception:
-    log(
-        f"Error: The specified valid build type '{build_type}' does not define a valid build function"
-    )
-    log(
-        "This is a misconfiguration of the YAML or the build script; please report a bug!"
-    )
-    exit(1)
-
-# Optional argument (only required for some build functions)
-try:
-    build_arch = sys.argv[3]
-except IndexError:
-    build_arch = None
-
-# Optional argument (only required for some build functions)
-try:
-    build_version = sys.argv[4]
-except IndexError:
-    build_version = None
 
 # Autocorrect "master" to a dated version string
-if jellyfin_version == "master":
+if jellyfin_version in ["auto", "master"]:
     jellyfin_version = datetime.now().strftime("%Y%m%d%H")
     log(f"NOTE: Autocorrecting 'master' version to {jellyfin_version}")
 
-if "--no-push" in sys.argv:
-    no_push = True
-else:
-    no_push = False
-
 # Launch the builder function
 function_definitions[configurations[build_type]["build_function"]](
-    jellyfin_version, build_type, build_arch, build_version, no_push=no_push
+    jellyfin_version, build_type, build_arch, build_version, no_push=args.no_push
 )
