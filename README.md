@@ -48,7 +48,7 @@ This repository contains operating system and Docker packaging for Jellyfin, for
 
 ## Quickstart
 
-To build Jellyfin packages for yourself, follow this quickstart guide. You will need to be running on a Linux system, preferably Debian- or Ubuntu-based, with Docker, Python3 and the Python packages `PyYAML` and `git`. Other systems including WSL are untested.
+To build Jellyfin packages for yourself, follow this quickstart guide. You will need to be running on a Linux system, preferably Debian- or Ubuntu-based, with Docker, Python3 and the Python packages `PyYAML` and `git` (`python3-yaml` and `python3-git` in Debian). Other systems including WSL are untested.
 
 1. Install Docker on your system. The build scripts leverage Docker containers to perform clean builds and avoid contaminating the host system with dependencies.
 
