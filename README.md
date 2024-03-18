@@ -42,9 +42,57 @@
 
 ---
 
-Jellyfin is a Free Software Media System that puts you in control of managing and streaming your media. It is an alternative to the proprietary Emby and Plex, to provide media from a dedicated server to end-user devices via multiple apps. Jellyfin is descended from Emby's 3.5.2 release and ported to the .NET Core framework to enable full cross-platform support. There are no strings attached, no premium licenses or features, and no hidden agendas: just a team who want to build something better and work together to achieve it. We welcome anyone who is interested in joining us in our quest!
+Jellyfin is the Free Software Media System that puts you in control of managing and streaming your media. It is an alternative to the proprietary Emby and Plex, to provide media from a dedicated server to end-user devices via multiple apps.
 
-This repository contains packaging for Jellyfin 10.9.0 and above, for use by manual builders or the CI system with GitHub workflows.
+This repository contains operating system and Docker packaging for Jellyfin, for use by manual builders and our release CI system with GitHub workflows. All packaging has henceforth been removed from the main code repositories for the [Jellyfin Server](https://github.com/jellyfin/jellyfin) and [Primary WebUI](https://github.com/jellyfin/jellyfin-web) and moved here.
+
+## Quickstart
+
+To build Jellyfin packages for yourself, follow this quickstart guide. You will need to be running on a Linux system with Python3 and the Python packages, preferably Debian- or Ubuntu-based. Other systems including WSL are untested.
+
+1. Install Docker on your system. The build scripts leverage Docker containers to perform clean builds and avoid contaminating the host system with dependencies.
+
+1. Clone this repository somewhere on your system and enter it.
+
+1. Run `git submodule update --init` to check out the submodules (`jellyfin-server`, `jellyfin-web`).
+
+1. Run `./checkout.py`. This command takes one argument, the tag or branch (i.e. `master`) of the repositories to check out; if nothing is specified, `master` is assumed. For example, `./checkout.py master` checks out the current `master` branch of both `jellyfin-server` and `jellyfin-web`, `./checkout.py v10.8.13` will check out the `v10.8.13` tag of both, etc.
+
+### Non-Docker Platforms
+
+If you want a non-Docker image output (`.deb`, `tar`/`zip` archive, etc.) follow this process:
+
+1. Run `./build.py`. This command takes up to 4 arguments, depending on what you're trying to build:
+
+   * The first argument is the version you want to tag your build as. For our official releases, we use either dates for unstable builds (`YYYYMMDDHH` numerical format or `auto` for autogeneration) or the tag without `v` for stable release builds (`10.8.13`, `10.9.0`, etc.), but you can use any version tag you wish here.
+   
+   * The second argument is the "platform" you want to build for. The available options are listed as top-level keys in the `build.yaml` configuration file or in the `-h` help output.
+
+   * The third argument is, for most builds except `docker` and `portable` (DotNET portable), the architecture you want to build for. For each platform, the available architectures can be found as the keys under `archmaps` in the `build.yaml` configuration file.
+
+   * The fourth argument is exclusive to `debian` and `ubuntu` `.deb` packages, and is the release version of Debian or Ubuntu to build for. For each platform, the available releases can be found as the keys under `releases` in the `build.yaml` configuration file.
+
+   **NOTE:** Your running user must have Docker privileges, or you should run `build.py` as root/with `sudo`.
+
+1. The output binaries will be in the `out/` directory, ready for use. The exact format varies depending on the build type, and can be found, for each archive-based platform, as the values to the `archivetypes` key in the `build.yaml` configuration file.
+
+### Docker Image Platform
+
+If you want a Docker image output follow this process:
+
+1. Run `./build.py`. This command takes up to 4 arguments specific to Docker builds:
+
+   * The first argument is the version you want to tag your build as. For our official releases, we use either dates for unstable builds (`YYYYMMDDHH` numerical format or `auto` for autogeneration) or the tag without `v` for stable release builds (`10.8.13`, `10.9.0`, etc.), but you can use any version tag you wish here.
+   
+   * The second argument is the "platform" you want to build for. For Docker images, this should be `docker`.
+
+   * The third argument is the architecture you wish to build for. This argument is optional, and not providing it will build images for all supported architectures (sequentially).
+
+   * The fourth argument is `--no-push`, which should be provided to prevent the script from trying to generate image manifests and push the resulting images to our repositories.
+
+1. The output container image(s) will be present in your `docker image ls` as `jellyfin/jellyfin` with the tag(s) `<jellyfin_version>-<build_arch>`.
+
+## Design
 
 Inside this repository are 7 major components:
 
