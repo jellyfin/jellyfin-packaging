@@ -277,16 +277,27 @@ def build_portable(
 
 
 def build_docker(
-    jellyfin_version, build_type, _build_arch, _build_version, no_push=False
+    jellyfin_version, build_type, build_arch, _build_version, no_push=False
 ):
     """
-    Build Docker images for all architectures and combining manifests
+    Build Docker images for one or all architectures and combining manifests
     """
     log("> Building Docker images...")
     log("")
 
+    if build_arch:
+        log(f"NOTE: Building only for arch {build_arch}")
+        log("")
+
     # We build all architectures simultaneously to push a single tag, so no conditional checks
     architectures = configurations["docker"]["archmaps"].keys()
+
+    if build_arch:
+        if build_arch not in architectures:
+            log(f"Error: Archtecture {build_arch} is not valid.")
+            exit(1)
+        else:
+            architectures = [build_arch]
 
     # Set the dockerfile
     dockerfile = configurations[build_type]["dockerfile"]
