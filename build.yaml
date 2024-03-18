@@ -3,7 +3,9 @@
 
 # DEB packages
 debian:
-  build_function: build_package_deb
+  releases:
+    bullseye: '11'
+    bookworm: '12'
   archmaps:
     amd64:
       PACKAGE_ARCH: amd64
@@ -14,13 +16,14 @@ debian:
   cross-gcc:
     bullseye: '10'
     bookworm: '12'
+  build_function: build_package_deb
   dockerfile: debian/docker/Dockerfile
   imagename: jellyfin-builder-debian
-  releases:
-    bullseye: '11'
-    bookworm: '12'
 ubuntu:
-  build_function: build_package_deb
+  releases:
+    focal: '20.04'
+    jammy: '22.04'
+    noble: '24.04'
   archmaps:
     amd64:
       PACKAGE_ARCH: amd64
@@ -32,12 +35,9 @@ ubuntu:
     focal: '10'
     jammy: '12'
     noble: '12'
+  build_function: build_package_deb
   dockerfile: debian/docker/Dockerfile
   imagename: jellyfin-builder-ubuntu
-  releases:
-    focal: '20.04'
-    jammy: '22.04'
-    noble: '24.04'
 
 # Portable archives
 linux:
