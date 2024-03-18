@@ -78,13 +78,13 @@ If you want a non-Docker image output (`.deb`, `tar`/`zip` archive, etc.) follow
 
 #### Examples
 
-Build `.deb` packages for Debian 12 "Bookworm" amd64:
+Build `.deb` packages for Debian 12 "Bookworm" `amd64`:
 
 ```
 ./build.py auto debian amd64 bookworm
 ```
 
-Build Linux `.tar.xx` archives for arm64-musl:
+Build Linux `.tar.xx` archives for `arm64-musl`:
 
 ```
 ./build.py auto linux arm64-musl
