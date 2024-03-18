@@ -354,8 +354,9 @@ def build_docker(
         )
         images_hub.append(imagename)
 
-        os.system(f"docker image tag {imagename} ghcr.io/{imagename}")
-        images_ghcr.append(f"ghcr.io/{imagename}")
+        if not no_push:
+            os.system(f"docker image tag {imagename} ghcr.io/{imagename}")
+            images_ghcr.append(f"ghcr.io/{imagename}")
 
         log("")
 
