@@ -361,6 +361,10 @@ def build_docker(
     if no_push:
         return
 
+    if not getenv('DOCKER_USERNAME') or not getenv('DOCKER_TOKEN'):
+        log("Warning: No DOCKER_USERNAME or DOCKER_TOKEN in environment; skipping manifest build and push (DockerHub and GHCR).")
+        return
+
     def build_manifests(server, images):
         # Build the manifests
         log(f">> Building Docker manifests for {server}...")
