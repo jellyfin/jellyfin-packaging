@@ -70,7 +70,7 @@ If you want a non-Docker image output (`.deb`, `tar`/`zip` archive, etc.) follow
 
    * The third argument is, for all platforms except `portable` (DotNET portable), the architecture you want to build for. For each platform, the available architectures can be found as the keys under `archmaps` in the `build.yaml` configuration file.
 
-   * The fourth argument is exclusive to `debian` and `ubuntu` `.deb` packages, and is the release version of Debian or Ubuntu to build for. For each platform, the available releases can be found as the keys under `releases` in the `build.yaml` configuration file.
+   * The fourth argument is exclusive to `debian` and `ubuntu` `.deb` packages, and is the release codename of Debian or Ubuntu to build for. For each platform, the available releases can be found as the keys under `releases` in the `build.yaml` configuration file.
 
    **NOTE:** Your running user must have Docker privileges, or you should run `build.py` as root/with `sudo`.
 
@@ -81,7 +81,7 @@ If you want a non-Docker image output (`.deb`, `tar`/`zip` archive, etc.) follow
 Build `.deb` packages for Debian 12 "Bookworm" amd64:
 
 ```
-./build.py auto debian amd64 12
+./build.py auto debian amd64 bookworm
 ```
 
 Build Linux `.tar.xx` archives for arm64-musl:
