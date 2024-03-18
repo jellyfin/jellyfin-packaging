@@ -88,7 +88,7 @@ If you want a Docker image output follow this process:
 
    * The third argument is the architecture you wish to build for. This argument is optional, and not providing it will build images for all supported architectures (sequentially).
 
-   * The fourth argument is `--no-push`, which should be provided to prevent the script from trying to generate image manifests and push the resulting images to our repositories.
+   * The fourth argument is `--local`, which should be provided to prevent the script from trying to generate image manifests and push the resulting images to our repositories.
 
 1. The output container image(s) will be present in your `docker image ls` as `jellyfin/jellyfin` with the tag(s) `<jellyfin_version>-<build_arch>`.
 

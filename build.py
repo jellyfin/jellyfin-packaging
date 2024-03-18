@@ -37,7 +37,7 @@ except Exception as e:
 
 
 def build_package_deb(
-    jellyfin_version, build_type, build_arch, build_version, no_push=False
+    jellyfin_version, build_type, build_arch, build_version, local=False
 ):
     """
     Build a .deb package (Debian or Ubuntu) within a Docker container that matches the requested distribution version
@@ -115,7 +115,7 @@ def build_package_deb(
 
 
 def build_linux(
-    jellyfin_version, build_type, build_arch, _build_version, no_push=False
+    jellyfin_version, build_type, build_arch, _build_version, local=False
 ):
     """
     Build a portable Linux archive
@@ -159,7 +159,7 @@ def build_linux(
 
 
 def build_windows(
-    jellyfin_version, build_type, _build_arch, _build_version, no_push=False
+    jellyfin_version, build_type, _build_arch, _build_version, local=False
 ):
     """
     Build a portable Windows archive
@@ -203,7 +203,7 @@ def build_windows(
 
 
 def build_macos(
-    jellyfin_version, build_type, build_arch, _build_version, no_push=False
+    jellyfin_version, build_type, build_arch, _build_version, local=False
 ):
     """
     Build a portable MacOS archive
@@ -247,7 +247,7 @@ def build_macos(
 
 
 def build_portable(
-    jellyfin_version, build_type, _build_arch, _build_version, no_push=False
+    jellyfin_version, build_type, _build_arch, _build_version, local=False
 ):
     """
     Build a portable .NET archive
@@ -278,7 +278,7 @@ def build_portable(
 
 
 def build_docker(
-    jellyfin_version, build_type, build_arch, _build_version, no_push=False
+    jellyfin_version, build_type, build_arch, _build_version, local=False
 ):
     """
     Build Docker images for one or all architectures and combining manifests
@@ -354,13 +354,13 @@ def build_docker(
         )
         images_hub.append(imagename)
 
-        if not no_push:
+        if not local:
             os.system(f"docker image tag {imagename} ghcr.io/{imagename}")
             images_ghcr.append(f"ghcr.io/{imagename}")
 
         log("")
 
-    if no_push:
+    if local:
         return
 
     if not getenv('DOCKER_USERNAME') or not getenv('DOCKER_TOKEN'):
@@ -460,7 +460,7 @@ def build_docker(
 
 
 def build_nuget(
-    jellyfin_version, build_type, _build_arch, _build_version, no_push=False
+    jellyfin_version, build_type, _build_arch, _build_version, local=False
 ):
     """
     Pack and upload nuget packages
@@ -498,7 +498,7 @@ def build_nuget(
         log(f">>>> {project_pack_command}")
         os.system(project_pack_command)
 
-    if no_push:
+    if local:
         return
 
     if is_unstable:
@@ -557,7 +557,7 @@ parser.add_argument('jellyfin_version', help='The output version')
 parser.add_argument('build_type', choices=configurations.keys(), help='The build platform')
 parser.add_argument('build_arch', default=None, nargs='?', help='The build architecture')
 parser.add_argument('build_version', default=None, nargs='?', help='The build release version [debian/ubuntu only]')
-parser.add_argument('--no-push', action='store_true', help='Do not generate Docker manifests or push them [docker only]')
+parser.add_argument('--local', action='store_true', help='Local build, do not generate manifests or push them [docker only]')
 
 args = parser.parse_args()
 
@@ -577,5 +577,5 @@ if jellyfin_version in ["auto", "master"]:
 
 # Launch the builder function
 function_definitions[configurations[build_type]["build_function"]](
-    jellyfin_version, build_type, build_arch, build_version, no_push=args.no_push
+    jellyfin_version, build_type, build_arch, build_version, local=args.local
 )
