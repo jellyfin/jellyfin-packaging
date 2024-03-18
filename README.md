@@ -68,7 +68,7 @@ If you want a non-Docker image output (`.deb`, `tar`/`zip` archive, etc.) follow
    
    * The second argument is the "platform" you want to build for. The available options are listed as top-level keys in the `build.yaml` configuration file or in the `-h` help output.
 
-   * The third argument is, for most builds except `docker` and `portable` (DotNET portable), the architecture you want to build for. For each platform, the available architectures can be found as the keys under `archmaps` in the `build.yaml` configuration file.
+   * The third argument is, for all platforms except `portable` (DotNET portable), the architecture you want to build for. For each platform, the available architectures can be found as the keys under `archmaps` in the `build.yaml` configuration file.
 
    * The fourth argument is exclusive to `debian` and `ubuntu` `.deb` packages, and is the release version of Debian or Ubuntu to build for. For each platform, the available releases can be found as the keys under `releases` in the `build.yaml` configuration file.
 
