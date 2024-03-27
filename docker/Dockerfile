@@ -110,8 +110,7 @@ COPY --from=qemu /usr/bin/* /usr/bin
 ENV HEALTHCHECK_URL=http://localhost:8096/health
 
 # Default environment variables for the Jellyfin invocation
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT="1" \
-    DEBIAN_FRONTEND="noninteractive" \
+ENV DEBIAN_FRONTEND="noninteractive" \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US:en" \
