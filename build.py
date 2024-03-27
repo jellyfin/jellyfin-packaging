@@ -566,7 +566,7 @@ build_type = args.build_type
 build_arch = args.build_arch
 build_version = args.build_version
 
-if build_type not in ["portable", "docker"] and not build_arch:
+if build_type not in ["portable", "docker", "nuget"] and not build_arch:
     log(f"Error: You must specify an architecture for build platform {build_type}")
     exit(1)
 
