@@ -75,7 +75,7 @@ windows:
   imagename: jellyfin-builder-windows
 macos:
   build_function: build_macos
-  archivetypes: targz,tarxz
+  archivetypes: tarxz
   archmaps:
     amd64:
       DOTNET_ARCH: x64
