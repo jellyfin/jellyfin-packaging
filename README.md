@@ -7,7 +7,7 @@
 <img alt="Logo Banner" src="https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/banner-logo-solid.svg?sanitize=true"/>
 <br/>
 <br/>
-<a href="https://github.com/jellyfin/jellyfin">
+<a href="https://github.com/jellyfin/jellyfin-packaging">
 <img alt="GPL 3.0 License" src="https://img.shields.io/github/license/jellyfin/jellyfin-packaging.svg"/>
 </a>
 <a href="https://github.com/jellyfin/jellyfin/releases">
