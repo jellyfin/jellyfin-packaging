@@ -19,7 +19,7 @@ revparse = run(["git", "rev-parse", "--show-toplevel"], stdout=PIPE)
 repo_root_dir = revparse.stdout.decode().strip()
 
 # Base Docker commands
-docker_build_cmd = "docker build --progress=plain --no-cache"
+docker_build_cmd = "docker buildx build --progress=plain --no-cache"
 docker_run_cmd = "docker run --rm"
 
 
