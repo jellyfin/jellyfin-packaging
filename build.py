@@ -36,6 +36,21 @@ except Exception as e:
     exit(1)
 
 
+# Shared functions
+def _determine_arch(build_type, build_arch, build_version):
+    PACKAGE_ARCH = (
+        configurations[build_type]["archmaps"][build_arch]["PACKAGE_ARCH"]
+        if build_arch in configurations[build_type]["archmaps"].keys()
+        else None
+    )
+    if PACKAGE_ARCH is None:
+        raise ValueError(
+            f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}"
+        )
+    else:
+        return PACKAGE_ARCH
+
+
 def build_package_deb(
     jellyfin_version, build_type, build_arch, build_version, local=False
 ):
@@ -60,15 +75,7 @@ def build_package_deb(
             raise ValueError(
                 f"{build_version} is not a valid {build_type} version in {configurations[build_type]['releases'].keys()}"
             )
-        PACKAGE_ARCH = (
-            configurations[build_type]["archmaps"][build_arch]["PACKAGE_ARCH"]
-            if build_arch in configurations[build_type]["archmaps"].keys()
-            else None
-        )
-        if PACKAGE_ARCH is None:
-            raise ValueError(
-                f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}"
-            )
+        PACKAGE_ARCH = _determine_arch(build_type, build_arch, build_version)
     except Exception as e:
         log(f"Invalid/unsupported arguments: {e}")
         exit(1)
@@ -124,15 +131,7 @@ def build_linux(
     log("")
 
     try:
-        PACKAGE_ARCH = (
-            configurations[build_type]["archmaps"][build_arch]["PACKAGE_ARCH"]
-            if build_arch in configurations[build_type]["archmaps"].keys()
-            else None
-        )
-        if PACKAGE_ARCH is None:
-            raise ValueError(
-                f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}"
-            )
+        PACKAGE_ARCH = _determine_arch(build_type, build_arch, _build_version)
         DOTNET_ARCH = configurations[build_type]["archmaps"][build_arch]["DOTNET_ARCH"]
     except Exception as e:
         log(f"Invalid/unsupported arguments: {e}")
@@ -168,15 +167,7 @@ def build_windows(
     log("")
 
     try:
-        PACKAGE_ARCH = (
-            configurations[build_type]["archmaps"][build_arch]["PACKAGE_ARCH"]
-            if build_arch in configurations[build_type]["archmaps"].keys()
-            else None
-        )
-        if PACKAGE_ARCH is None:
-            raise ValueError(
-                f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}"
-            )
+        PACKAGE_ARCH = _determine_arch(build_type, build_arch, _build_version)
         DOTNET_ARCH = configurations[build_type]["archmaps"][build_arch]["DOTNET_ARCH"]
     except Exception as e:
         log(f"Invalid/unsupported arguments: {e}")
@@ -212,15 +203,7 @@ def build_macos(
     log("")
 
     try:
-        PACKAGE_ARCH = (
-            configurations[build_type]["archmaps"][build_arch]["PACKAGE_ARCH"]
-            if build_arch in configurations[build_type]["archmaps"].keys()
-            else None
-        )
-        if PACKAGE_ARCH is None:
-            raise ValueError(
-                f"{build_arch} is not a valid {build_type} {build_version} architecture in {configurations[build_type]['archmaps'].keys()}"
-            )
+        PACKAGE_ARCH = _determine_arch(build_type, build_arch, _build_version)
         DOTNET_ARCH = configurations[build_type]["archmaps"][build_arch]["DOTNET_ARCH"]
     except Exception as e:
         log(f"Invalid/unsupported arguments: {e}")
