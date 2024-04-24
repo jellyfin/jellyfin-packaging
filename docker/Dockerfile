@@ -121,6 +121,9 @@ ENV DEBIAN_FRONTEND="noninteractive" \
     JELLYFIN_WEB_DIR="/jellyfin/jellyfin-web" \
     JELLYFIN_FFMPEG="/usr/lib/jellyfin-ffmpeg/ffmpeg"
 
+# required for fontconfig cache
+ENV XDG_CACHE_HOME=${JELLYFIN_CACHE_DIR}
+
 # https://github.com/dlemstra/Magick.NET/issues/707#issuecomment-785351620
 ENV MALLOC_TRIM_THRESHOLD_=131072
 
