@@ -16,7 +16,7 @@ ARG LEVEL_ZERO_VERSION=1.3.29138.7
 
 # https://github.com/tsukumijima/libmali-rockchip
 ARG MALI_PKG_VER=1.9-1_arm64
-ARG MALI_PKG_TAG=v1.9-1-b5d7972
+ARG MALI_PKG_TAG=v1.9-1-55611b0
 ARG MALI_PKG_CFG=valhall-g610-g13p0-gbm
 
 # Debian architecture (amd64, arm64, armhf), set by build script

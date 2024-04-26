@@ -34,7 +34,7 @@ ubuntu:
   cross-gcc:
     focal: '10'
     jammy: '12'
-    noble: '12'
+    noble: '13'
   build_function: build_package_deb
   dockerfile: debian/docker/Dockerfile
   imagename: jellyfin-builder-ubuntu
