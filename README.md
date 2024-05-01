@@ -188,6 +188,10 @@ Inside this repository are 7 major components:
 
    This simplifies our builds as we do not need to then track many 9-month-only releases of Ubuntu, and also reduces the build burden. Users of non-LTS Ubuntu releases can use either the closest Ubuntu LTS version or use Docker containers instead.
 
+* Signing of Debian packages with `debsigs`.
+
+   This was suggested in https://github.com/jellyfin/jellyfin-packaging/issues/14 and was not something we had ever done, but has become trivial with this CI. This alows for the end-user verification of the ownership and integrity of the binary `.deb` files obtained from the repository with the `debsigs-verify` command and the policy detailed in that issue. We can also integrate this automatically into our installer script and documented process.
+
 ### Docker
 
 * Single unified Docker build: the entirety of our Docker images are built as one container from one Dockerfile.
