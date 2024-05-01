@@ -54,7 +54,7 @@ jobs:
   Debian:
     runs-on: ubuntu-22.04
     strategy:
-      fast-fail: false
+      fail-fast: false
       matrix:
         release:
           - bullseye
@@ -147,7 +147,7 @@ jobs:
   Ubuntu:
     runs-on: ubuntu-22.04
     strategy:
-      fast-fail: false
+      fail-fast: false
       matrix:
         release:
           - focal
@@ -241,7 +241,7 @@ jobs:
   Linux:
     runs-on: ubuntu-22.04
     strategy:
-      fast-fail: false
+      fail-fast: false
       matrix:
         arch:
           - amd64
@@ -309,7 +309,7 @@ jobs:
   Windows:
     runs-on: ubuntu-22.04
     strategy:
-      fast-fail: false
+      fail-fast: false
       matrix:
         arch:
           - amd64
@@ -374,7 +374,7 @@ jobs:
   MacOS:
     runs-on: ubuntu-22.04
     strategy:
-      fast-fail: false
+      fail-fast: false
       matrix:
         arch:
           - amd64
