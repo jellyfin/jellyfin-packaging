@@ -190,7 +190,7 @@ Inside this repository are 7 major components:
 
 * Signing of Debian packages with `debsigs`.
 
-   This was suggested in https://github.com/jellyfin/jellyfin-packaging/issues/14 and was not something we had ever done, but has become trivial with this CI. This alows for the end-user verification of the ownership and integrity of the binary `.deb` files obtained from the repository with the `debsigs-verify` command and the policy detailed in that issue. We can also integrate this automatically into our installer script and documented process.
+   This was suggested in https://github.com/jellyfin/jellyfin-packaging/issues/14 and was not something we had ever done, but has become trivial with this CI. This alows for the end-user verification of the ownership and integrity of manually downloaded binary `.deb` files obtained from the repository with the `debsigs-verify` command and the policy detailed in that issue. Note that since Debian as a whole (i.e. `dpkg`, `apt`, etc.) does not enforce package signing at this time, enabling this for the *repository* is not possible; conventional repository signatures (using the same signing key) are considered sufficient.
 
 ### Docker
 
