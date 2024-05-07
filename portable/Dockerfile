@@ -26,6 +26,7 @@ RUN apt-get update -y \
  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install --no-install-recommends -y \
     wget \
+    unzip \
     debhelper \
     gnupg \
     devscripts \
