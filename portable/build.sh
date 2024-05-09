@@ -52,30 +52,30 @@ pushd jellyfin
 # Fetch any additional package(s) needed here (i.e. FFmpeg)
 # This is a hack because the ffmpeg naming is very inconsistent and we need to find the right URL(s) from the repo browser
 case ${BUILD_TYPE}-${PACKAGE_ARCH} in
-    linux-amd64*)
-        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/linux/latest-${FFMPEG_VERSION}/amd64 | grep -o "/files/.*_portable_linux64-gpl.tar.xz'" | sed "s/'$//" )
-        curl --location --output ffmpeg.tar.xz ${REPOSITORY_URI}${FFMPEG_PATH}
-        tar -xvJf ffmpeg.tar.xz
-        rm ffmpeg.tar.xz
-    ;;
-    linux-arm64*)
-        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/linux/latest-${FFMPEG_VERSION}/arm64 | grep -o "/files/.*_portable_linuxarm64-gpl.tar.xz'" | sed "s/'$//" )
-        curl --location --output ffmpeg.tar.xz ${REPOSITORY_URI}${FFMPEG_PATH}
-        tar -xvJf ffmpeg.tar.xz
-        rm ffmpeg.tar.xz
-    ;;
-    macos-amd64)
-        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/macos/latest-${FFMPEG_VERSION}/x86_64 | grep -o "/files/.*_portable_mac64-gpl.tar.xz'" | sed "s/'$//" )
-        curl --location --output ffmpeg.tar.xz ${REPOSITORY_URI}${FFMPEG_PATH}
-        tar -xvJf ffmpeg.tar.xz
-        rm ffmpeg.tar.xz
-    ;;
-    macos-arm64)
-        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/macos/latest-${FFMPEG_VERSION}/arm64 | grep -o "/files/.*_portable_macarm64-gpl.tar.xz'" | sed "s/'$//" )
-        curl --location --output ffmpeg.tar.xz ${REPOSITORY_URI}${FFMPEG_PATH}
-        tar -xvJf ffmpeg.tar.xz
-        rm ffmpeg.tar.xz
-    ;;
+#    linux-amd64*)
+#        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/linux/latest-${FFMPEG_VERSION}/amd64 | grep -o "/files/.*_portable_linux64-gpl.tar.xz'" | sed "s/'$//" )
+#        curl --location --output ffmpeg.tar.xz ${REPOSITORY_URI}${FFMPEG_PATH}
+#        tar -xvJf ffmpeg.tar.xz
+#        rm ffmpeg.tar.xz
+#    ;;
+#    linux-arm64*)
+#        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/linux/latest-${FFMPEG_VERSION}/arm64 | grep -o "/files/.*_portable_linuxarm64-gpl.tar.xz'" | sed "s/'$//" )
+#        curl --location --output ffmpeg.tar.xz ${REPOSITORY_URI}${FFMPEG_PATH}
+#        tar -xvJf ffmpeg.tar.xz
+#        rm ffmpeg.tar.xz
+#    ;;
+#    macos-amd64)
+#        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/macos/latest-${FFMPEG_VERSION}/x86_64 | grep -o "/files/.*_portable_mac64-gpl.tar.xz'" | sed "s/'$//" )
+#        curl --location --output ffmpeg.tar.xz ${REPOSITORY_URI}${FFMPEG_PATH}
+#        tar -xvJf ffmpeg.tar.xz
+#        rm ffmpeg.tar.xz
+#    ;;
+#    macos-arm64)
+#        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/macos/latest-${FFMPEG_VERSION}/arm64 | grep -o "/files/.*_portable_macarm64-gpl.tar.xz'" | sed "s/'$//" )
+#        curl --location --output ffmpeg.tar.xz ${REPOSITORY_URI}${FFMPEG_PATH}
+#        tar -xvJf ffmpeg.tar.xz
+#        rm ffmpeg.tar.xz
+#    ;;
     windows-amd64)
         FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/windows/latest-${FFMPEG_VERSION}/win64 | grep -o "/files/.*-portable_win64.zip'" | sed "s/'$//" )
         curl --location --output ffmpeg.zip ${REPOSITORY_URI}${FFMPEG_PATH}
