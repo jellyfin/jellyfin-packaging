@@ -140,7 +140,7 @@ RUN apt-get update \
     apt-transport-https \
  && curl -fsSL https://repo.jellyfin.org/jellyfin_team.gpg.key \
   | gpg --dearmor -o /etc/apt/trusted.gpg.d/debian-jellyfin.gpg \
- && echo "deb [arch=${PACKAGE_ARCH}] https://repo.jellyfin.org/debian ${OS_VERSION} main" > /etc/apt/sources.list.d/jellyfin.list \
+ && echo "deb [arch=${PACKAGE_ARCH}] https://repo.jellyfin.org/master/debian ${OS_VERSION} main" > /etc/apt/sources.list.d/jellyfin.list \
  && apt-get update \
  && apt-get install --no-install-recommends --no-install-suggests --yes \
     ${FFMPEG_PACKAGE} \
