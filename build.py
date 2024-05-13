@@ -332,9 +332,11 @@ def build_docker(
         log(
             f">>> {docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --build-arg JELLYFIN_VERSION={jellyfin_version} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
         )
-        os.system(
+        ret = os.system(
             f"{docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --build-arg JELLYFIN_VERSION={jellyfin_version} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
         )
+        if ret > 0:
+            exit(1)
         images_hub.append(imagename)
 
         if not local:
