@@ -105,11 +105,7 @@ RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
  ; fi
 
 # Prepare dotnet SDK
-RUN wget https://packages.microsoft.com/config/${PACKAGE_TYPE}/${PACKAGE_VERSION}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
- && dpkg -i packages-microsoft-prod.deb \
- && apt-get -f install \
- && apt-get update \
- && apt-get install -y dotnet-sdk-${DOTNET_VERSION}
+RUN wget -O- https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel ${DOTNET_VERSION} --install-dir /usr/local/bin
 
 # Prepare nodejs
 RUN wget https://deb.nodesource.com/setup_${NODEJS_VERSION}.x -O nodejs-install.sh \
