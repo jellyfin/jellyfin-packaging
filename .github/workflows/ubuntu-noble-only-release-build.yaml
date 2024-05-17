@@ -1,0 +1,122 @@
+name: "Release Build"
+
+on:
+  workflow_dispatch:
+    # Manual trigger from bot
+    inputs:
+      version:
+        required: true
+        type: string
+        description: 'The server and web stable release tag ("vX.Y.Z") or "master"'
+
+permissions:
+  contents: read
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        release:
+          - noble
+        arch:
+          - amd64
+          - arm64
+          - armhf
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          fi
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get install --yes python3-git python3-yaml debsigs devscripts
+
+      - name: "Checkout repository"
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version || 'master' }}
+
+      - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
+        run: |-
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
+          sudo chown --recursive $USER out/ubuntu
+
+      - name: "Import repository signing GPG key"
+        run: |
+          echo -n "${{ secrets.DEBIAN_SIGNING_KEY }}" | base64 --decode | gpg --batch --yes --import
+
+      - name: "Sign Ubuntu package and source files"
+        run: |
+          for file in out/ubuntu/*.deb; do
+              debsigs --sign=origin --default-key=${{ secrets.DEBIAN_SIGNING_KEY_ID }} ${file}
+          done
+          debsign -k ${{ secrets.DEBIAN_SIGNING_KEY_ID }} out/ubuntu/*.changes
+
+      - name: "Remove repository signing GPG key"
+        run: |
+          gpg --batch --yes --delete-secret-keys ${{ secrets.DEBIAN_SIGNING_KEY_ID }}
+
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/ubuntu/*"
+          strip_components: 2
+          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}"
+
+      - name: "Import artifacts into reprepro"
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: false
+          script: |
+            set -o xtrace
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                COMPONENT="main"
+            else
+                COMPONENT="unstable"
+            fi
+            # Only include the architecture-dependent deb here, as the others are done only for amd64
+            sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*_${{ matrix.arch }}.deb || exit 1
+            if [[ ${{ matrix.arch }} == "amd64" ]]; then
+                # Only include the architecture-independent packages for amd64; the other architectures are the same and conflict
+                sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*_all.deb || exit 1
+                # Only include the source DSC for amd64; the other architectures are the same and conflict
+                sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
+            fi
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: false
+          script: |
+            export BASEDIR="/srv/repository/main/server/ubuntu"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
