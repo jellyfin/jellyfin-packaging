@@ -106,6 +106,8 @@ Build a .NET portable `.zip`:
 
 If you want a Docker image output follow this process:
 
+1. Install `docker` and `docker-buildx-plugin` for your OS.
+
 1. Run `./build.py`. This command takes up to 4 arguments specific to Docker builds:
 
    * The first argument is the version you want to tag your build as. For our official releases, we use either dates for unstable builds (`YYYYMMDDHH` numerical format or `auto` for autogeneration) or the tag without `v` for stable release builds (`10.8.13`, `10.9.0`, etc.), but you can use any version tag you wish here.
