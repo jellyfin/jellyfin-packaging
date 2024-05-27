@@ -79,6 +79,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
+          sudo apt-get update
           sudo apt-get install --yes python3-git python3-yaml debsigs devscripts
 
       - name: "Checkout repository"
@@ -189,6 +190,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
+          sudo apt-get update
           sudo apt-get install --yes python3-git python3-yaml debsigs devscripts
 
       - name: "Checkout repository"
@@ -297,6 +299,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
+          sudo apt-get update
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
@@ -362,6 +365,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
+          sudo apt-get update
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
@@ -427,6 +431,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
+          sudo apt-get update
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
@@ -486,6 +491,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
+          sudo apt-get update
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
@@ -544,6 +550,7 @@ jobs:
 
       - name: "Install dependencies"
         run: |-
+          sudo apt-get update
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
