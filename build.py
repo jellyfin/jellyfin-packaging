@@ -288,11 +288,9 @@ def build_docker(
 
     # Determine if this is a "latest"-type image (v in jellyfin_version) or not
     if "v" in jellyfin_version:
-        is_unstable = False
-        version_suffix = True
+        is_stable = True
     else:
-        is_unstable = True
-        version_suffix = False
+        is_stable = False
 
     jellyfin_version = jellyfin_version.replace("v", "")
 
@@ -312,7 +310,7 @@ def build_docker(
         IMAGE_ARCH = configurations["docker"]["archmaps"][_build_arch]["IMAGE_ARCH"]
 
         # Use a unique docker image name for consistency
-        if version_suffix:
+        if is_stable:
             imagename = f"{configurations['docker']['imagename']}:{jellyfin_version}-{_build_arch}.{date}"
         else:
             imagename = f"{configurations['docker']['imagename']}:{jellyfin_version}-{_build_arch}"
@@ -355,7 +353,7 @@ def build_docker(
         log(f">> Building Docker manifests for {server}...")
         manifests = list()
 
-        if not is_unstable and version_suffix:
+        if is_stable:
             log(">>> Building X.Y.Z dated version manifest...")
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
@@ -376,7 +374,7 @@ def build_docker(
         )
         manifests.append(f"{server}/{configurations['docker']['imagename']}:{jellyfin_version}")
 
-        if not is_unstable and version_suffix:
+        if is_stable:
             # Build major-minor point version
             log(">>> Building X.Y version manifest...")
             manifest_version_xy = '.'.join(jellyfin_version.split('.')[0:2])
@@ -407,7 +405,7 @@ def build_docker(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:latest {' '.join(images)}"
             )
             manifests.append(f"{server}/{configurations['docker']['imagename']}:latest")
-        elif is_unstable:
+        else:
             log(">>> Building unstable manifest...")
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
@@ -478,9 +476,9 @@ def build_nuget(
 
     # Determine if this is a "latest"-type image (v in jellyfin_version) or not
     if "v" in jellyfin_version:
-        is_unstable = False
+        is_stable = True
     else:
-        is_unstable = True
+        is_stable = False
 
     jellyfin_version = jellyfin_version.replace("v", "")
 
@@ -488,12 +486,12 @@ def build_nuget(
     date = datetime.now().strftime("%Y%m%d%H%M%S")
 
     pack_command_base = "dotnet pack -o out/nuget/"
-    if is_unstable:
+    if is_stable:
+        pack_command = f"{pack_command_base} -p:Version={jellyfin_version}"
+    else:
         pack_command = (
             f"{pack_command_base} --version-suffix {date} -p:Stability=Unstable"
         )
-    else:
-        pack_command = f"{pack_command_base} -p:Version={jellyfin_version}"
 
     for project in project_files:
         log(f">> Packing  {project}...")
@@ -506,12 +504,12 @@ def build_nuget(
     if local:
         return
 
-    if is_unstable:
-        nuget_repo = configurations["nuget"]["feed_urls"]["unstable"]
-        nuget_key = getenv("NUGET_UNSTABLE_KEY")
-    else:
+    if is_stable:
         nuget_repo = configurations["nuget"]["feed_urls"]["stable"]
         nuget_key = getenv("NUGET_STABLE_KEY")
+    else:
+        nuget_repo = configurations["nuget"]["feed_urls"]["unstable"]
+        nuget_key = getenv("NUGET_UNSTABLE_KEY")
 
     if nuget_key is None:
         log(f"Error: Failed to get NUGET_*_KEY environment variable")
