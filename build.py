@@ -288,11 +288,9 @@ def build_docker(
 
     # Determine if this is a "latest"-type image (v in jellyfin_version) or not
     if "v" in jellyfin_version:
-        is_latest = True
         is_unstable = False
         version_suffix = True
     else:
-        is_latest = False
         is_unstable = True
         version_suffix = False
 
@@ -357,8 +355,8 @@ def build_docker(
         log(f">> Building Docker manifests for {server}...")
         manifests = list()
 
-        if version_suffix:
-            log(">>> Building dated version manifest...")
+        if not is_unstable and version_suffix:
+            log(">>> Building X.Y.Z dated version manifest...")
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
             )
@@ -369,7 +367,7 @@ def build_docker(
                 f"{server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date}"
             )
 
-        log(">>> Building version manifest...")
+        log(">>> Building X.Y.Z version manifest...")
         log(
             f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
         )
@@ -378,7 +376,29 @@ def build_docker(
         )
         manifests.append(f"{server}/{configurations['docker']['imagename']}:{jellyfin_version}")
 
-        if is_latest:
+        if not is_unstable and version_suffix:
+            # Build major-minor point version
+            log(">>> Building X.Y version manifest...")
+            manifest_version_xy = '.'.join(jellyfin_version.split('.')[0:2])
+            log(
+                f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_xy} {' '.join(images)}"
+            )
+            os.system(
+                f"docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_xy} {' '.join(images)}"
+            )
+            manifests.append(f"{server}/{configurations['docker']['imagename']}:{manifest_version_xy}")
+
+            # Build major-only point version
+            log(">>> Building X version manifest...")
+            manifest_version_x = '.'.join(jellyfin_version.split('.')[0:1])
+            log(
+                f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_x} {' '.join(images)}"
+            )
+            os.system(
+                f"docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_x} {' '.join(images)}"
+            )
+            manifests.append(f"{server}/{configurations['docker']['imagename']}:{manifest_version_x}")
+
             log(">>> Building latest manifest...")
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:latest {' '.join(images)}"
