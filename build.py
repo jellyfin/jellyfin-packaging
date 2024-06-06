@@ -267,11 +267,9 @@ def build_docker(
     Build Docker images for one or all architectures and combining manifests
     """
     log("> Building Docker images...")
-    log("")
 
     if build_arch:
         log(f"NOTE: Building only for arch {build_arch}")
-        log("")
 
     # We build all architectures simultaneously to push a single tag, so no conditional checks
     architectures = configurations["docker"]["archmaps"].keys()
@@ -293,6 +291,9 @@ def build_docker(
         is_stable = False
 
     jellyfin_version = jellyfin_version.replace("v", "")
+
+    log(f"NOTE: Build type is {'stable' if is_stable else 'unstable'} for version {jellyfin_version}")
+    log("")
 
     # Set today's date in a convenient format for use as an image suffix
     date = datetime.now().strftime("%Y%m%d-%H%M%S")
