@@ -37,7 +37,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: "Prepare repository"
         run: |-
@@ -83,7 +83,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml debsigs devscripts
 
       - name: "Checkout repository"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: "Prepare repository"
         run: |-
@@ -194,7 +194,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml debsigs devscripts
 
       - name: "Checkout repository"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: "Prepare repository"
         run: |-
@@ -303,7 +303,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: "Prepare repository"
         run: |-
@@ -369,7 +369,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: "Prepare repository"
         run: |-
@@ -435,7 +435,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: "Prepare repository"
         run: |-
@@ -495,7 +495,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: "Prepare repository"
         run: |-
@@ -554,7 +554,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: "Prepare repository"
         run: |-
