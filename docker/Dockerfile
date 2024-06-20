@@ -203,8 +203,7 @@ LABEL "org.opencontainers.image.url"="https://jellyfin.org"
 
 EXPOSE 8096
 VOLUME ${JELLYFIN_DATA_DIR} ${JELLYFIN_CACHE_DIR}
-ENTRYPOINT [ "/jellyfin/jellyfin", \
-             "--ffmpeg", "/usr/lib/jellyfin-ffmpeg/ffmpeg" ]
+ENTRYPOINT ["/jellyfin/jellyfin"]
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
      CMD curl -Lk -fsS "${HEALTHCHECK_URL}" || exit 1
