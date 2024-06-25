@@ -39,29 +39,29 @@ case "$1" in
     delgroup --quiet jellyfin > /dev/null 2>&1 || true
     # Remove config dir
     if [[ -d $CONFIGDATA ]]; then
-      rm -rf $CONFIGDATA
+      rm -rf $CONFIGDATA || true
     fi
     # Remove log dir
     if [[ -d $LOGDATA ]]; then
-      rm -rf $LOGDATA
+      rm -rf $LOGDATA || true
     fi
     # Remove cache dir
     if [[ -d $CACHEDATA ]]; then
-      rm -rf $CACHEDATA
+      rm -rf $CACHEDATA || true
     fi
     # Remove program data dir
     if [[ -d $PROGRAMDATA ]]; then
-      rm -rf $PROGRAMDATA
+      rm -rf $PROGRAMDATA || true
     fi
     # Remove binary symlink
     rm -f /usr/bin/jellyfin
     # Remove sudoers config
     [[ -f /etc/sudoers.d/jellyfin-sudoers ]] && rm /etc/sudoers.d/jellyfin-sudoers
     # Remove anything at the default locations; catches situations where the user moved the defaults
-    [[ -e /etc/jellyfin ]] && rm -rf /etc/jellyfin
-    [[ -e /var/log/jellyfin ]] && rm -rf /var/log/jellyfin
-    [[ -e /var/cache/jellyfin ]] && rm -rf /var/cache/jellyfin
-    [[ -e /var/lib/jellyfin ]] && rm -rf /var/lib/jellyfin
+    [[ -e /etc/jellyfin ]] && rm -rf /etc/jellyfin || true
+    [[ -e /var/log/jellyfin ]] && rm -rf /var/log/jellyfin || true
+    [[ -e /var/cache/jellyfin ]] && rm -rf /var/cache/jellyfin || true
+    [[ -e /var/lib/jellyfin ]] && rm -rf /var/lib/jellyfin || true
     ;;
   remove)
     if [[ -x "/usr/bin/deb-systemd-helper" ]]; then
