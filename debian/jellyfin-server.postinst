@@ -41,23 +41,31 @@ case "$1" in
     # ensure $PROGRAMDATA exists
     if [[ ! -d $PROGRAMDATA ]]; then
       mkdir $PROGRAMDATA
+      chown -R ${JELLYFIN_USER} $PROGRAMDATA
+      chgrp adm $PROGRAMDATA
+      chmod 0750 $PROGRAMDATA
     fi
     # ensure $CONFIGDATA exists
     if [[ ! -d $CONFIGDATA ]]; then
       mkdir $CONFIGDATA
+      chown -R ${JELLYFIN_USER} $CONFIGDATA
+      chgrp adm $CONFIGDATA
+      chmod 0750 $CONFIGDATA
     fi
     # ensure $LOGDATA exists
     if [[ ! -d $LOGDATA ]]; then
       mkdir $LOGDATA
+      chown -R ${JELLYFIN_USER} $LOGDATA
+      chgrp adm $LOGDATA
+      chmod 0750 $LOGDATA
     fi
     # ensure $CACHEDATA exists
     if [[ ! -d $CACHEDATA ]]; then
       mkdir $CACHEDATA
+      chown -R ${JELLYFIN_USER} $CACHEDATA
+      chgrp adm $CACHEDATA
+      chmod 0750 $CACHEDATA
     fi
-    # Ensure permissions are correct on all config directories
-    chown -R ${JELLYFIN_USER} $PROGRAMDATA $CONFIGDATA $LOGDATA $CACHEDATA
-    chgrp adm $PROGRAMDATA $CONFIGDATA $LOGDATA $CACHEDATA
-    chmod 0750 $PROGRAMDATA $CONFIGDATA $LOGDATA $CACHEDATA
 
     # Install jellyfin symlink into /usr/bin
     ln -sf /usr/lib/jellyfin/bin/jellyfin /usr/bin/jellyfin
