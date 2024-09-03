@@ -38,7 +38,7 @@ case "$1" in
     if [[ ! -z "$(getent group ${VIDEO_GROUP})" ]]; then
       usermod -aG ${VIDEO_GROUP} ${JELLYFIN_USER} > /dev/null 2>&1
     fi
-    
+
     # Ensure directories exist and, on initial creation, are chowned to the correct user(s)
     for DIRECTORY in $PROGRAMDATA $CONFIGDATA $LOGDATA $CACHEDATA; do
         if [[ ! -d $DIRECTORY ]]; then
