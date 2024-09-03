@@ -38,34 +38,17 @@ case "$1" in
     if [[ ! -z "$(getent group ${VIDEO_GROUP})" ]]; then
       usermod -aG ${VIDEO_GROUP} ${JELLYFIN_USER} > /dev/null 2>&1
     fi
-    # ensure $PROGRAMDATA exists
-    if [[ ! -d $PROGRAMDATA ]]; then
-      mkdir -p $PROGRAMDATA
-      chown -R ${JELLYFIN_USER} $PROGRAMDATA
-      chgrp adm $PROGRAMDATA
-      chmod 0750 $PROGRAMDATA
-    fi
-    # ensure $CONFIGDATA exists
-    if [[ ! -f $CONFIGDATA/system.xml ]]; then
-      mkdir -p $CONFIGDATA
-      chown -R ${JELLYFIN_USER} $CONFIGDATA
-      chgrp adm $CONFIGDATA
-      chmod 0750 $CONFIGDATA
-    fi
-    # ensure $LOGDATA exists
-    if [[ ! -d $LOGDATA ]]; then
-      mkdir -p $LOGDATA
-      chown -R ${JELLYFIN_USER} $LOGDATA
-      chgrp adm $LOGDATA
-      chmod 0750 $LOGDATA
-    fi
-    # ensure $CACHEDATA exists
-    if [[ ! -d $CACHEDATA ]]; then
-      mkdir -p $CACHEDATA
-      chown -R ${JELLYFIN_USER} $CACHEDATA
-      chgrp adm $CACHEDATA
-      chmod 0750 $CACHEDATA
-    fi
+    
+    # Ensure directories exist and, on initial creation, are chowned to the correct user(s)
+    for DIRECTORY in $PROGRAMDATA $CONFIGDATA $LOGDATA $CACHEDATA; do
+        if [[ ! -d $DIRECTORY ]]; then
+            mkdir -p $DIRECTORY
+        fi
+        if [[ $(stat -c '%u' $DIRECTORY) -eq 0 ]]; then
+            chown -R ${JELLYFIN_USER}:adm $DIRECTORY
+            chmod 0750 $DIRECTORY
+        fi
+    done
 
     # Install jellyfin symlink into /usr/bin
     ln -sf /usr/lib/jellyfin/bin/jellyfin /usr/bin/jellyfin
