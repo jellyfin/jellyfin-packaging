@@ -7,7 +7,7 @@ set -o xtrace
 
 # Set global variables
 REPOSITORY_URI="https://repo.jellyfin.org"
-FFMPEG_VERSION="6.x"
+FFMPEG_VERSION="7.x"
 
 # Create the intermediate build dir
 BUILD_DIR="/build"
