@@ -6,7 +6,7 @@ ARG NODEJS_VERSION=20
 ARG OS_VERSION=bookworm
 
 # Jellyfin FFMPEG package
-ARG FFMPEG_PACKAGE=jellyfin-ffmpeg6
+ARG FFMPEG_PACKAGE=jellyfin-ffmpeg7
 
 # https://github.com/intel/compute-runtime/releases
 ARG GMMLIB_VERSION=22.4.1

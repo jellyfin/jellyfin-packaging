@@ -7,7 +7,7 @@ set -o xtrace
 
 # Set global variables
 REPOSITORY_URI="https://repo.jellyfin.org"
-FFMPEG_VERSION="6.x"
+FFMPEG_VERSION="7.x"
 
 # Create the intermediate build dir
 BUILD_DIR="/build"
@@ -77,7 +77,7 @@ case ${BUILD_TYPE}-${PACKAGE_ARCH} in
 #        rm ffmpeg.tar.xz
 #    ;;
     windows-amd64)
-        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/windows/latest-${FFMPEG_VERSION}/win64 | grep -o "/files/.*-portable_win64.zip'" | sed "s/'$//" )
+        FFMPEG_PATH=$( curl ${REPOSITORY_URI}/?path=/ffmpeg/windows/latest-${FFMPEG_VERSION}/win64 | grep -o "/files/.*-portable_win64-clang-gpl.zip'" | sed "s/'$//" )
         curl --location --output ffmpeg.zip ${REPOSITORY_URI}${FFMPEG_PATH}
         unzip ffmpeg.zip
         rm ffmpeg.zip
