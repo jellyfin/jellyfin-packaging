@@ -27,6 +27,7 @@ RUN apt-get update -y \
     apt-get install --no-install-recommends -y \
     wget \
     unzip \
+    git \
     debhelper \
     gnupg \
     devscripts \
