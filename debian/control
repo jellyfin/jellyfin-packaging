@@ -17,7 +17,7 @@ Description: Jellyfin is the Free Software Media System.
 Package: jellyfin-server
 Architecture: any
 Depends: libfontconfig1, adduser
-Recommends: jellyfin-web, sudo, ffmpeg | jellyfin-ffmpeg7
+Recommends: jellyfin-web, sudo, jellyfin-ffmpeg7 | ffmpeg
 Description: Jellyfin is the Free Software Media System.
  This package provides the Jellyfin server backend and API.
 
