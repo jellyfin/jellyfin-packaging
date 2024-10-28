@@ -19,9 +19,10 @@ JELLYFIN_LOG_DIR="/var/log/jellyfin"
 JELLYFIN_CACHE_DIR="/var/cache/jellyfin"
 
 # temporary directory path; used to construct paths for short-lived temporary files
-# the old default was $JELLYFIN_CACHE_DIR/temp; use that to restore previous behaviour
+# the old default was $JELLYFIN_CACHE_DIR/temp; use that to restore previous behaviour,
+# though it will have an additional jellyfin/ subdir appended
 # otherwise, leave this commented
-#TEMPDIR="/tmp"
+#TMPDIR="/tmp"
 
 # web client path, installed by the jellyfin-web package
 JELLYFIN_WEB_OPT="--webdir=/usr/share/jellyfin/web"
