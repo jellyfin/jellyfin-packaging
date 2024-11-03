@@ -32,6 +32,7 @@ RUN apt-get update -y \
     gnupg \
     devscripts \
     build-essential \
+    git \
     mmv \
     lsb-release\
     zip \

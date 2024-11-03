@@ -54,7 +54,8 @@ RUN apk add \
     gcc \
     musl-dev \
     nasm \
-    python3
+    python3 \
+    git
 
 WORKDIR ${SOURCE_DIR}
 COPY jellyfin-web .
