@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   Docker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     continue-on-error: false  # true in prod, false for testing
     steps:
       - name: "Set dated version for unstable builds"
@@ -53,7 +53,7 @@ jobs:
           sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} docker
 
   Debian:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -163,7 +163,7 @@ jobs:
             fi
 
   Ubuntu:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -274,7 +274,7 @@ jobs:
             fi
 
   Linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -343,7 +343,7 @@ jobs:
             fi
 
   Windows:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -409,7 +409,7 @@ jobs:
             fi
 
   MacOS:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -475,7 +475,7 @@ jobs:
             fi
 
   Portable:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     continue-on-error: false  # true in prod, false for testing
     steps:
       - name: "Set dated version for unstable builds"
@@ -535,7 +535,7 @@ jobs:
             fi
 
   Nuget:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: "Set dated version for unstable builds"
         id: version
