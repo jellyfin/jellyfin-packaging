@@ -100,16 +100,19 @@ docker:
       IMAGE_ARCH: amd64
       PACKAGE_ARCH: amd64
       QEMU_ARCH: x86_64
+      TARGET_ARCH: amd64
     arm64:
       DOTNET_ARCH: arm64
       IMAGE_ARCH: arm64v8
       PACKAGE_ARCH: arm64
       QEMU_ARCH: aarch64
+      TARGET_ARCH: arm64/v8
     armhf:
       DOTNET_ARCH: arm
       IMAGE_ARCH: arm32v7
       PACKAGE_ARCH: armhf
       QEMU_ARCH: arm
+      TARGET_ARCH: arm/v7
   dockerfile: docker/Dockerfile
   imagename: jellyfin/jellyfin
 

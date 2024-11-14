@@ -25,8 +25,10 @@ ARG PACKAGE_ARCH
 ARG DOTNET_ARCH
 # QEMU architecture (x86_64, aarch64, arm), set by build script
 ARG QEMU_ARCH
-# Base Image archiecture (amd64, arm64v8, arm32v7), set by build script
+# Base Image architecture (amd64, arm64v8, arm32v7), set by build script
 ARG IMAGE_ARCH
+# Target platform architecture (amd64, arm64/v8, arm/v7), set by build script
+ARG TARGET_ARCH
 
 # Jellyfin version
 ARG JELLYFIN_VERSION
@@ -86,7 +88,7 @@ RUN dotnet publish Jellyfin.Server --configuration Release \
 # Build the final combined image
 #
 FROM multiarch/qemu-user-static:x86_64-${QEMU_ARCH} as qemu
-FROM ${IMAGE_ARCH}/debian:${OS_VERSION}-slim as combined
+FROM --platform=linux/${TARGET_ARCH} ${IMAGE_ARCH}/debian:${OS_VERSION}-slim as combined
 
 ARG OS_VERSION
 ARG FFMPEG_PACKAGE
