@@ -44,7 +44,7 @@ case "$1" in
       sleep 1
       # if it's still running, show error
       if [[ -n "$(ps -p $JELLYFIN_PID -o pid=)" ]]; then
-        echo "Could not successfully stop JellyfinServer, please do so before uninstalling."
+        echo "Could not successfully stop Jellyfin, please do so before installing."
         exit 1
       else
         [[ -f $PIDFILE ]] && rm $PIDFILE
