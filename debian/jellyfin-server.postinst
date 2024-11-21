@@ -65,8 +65,6 @@ esac
 #DEBHELPER
 
 if [[ -x "/usr/bin/deb-systemd-helper" ]]; then
-  # Manual init script handling
-  deb-systemd-helper unmask jellyfin.service >/dev/null || true
   # was-enabled defaults to true, so new installations run enable.
   if deb-systemd-helper --quiet was-enabled jellyfin.service; then
     # Enables the unit on first installation, creates new
@@ -79,15 +77,17 @@ if [[ -x "/usr/bin/deb-systemd-helper" ]]; then
   fi
 fi
 
-# End automatically added section
-# Automatically added by dh_installinit
 if [[ "$1" == "configure" ]] || [[ "$1" == "abort-upgrade" ]]; then
   if [[ -d "/run/systemd/system" ]]; then
     systemctl --system daemon-reload >/dev/null || true
-    deb-systemd-invoke start jellyfin >/dev/null || true
+    if [[ -z ${DISABLE_JELLYFIN_AUTOSTART} ]]; then
+        deb-systemd-invoke start jellyfin >/dev/null || true
+    fi
   elif [[ -x "/etc/init.d/jellyfin" ]] || [[ -e "/etc/init/jellyfin.conf" ]]; then
-    update-rc.d jellyfin defaults >/dev/null
-    invoke-rc.d jellyfin start || exit $?
+    if [[ -z ${DISABLE_JELLYFIN_AUTOSTART} ]]; then
+        update-rc.d jellyfin defaults >/dev/null
+        invoke-rc.d jellyfin start || exit $?
+    fi
   fi
 fi
 exit 0
