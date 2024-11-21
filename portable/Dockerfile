@@ -61,8 +61,7 @@ RUN wget https://deb.nodesource.com/setup_${NODEJS_VERSION}.x -O nodejs-install.
     nodejs
 
 # Clean up dependencies
-RUN apt-get remove wget -y \
- && apt-get clean autoclean -y \
+RUN apt-get clean autoclean -y \
  && apt-get autoremove -y \
  && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
