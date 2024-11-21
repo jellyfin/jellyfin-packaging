@@ -380,7 +380,7 @@ def build_portable(
 
     # Build the dockerfile and packages
     log(
-        f">>>{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+        f">>> {docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
     )
     os.system(
         f"{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
