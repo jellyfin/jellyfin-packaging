@@ -28,6 +28,7 @@ case ${BUILD_TYPE} in
         APPHOST="-p:UseAppHost=true"
     ;;
 esac
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
 dotnet publish Jellyfin.Server --configuration Release ${RUNTIME} --output ${BUILD_DIR}/jellyfin/ -p:DebugSymbols=false -p:DebugType=none ${APPHOST}
 popd
 
