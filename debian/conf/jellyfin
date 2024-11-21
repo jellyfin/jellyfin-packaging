@@ -47,6 +47,9 @@ JELLYFIN_ADDITIONAL_OPTS=""
 # 1 = Server
 #COMPlus_gcServer=1
 
+# Uncomment this option to stop Jellyfin from auto-starting during package installation; for systemd, `mask` is preferred.
+#DISABLE_JELLYFIN_AUTOSTART="yes"
+
 #
 # SysV init/Upstart options
 #
