@@ -11,6 +11,7 @@ from email.utils import format_datetime, localtime
 from git import Repo
 from os import getenv
 import os.path
+from packaging.version import Version
 from subprocess import run, PIPE
 import sys
 from yaml import load, SafeLoader
@@ -62,7 +63,9 @@ def _determine_framework_versions():
         if submodule.name in configurations["frameworks"].keys():
             for framework_arg in configurations["frameworks"][submodule.name].keys():
                 framework_args[framework_arg] = None
-                for commit_hash in configurations["frameworks"][submodule.name][framework_arg].keys():
+                def sort_versions(input_dict):
+                    return dict(sorted(input_dict.items(), key=lambda item: Version(str(item[1]))))
+                for commit_hash in sort_versions(configurations["frameworks"][submodule.name][framework_arg]):
                     try:
                         commit = submodule.module().commit(commit_hash)
                         if commit in submodule.module().iter_commits('HEAD'):
