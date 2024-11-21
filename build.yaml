@@ -1,6 +1,26 @@
 ---
 # Build definitions for `build.py`
 
+# Upstream Framework versions
+# This section defines target commits after which a particular framework is required.
+# This is used by build.py to automatically determine which framework version to use
+# within the build containers based on whatever HEAD the project is at (from checkout.py).
+# Target commits should be a merge commit!
+# Target commits should be in order from oldest to newest!
+# HOW THIS WORKS:
+#   For each submodule, and then for each upsteam framework version ARG to Docker...
+#   Provide a commit hash as a key, and a version as a value...
+#   If the given commit is in the commit tree of the current HEAD of the repo...
+#   Use the given version. Otherwise use the default.
+frameworks:
+  jellyfin-web:
+    NODEJS_VERSION:
+      6c0a64ef12b9eb40a7c4ee4b9d43d0a5f32f2287: 20  # Default
+  jellyfin-server:
+    DOTNET_VERSION:
+      6d1abf67c36379f0b061095619147a3691841e21: 8.0  # Default
+      ceb850c77052c465af8422dcf152f1d1d1530457: 9.0
+
 # DEB packages
 debian:
   releases:

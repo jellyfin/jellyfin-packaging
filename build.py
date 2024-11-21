@@ -8,6 +8,7 @@
 from argparse import ArgumentParser
 from datetime import datetime
 from email.utils import format_datetime, localtime
+from git import Repo
 from os import getenv
 import os.path
 from subprocess import run, PIPE
@@ -49,6 +50,32 @@ def _determine_arch(build_type, build_arch, build_version):
         )
     else:
         return PACKAGE_ARCH
+
+def _determine_framework_versions():
+    # Prepare repo object for this repository
+    this_repo = Repo(repo_root_dir)
+
+    framework_args = dict()
+
+    submodules = dict()
+    for submodule in this_repo.submodules:
+        if submodule.name in configurations["frameworks"].keys():
+            for framework_arg in configurations["frameworks"][submodule.name].keys():
+                framework_args[framework_arg] = None
+                for commit_hash in configurations["frameworks"][submodule.name][framework_arg].keys():
+                    try:
+                        commit = submodule.module().commit(commit_hash)
+                        if commit in submodule.module().iter_commits('HEAD'):
+                            framework_args[framework_arg] = configurations["frameworks"][submodule.name][framework_arg][commit_hash]
+                    except ValueError:
+                        continue
+
+    log(f"Determined the following framework versions based on current HEAD values:")
+    for k, v in framework_args.items():
+        log(f"  * {k}: {v}")
+    log("")
+
+    return framework_args
 
 
 def build_package_deb(
@@ -112,9 +139,33 @@ def build_package_deb(
     # Use a unique docker image name for consistency
     imagename = f"{configurations[build_type]['imagename']}-{jellyfin_version}_{build_arch}-{build_type}-{build_version}"
 
+    # Prepare the list of build-args
+    build_args = list()
+    build_args.append(f"--build-arg PACKAGE_TYPE={os_type}")
+    build_args.append(f"--build-arg PACKAGE_VERSION={os_version}")
+    build_args.append(f"--build-arg PACKAGE_ARCH={PACKAGE_ARCH}")
+    build_args.append(f"--build-arg GCC_VERSION={crossgccvers}")
+
+    # Determine framework versions
+    framework_versions = _determine_framework_versions()
+    for arg in framework_versions.keys():
+        if framework_versions[arg] is not None:
+            build_args.append(
+                f"--build-arg {arg}={framework_versions[arg]}"
+            )
+
+    build_args = ' '.join(build_args)
+
     # Build the dockerfile and packages
+    log(
+        f">>> {docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
     os.system(
-        f"{docker_build_cmd} --build-arg PACKAGE_TYPE={os_type} --build-arg PACKAGE_VERSION={os_version} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg GCC_VERSION={crossgccvers} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+        f"{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
+
+    log(
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --name {imagename} {imagename}"
     )
     os.system(
         f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --name {imagename} {imagename}"
@@ -148,9 +199,29 @@ def build_linux(
     # Set the archive type (tar-gz or zip)
     archivetypes = f"{configurations[build_type]['archivetypes']}"
 
+    # Prepare the list of build-args
+    build_args = list()
+
+    # Determine framework versions
+    framework_versions = _determine_framework_versions()
+    for arg in framework_versions.keys():
+        if framework_versions[arg] is not None:
+            build_args.append(
+                f"--build-arg {arg}={framework_versions[arg]}"
+            )
+
+    build_args = ' '.join(build_args)
+
     # Build the dockerfile and packages
+    log(
+        f">>> {docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
     os.system(
-        f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+        f"{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
+
+    log(
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=linux --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
     )
     os.system(
         f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=linux --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
@@ -184,9 +255,29 @@ def build_windows(
     # Set the archive type (tar-gz or zip)
     archivetypes = f"{configurations[build_type]['archivetypes']}"
 
+    # Prepare the list of build-args
+    build_args = list()
+
+    # Determine framework versions
+    framework_versions = _determine_framework_versions()
+    for arg in framework_versions.keys():
+        if framework_versions[arg] is not None:
+            build_args.append(
+                f"--build-arg {arg}={framework_versions[arg]}"
+            )
+
+    build_args = ' '.join(build_args)
+
     # Build the dockerfile and packages
+    log(
+        f">>> {docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
     os.system(
-        f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+        f"{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
+
+    log(
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=win --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
     )
     os.system(
         f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=win --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
@@ -220,9 +311,29 @@ def build_macos(
     # Set the archive type (tar-gz or zip)
     archivetypes = f"{configurations[build_type]['archivetypes']}"
 
+    # Prepare the list of build-args
+    build_args = list()
+
+    # Determine framework versions
+    framework_versions = _determine_framework_versions()
+    for arg in framework_versions.keys():
+        if framework_versions[arg] is not None:
+            build_args.append(
+                f"--build-arg {arg}={framework_versions[arg]}"
+            )
+
+    build_args = ' '.join(build_args)
+
     # Build the dockerfile and packages
+    log(
+        f">>> {docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
     os.system(
-        f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+        f"{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
+
+    log(
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=osx --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
     )
     os.system(
         f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=osx --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
@@ -251,9 +362,29 @@ def build_portable(
     # Set the archive type (tar-gz or zip)
     archivetypes = f"{configurations[build_type]['archivetypes']}"
 
+    # Prepare the list of build-args
+    build_args = list()
+
+    # Determine framework versions
+    framework_versions = _determine_framework_versions()
+    for arg in framework_versions.keys():
+        if framework_versions[arg] is not None:
+            build_args.append(
+                f"--build-arg {arg}={framework_versions[arg]}"
+            )
+
+    build_args = ' '.join(build_args)
+
     # Build the dockerfile and packages
+    log(
+        f">>>{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
     os.system(
-        f"{docker_build_cmd} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+        f"{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+    )
+
+    log(
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
     )
     os.system(
         f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
@@ -326,12 +457,31 @@ def build_docker(
         )
         log("")
 
+        # Prepare the list of build-args
+        build_args = list()
+        build_args.append(f"--build-arg PACKAGE_ARCH={PACKAGE_ARCH}")
+        build_args.append(f"--build-arg DOTNET_ARCH={DOTNET_ARCH}")
+        build_args.append(f"--build-arg QEMU_ARCH={QEMU_ARCH}")
+        build_args.append(f"--build-arg IMAGE_ARCH={IMAGE_ARCH}")
+        build_args.append(f"--build-arg TARGET_ARCH={TARGET_ARCH}")
+        build_args.append(f"--build-arg JELLYFIN_VERSION={jellyfin_version}")
+
+        # Determine framework versions
+        framework_versions = _determine_framework_versions()
+        for arg in framework_versions.keys():
+            if framework_versions[arg] is not None:
+                build_args.append(
+                    f"--build-arg {arg}={framework_versions[arg]}"
+                )
+
+        build_args = ' '.join(build_args)
+
         # Build the dockerfile
         log(
-            f">>> {docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --build-arg TARGET_ARCH={TARGET_ARCH} --build-arg JELLYFIN_VERSION={jellyfin_version} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+            f">>> {docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
         )
         ret = os.system(
-            f"{docker_build_cmd} --build-arg PACKAGE_ARCH={PACKAGE_ARCH} --build-arg DOTNET_ARCH={DOTNET_ARCH} --build-arg QEMU_ARCH={QEMU_ARCH} --build-arg IMAGE_ARCH={IMAGE_ARCH} --build-arg TARGET_ARCH={TARGET_ARCH} --build-arg JELLYFIN_VERSION={jellyfin_version} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
+            f"{docker_build_cmd} {build_args} --file {repo_root_dir}/{dockerfile} --tag {imagename} {repo_root_dir}"
         )
         if ret > 0:
             exit(1)
