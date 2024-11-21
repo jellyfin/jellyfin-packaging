@@ -31,7 +31,6 @@ case "$1" in
 
     if [[ -x "/usr/bin/deb-systemd-helper" ]]; then
       deb-systemd-helper purge jellyfin.service >/dev/null
-      deb-systemd-helper unmask jellyfin.service >/dev/null
     fi
 
     # Remove user and group
@@ -63,12 +62,7 @@ case "$1" in
     [[ -e /var/cache/jellyfin ]] && rm -rf /var/cache/jellyfin || true
     [[ -e /var/lib/jellyfin ]] && rm -rf /var/lib/jellyfin || true
     ;;
-  remove)
-    if [[ -x "/usr/bin/deb-systemd-helper" ]]; then
-      deb-systemd-helper mask jellyfin.service >/dev/null
-    fi
-    ;;
-  upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+  remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
     ;;
   *)
     echo "postrm called with unknown argument \`$1'" >&2
