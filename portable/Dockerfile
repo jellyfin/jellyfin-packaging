@@ -44,7 +44,8 @@ RUN apt-get update -y \
     libfreetype*-dev \
  && apt-get clean autoclean -y \
  && apt-get autoremove -y \
- && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/* \
+ && git config --global --add safe.directory /jellyfin/jellyfin-web
 
 # Prepare dotnet SDK
 RUN wget https://packages.microsoft.com/config/${PACKAGE_TYPE}/${PACKAGE_VERSION}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \

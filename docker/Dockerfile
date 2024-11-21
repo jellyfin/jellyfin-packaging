@@ -57,7 +57,8 @@ RUN apk add \
     musl-dev \
     nasm \
     python3 \
-    git
+    git \
+ && git config --global --add safe.directory /jellyfin/jellyfin-web
 
 WORKDIR ${SOURCE_DIR}
 COPY jellyfin-web .

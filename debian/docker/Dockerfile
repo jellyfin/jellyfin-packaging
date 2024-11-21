@@ -47,7 +47,8 @@ RUN apt-get update -y \
     libssl-dev \
  && apt-get clean autoclean -y \
  && apt-get autoremove -y \
- && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
+ && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/* \
+ && git config --global --add safe.directory /jellyfin/jellyfin-web
 
 # Prepare the cross-toolchain
 RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
