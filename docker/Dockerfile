@@ -9,10 +9,14 @@ ARG OS_VERSION=bookworm
 ARG FFMPEG_PACKAGE=jellyfin-ffmpeg7
 
 # https://github.com/intel/compute-runtime/releases
-ARG GMMLIB_VERSION=22.4.1
-ARG IGC_VERSION=1.0.17384.11
-ARG NEO_VERSION=24.31.30508.7
-ARG LEVEL_ZERO_VERSION=1.3.30508.7
+ARG GMMLIB_VER=22.5.4
+# >= Gen12 graphics (current)
+ARG IGC2_VER=2.2.3
+ARG IGC2_BUILD=18220
+ARG NEO_VER=24.48.31907.7
+# <= Gen11 graphics (legacy)
+ARG IGC1_LEGACY_VER=1.0.17537.20
+ARG NEO_LEGACY_VER=24.35.30872.22
 
 # https://github.com/tsukumijima/libmali-rockchip
 ARG MALI_PKG_VER=1.9-1_arm64
@@ -94,10 +98,12 @@ FROM --platform=linux/${TARGET_ARCH} ${IMAGE_ARCH}/debian:${OS_VERSION}-slim as 
 ARG OS_VERSION
 ARG FFMPEG_PACKAGE
 
-ARG GMMLIB_VERSION
-ARG IGC_VERSION
-ARG NEO_VERSION
-ARG LEVEL_ZERO_VERSION
+ARG GMMLIB_VER
+ARG IGC2_VER
+ARG IGC2_BUILD
+ARG NEO_VER
+ARG IGC1_LEGACY_VER
+ARG NEO_LEGACY_VER
 
 ARG MALI_PKG_VER
 ARG MALI_PKG_TAG
@@ -158,18 +164,17 @@ RUN apt-get update \
  && apt-get autoremove --yes \
  && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
 
-# Intel VAAPI Tone mapping dependencies:
-# Prefer NEO to Beignet since the latter one doesn't support Comet Lake or newer for now.
-# Do not use the intel-opencl-icd package from repo since they will not build with RELEASE_WITH_REGKEYS enabled.
-# https://github.com/intel/compute-runtime/releases
+# Intel OpenCL Tone mapping dependencies:
 RUN if test "${PACKAGE_ARCH}" = "amd64"; then \
     mkdir intel-compute-runtime \
  && cd intel-compute-runtime \
- && curl -LO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${IGC_VERSION}/intel-igc-core_${IGC_VERSION}_amd64.deb \
-         -LO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${IGC_VERSION}/intel-igc-opencl_${IGC_VERSION}_amd64.deb \
-         -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/intel-opencl-icd_${NEO_VERSION}_amd64.deb \
-         -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/intel-level-zero-gpu_${LEVEL_ZERO_VERSION}_amd64.deb \
-         -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VERSION}/libigdgmm12_${GMMLIB_VERSION}_amd64.deb \
+ && curl -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VER}/libigdgmm12_${GMMLIB_VER}_amd64.deb \
+         -LO https://github.com/intel/intel-graphics-compiler/releases/download/v${IGC2_VER}/intel-igc-core-2_${IGC2_VER}+${IGC2_BUILD}_amd64.deb \
+         -LO https://github.com/intel/intel-graphics-compiler/releases/download/v${IGC2_VER}/intel-igc-opencl-2_${IGC2_VER}+${IGC2_BUILD}_amd64.deb \
+         -LO https://github.com/intel/compute-runtime/releases/download/${NEO_VER}/intel-opencl-icd_${NEO_VER}_amd64.deb \
+         -LO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${IGC1_LEGACY_VER}/intel-igc-core_${IGC1_LEGACY_VER}_amd64.deb \
+         -LO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${IGC1_LEGACY_VER}/intel-igc-opencl_${IGC1_LEGACY_VER}_amd64.deb \
+         -LO https://github.com/intel/compute-runtime/releases/download/${NEO_LEGACY_VER}/intel-opencl-icd-legacy1_${NEO_LEGACY_VER}_amd64.deb \
  && apt-get install --no-install-recommends --no-install-suggests -f -y ./*.deb \
  && cd .. \
  && rm -rf intel-compute-runtime \
