@@ -23,7 +23,7 @@ jobs:
       matrix:
         arch:
           - amd64
-          - arm64
+#          - arm64
     continue-on-error: false  # true in prod, false for testing
     steps:
       - name: "Set dated version for unstable builds"
