@@ -453,10 +453,9 @@ jobs:
 
       - name: "Clone UX repository"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        working-directory: ./jellyfin-server-windows
         with:
           repository: jellyfin/jellyfin-ux
-          path: .\jellyfin-ux
+          path: .\jellyfin-server-windows\jellyfin-ux
 
       - name: "Extract Jellyfin server archive"
         working-directory: ./jellyfin-server-windows
