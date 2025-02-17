@@ -432,11 +432,12 @@ jobs:
           $version = "${{ inputs.version || 'master' }}"
           
           if ($version -match "^v[0-9]+") {
-              echo "JELLYFIN_VERSION=$version.Substring(1)" | Out-File -FilePath $env:GITHUB_ENV -Append
+              $cleanVersion = $version.Substring(1)  # Remove the leading 'v'
           } else {
-              $dateVersion = Get-Date -Format "yyyyMMddHH"
-              echo "JELLYFIN_VERSION=$dateVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
+              $cleanVersion = Get-Date -Format "yyyyMMddHH"  # Fallback to timestamp
           }
+
+          echo "JELLYFIN_VERSION=$cleanVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: "Fetch artifact from previous stage"
         uses: actions/download-artifact@v4
