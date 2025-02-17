@@ -47,6 +47,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
+          python -m pip install --upgrade git
           ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for ${{ matrix.arch }}"
