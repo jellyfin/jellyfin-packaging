@@ -489,7 +489,7 @@ jobs:
           name: windows-installer-x64
           retention-days: 1
           if-no-files-found: error
-          path: jellyfin-server-windows\jellyfin_*_windows-x64.exe
+          path: jellyfin-server-windows\nsis\jellyfin_*_windows-x64.exe
 
   WindowsInstallerUpload:
     needs: WindowsInstaller
