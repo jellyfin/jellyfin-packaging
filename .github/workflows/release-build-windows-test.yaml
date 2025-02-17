@@ -219,8 +219,7 @@ jobs:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
-          source: "*.exe"
-          strip_components: 1
+          source: "jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe"
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
@@ -233,4 +232,4 @@ jobs:
           script_stop: true
           script: |
             export BASEDIR="/srv/repository/main/server/windows"
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/jellyfin_*.exe || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe || exit 1
