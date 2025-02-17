@@ -421,6 +421,9 @@ jobs:
     runs-on: windows-latest
     strategy:
       fail-fast: false
+      matrix:
+        arch:
+          - amd64
     continue-on-error: false  # true in prod, false for testing
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
