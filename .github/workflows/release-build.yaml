@@ -478,9 +478,8 @@ jobs:
           makensis /Dx64 /DUXPATH=$(Resolve-Path .\jellyfin-ux) $(Join-Path -Path $(Resolve-Path .\nsis) -ChildPath jellyfin.nsi)
 
       - name: "Rename installer"
-        working-directory: ./jellyfin-server-windows
+        working-directory: ./jellyfin-server-windows/nsis
         run: |
-          cd .\nsis
           Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe")
         
       - name: "Store artifact for next stage"
