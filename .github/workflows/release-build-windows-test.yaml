@@ -184,7 +184,7 @@ jobs:
           name: windows-installer-artifacts
           retention-days: 1
           if-no-files-found: error
-          path: jellyfin-server-windows\nsis\jellyfin_*_windows-x64.exe
+          path: ./jellyfin-server-windows/nsis/jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe
 
   WindowsInstallerUpload:
     needs:
@@ -209,13 +209,17 @@ jobs:
         with:
           name: windows-installer-artifacts
 
+      - name: "Check for contents"
+        run: |
+          ls -alh .
+
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
-          source: "jellyfin_*_windows-x64.exe"
+          source: "*.exe"
           strip_components: 1
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
 
