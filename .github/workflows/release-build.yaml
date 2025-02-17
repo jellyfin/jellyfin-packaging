@@ -350,6 +350,9 @@ jobs:
         arch:
           - amd64
           - arm64
+    outputs:
+      JELLYFIN_VERSION: ${{ steps.version.outputs.JELLYFIN_VERSION }}
+      JELLYFIN_RELEASE_TYPE: ${{ steps.version.outputs.JELLYFIN_RELEASE_TYPE }}
     continue-on-error: false  # true in prod, false for testing
     steps:
       - name: "Set dated version for unstable builds"
@@ -357,10 +360,14 @@ jobs:
         run: |-
           if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
             echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_OUTPUT
             echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_OUTPUT
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_OUTPUT
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_OUTPUT
           fi
 
       - name: "Install dependencies"
@@ -408,16 +415,17 @@ jobs:
                 sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
             fi
 
-      - name: "Store artifact for next stage"
+      - name: "Store artifacts for next stage"
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
-          name: windows-x64
+          name: windows-artifacts
           retention-days: 1
           if-no-files-found: ignore  # Ignore for arm64 build, as no file will be found
           path: out/windows/jellyfin_*-amd64.zip
 
   WindowsInstaller:
-    needs: Windows
+    needs:
+      - Windows
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -432,12 +440,12 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $version = "${{ inputs.version || 'master' }}"
+          $version = "${{ needs.Windows.outputs.JELLYFIN_VERSION }}"
           
           if ($version -match "^v[0-9]+") {
-              $cleanVersion = $version.Substring(1)  # Remove the leading 'v'
+              $cleanVersion = $version.Substring(1)
           } else {
-              $cleanVersion = Get-Date -Format "yyyyMMddHH"  # Fallback to timestamp
+              $cleanVersion = $version
           }
 
           echo "JELLYFIN_VERSION=$cleanVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -445,14 +453,18 @@ jobs:
       - name: "Checkout repository"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: "Install dependencies"
+        run: |-
+          python -m pip install --upgrade gitpython
+
       - name: "Prepare repository"
         run: |-
           python checkout.py ${{ inputs.version || 'master' }}
 
-      - name: "Fetch artifact from previous stage"
+      - name: "Fetch artifacts from previous stage"
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
-          name: windows-x64
+          name: windows-artifacts
           path: ./jellyfin-server-windows
 
       - name: "Clone UX repository"
@@ -464,8 +476,9 @@ jobs:
       - name: "Extract Jellyfin server archive"
         working-directory: ./jellyfin-server-windows
         run: |
-          Expand-Archive 'jellyfin_*-amd64.zip'
-          Copy-Item ".\nssm\nssm.exe" -Destination $(Resolve-Path .\jellyfin\jellyfin)
+          New-Item -ItemType Directory -Path jellyfin
+          Expand-Archive -Path 'jellyfin_*-amd64.zip' -DestinationPath jellyfin -Force
+          Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin)
 
       - name: "Add NSSM"
         working-directory: ./jellyfin-server-windows
@@ -491,16 +504,18 @@ jobs:
         run: |
           Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe")
         
-      - name: "Store artifact for next stage"
+      - name: "Store artifacts for next stage"
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
-          name: windows-installer-x64
+          name: windows-installer-artifacts
           retention-days: 1
           if-no-files-found: error
-          path: jellyfin-server-windows\nsis\jellyfin_*_windows-x64.exe
+          path: ./jellyfin-server-windows/nsis/jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe
 
   WindowsInstallerUpload:
-    needs: WindowsInstaller
+    needs:
+      - Windows
+      - WindowsInstaller
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -509,21 +524,16 @@ jobs:
           - amd64
     continue-on-error: false  # true in prod, false for testing
     steps:
-      - name: "Set dated version for unstable builds"
+      - name: "Set version from previous job"
         id: version
         run: |-
-          if grep --silent --extended-regexp '^v[0-9]+' <<< "${{ inputs.version || 'master' }}"; then
-            echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-            echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
-          else
-            echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
-            echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
-          fi
+          echo "JELLYFIN_VERSION=${{ needs.Windows.outputs.JELLYFIN_VERSION }}" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=${{ needs.Windows.outputs.JELLYFIN_RELEASE_TYPE }}" >> $GITHUB_ENV
 
       - name: "Fetch artifact from previous stage"
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
-          name: windows-installer-x64
+          name: windows-installer-artifacts
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -531,8 +541,7 @@ jobs:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
-          source: "jellyfin_*_windows-x64.exe"
-          strip_components: 1
+          source: "jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe"
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
@@ -545,7 +554,7 @@ jobs:
           script_stop: true
           script: |
             export BASEDIR="/srv/repository/main/server/windows"
-            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/jellyfin_*.exe || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe || exit 1
 
   MacOS:
     runs-on: ubuntu-24.04
