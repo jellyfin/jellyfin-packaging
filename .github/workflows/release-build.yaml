@@ -453,6 +453,7 @@ jobs:
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: windows-x64
+          path: ./jellyfin-server-windows
 
       - name: "Clone UX repository"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -463,7 +464,6 @@ jobs:
       - name: "Extract Jellyfin server archive"
         working-directory: ./jellyfin-server-windows
         run: |
-          Move-Item -Path $(Resolve-Path ..\jellyfin_*-amd64.zip) -Destination $(Resolve-Path .\)
           Expand-Archive 'jellyfin_*-amd64.zip'
           Copy-Item ".\nssm\nssm.exe" -Destination $(Resolve-Path .\jellyfin\jellyfin)
 
