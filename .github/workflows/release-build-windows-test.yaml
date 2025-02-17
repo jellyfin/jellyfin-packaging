@@ -53,34 +53,34 @@ jobs:
         run: |-
           sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }}
 
-#      - name: "Upload artifacts to repository server"
-#        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          source: "out/windows/*"
-#          strip_components: 2
-#          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
-#
-#      - name: "Move artifacts into repository"
-#        uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
-#        with:
-#          host: "${{ secrets.REPO_HOST }}"
-#          username: "${{ secrets.REPO_USER }}"
-#          key: "${{ secrets.REPO_KEY }}"
-#          debug: false
-#          script_stop: true
-#          script: |
-#            export BASEDIR="/srv/repository/main/server/windows"
-#            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
-#            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
-#            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
-#            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-#            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
-#                sudo rm ${BASEDIR}/latest || true
-#                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
-#            fi
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "out/windows/*"
+          strip_components: 2
+          target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            export BASEDIR="/srv/repository/main/server/windows"
+            sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
+            sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
+            sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
+            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
 
       - name: "Store artifact for next stage"
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
@@ -119,9 +119,12 @@ jobs:
       - name: "Checkout repository"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: "Prepare repository"
+      - name: "Install dependencies"
         run: |-
           python -m pip install --upgrade gitpython
+
+      - name: "Prepare repository"
+        run: |-
           python checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Fetch artifact from previous stage"
