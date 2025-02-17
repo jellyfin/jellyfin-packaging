@@ -82,10 +82,10 @@ jobs:
                 sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
             fi
 
-      - name: "Store artifact for next stage"
+      - name: "Store artifacts for next stage"
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
-          name: windows-x64
+          name: windows-artifacts
           retention-days: 1
           if-no-files-found: ignore  # Ignore for arm64 build, as no file will be found
           path: out/windows/jellyfin_*-amd64.zip
@@ -127,10 +127,10 @@ jobs:
         run: |-
           python checkout.py ${{ inputs.version || 'master' }}
 
-      - name: "Fetch artifact from previous stage"
+      - name: "Fetch artifacts from previous stage"
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
-          name: windows-x64
+          name: windows-artifacts
           path: ./jellyfin-server-windows
 
       - name: "Clone UX repository"
@@ -142,8 +142,8 @@ jobs:
       - name: "Extract Jellyfin server archive"
         working-directory: ./jellyfin-server-windows
         run: |
-          Expand-Archive 'windows-x64.zip'
-          Copy-Item ".\nssm\nssm.exe" -Destination $(Resolve-Path .\jellyfin\jellyfin)
+          Expand-Archive 'jellyfin_*-amd64.zip'
+          Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin)
 
       - name: "Add NSSM"
         working-directory: ./jellyfin-server-windows
@@ -169,10 +169,10 @@ jobs:
         run: |
           Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe")
         
-      - name: "Store artifact for next stage"
+      - name: "Store artifacts for next stage"
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
-          name: windows-installer-x64
+          name: windows-installer-artifacts
           retention-days: 1
           if-no-files-found: error
           path: jellyfin-server-windows\nsis\jellyfin_*_windows-x64.exe
@@ -201,7 +201,7 @@ jobs:
       - name: "Fetch artifact from previous stage"
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
-          name: windows-installer-x64
+          name: windows-installer-artifacts
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
