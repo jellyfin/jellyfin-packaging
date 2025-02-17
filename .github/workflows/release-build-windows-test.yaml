@@ -47,7 +47,6 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          python -m pip install --upgrade git
           ./checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Run builder for ${{ matrix.arch }}"
@@ -122,6 +121,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
+          python -m pip install --upgrade gitpython
           python checkout.py ${{ inputs.version || 'master' }}
 
       - name: "Fetch artifact from previous stage"
