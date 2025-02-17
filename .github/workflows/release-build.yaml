@@ -413,7 +413,7 @@ jobs:
         with:
           name: windows-x64
           retention-days: 1
-          if-no-files-found: error
+          if-no-files-found: ignore  # Ignore for arm64 build, as no file will be found
           path: out/windows/jellyfin_*-amd64.zip
 
   WindowsInstaller:
