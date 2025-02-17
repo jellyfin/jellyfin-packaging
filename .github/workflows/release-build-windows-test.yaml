@@ -142,7 +142,7 @@ jobs:
       - name: "Extract Jellyfin server archive"
         working-directory: ./jellyfin-server-windows
         run: |
-          Expand-Archive 'jellyfin_*-amd64.zip'
+          Expand-Archive 'windows-x64.zip'
           Copy-Item ".\nssm\nssm.exe" -Destination $(Resolve-Path .\jellyfin\jellyfin)
 
       - name: "Add NSSM"
