@@ -408,6 +408,93 @@ jobs:
                 sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
             fi
 
+      - name: "Store artifact for next build"
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          retention-days: 1
+          if-no-files-found: error
+          path: out/windows/jellyfin_*-amd64.zip
+
+  WindowsInstaller:
+    needs: Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - amd64
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    if: startsWith(inputs.jellyfin_version, 'v')
+    steps:
+      - name: "Fetch artifact from previous build"
+        uses: actions/download-artifact@v4
+        working-directory: ./jellyfin-server-windows
+        with:
+          name: windows-x64
+
+      - name: "Clone UX repository"
+        uses: actions/checkout@v4
+        working-directory: ./jellyfin-server-windows
+        with:
+          repository: jellyfin/jellyfin-ux
+          path: .\jellyfin-ux
+
+      - name: "Extract Jellyfin server archive"
+        working-directory: ./jellyfin-server-windows
+        run: |
+          Expand-Archive 'jellyfin_*-amd64.zip'
+          Copy-Item ".\nssm\nssm.exe" -Destination $(Resolve-Path .\jellyfin\jellyfin)
+
+      - name: "Add NSSM"
+        working-directory: ./jellyfin-server-windows
+        run: |
+          Invoke-WebRequest 'https://repo.jellyfin.org/files/other/nssm.zip' -OutFile 'nssm.zip'
+          Expand-Archive 'nssm.zip'
+          Copy-Item ".\nssm\nssm.exe" -Destination $(Resolve-Path .\jellyfin\jellyfin)
+        
+      - name: "Publish tray"
+        working-directory: ./jellyfin-server-windows
+        run: |
+          New-Item -Path .\jellyfin\jellyfin\jellyfin-windows-tray -ItemType Directory
+          dotnet publish -c Release -r win-x64 -f net472 --no-self-contained --output $(Resolve-Path .\jellyfin\jellyfin\jellyfin-windows-tray)
+
+      - name: "Build installer"
+        working-directory: ./jellyfin-server-windows
+        run: |
+          $env:InstallLocation = $(Resolve-Path .\jellyfin\jellyfin)
+          makensis /Dx64 /DUXPATH=$(Resolve-Path .\jellyfin-ux) $(Join-Path -Path $(Resolve-Path .\nsis) -ChildPath jellyfin.nsi)
+
+      - name: "Rename installer"
+        working-directory: ./jellyfin-server-windows
+        run: |
+          cd .\nsis
+          $version = "${{ inputs.jellyfin_version }}".Substring(1)
+          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${version}_windows-x64.exe")
+        
+      - name: "Upload artifacts to repository server"
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          source: "jellyfin-server-windows\jellyfin_*_windows-x64.exe"
+          strip_components: 1
+          target: "/srv/incoming/server/${{ inputs.jellyfin_version }}/windows/${{ matrix.arch }}"
+
+      - name: "Move artifacts into repository"
+        uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
+        with:
+          host: "${{ secrets.REPO_HOST }}"
+          username: "${{ secrets.REPO_USER }}"
+          key: "${{ secrets.REPO_KEY }}"
+          debug: false
+          script_stop: true
+          script: |
+            export BASEDIR="/srv/repository/main/server/windows"
+            sudo mv -t ${BASEDIR}/stable/${{ inputs.jellyfin_version }}/${{ matrix.arch }}/ /srv/incoming/server/${{ inputs.jellyfin_version }}/windows/${{ matrix.arch }}/jellyfin_*_windows-x64.exe || exit 1
+
   MacOS:
     runs-on: ubuntu-24.04
     strategy:
