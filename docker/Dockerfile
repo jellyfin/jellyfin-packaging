@@ -85,9 +85,9 @@ WORKDIR ${SOURCE_DIR}
 COPY jellyfin-server .
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-RUN dotnet publish Jellyfin.Server --configuration Release \
+RUN dotnet publish Jellyfin.Server --arch ${DOTNET_ARCH} \
     --output="${ARTIFACT_DIR}" --self-contained \
-    --runtime linux-${DOTNET_ARCH} -p:DebugSymbols=false -p:DebugType=none
+    -p:DebugSymbols=false -p:DebugType=none
 
 #
 # Build the final combined image
