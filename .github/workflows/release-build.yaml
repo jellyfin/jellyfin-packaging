@@ -153,7 +153,9 @@ jobs:
                     OBSOLETE=( sed "1,${NKEEP}d" <<<"${LIST}" )
                     for VERSION in ${OBSOLETE[@]}; do
                         for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
-                            sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${VERSION}
+                            for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${VERSION}" | sort | uniq ); do
+                                sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
+                            done
                         done
                     done
                 fi
@@ -168,7 +170,9 @@ jobs:
                     LAST_POINT_VERSION=$(( NEW_POINT_VERSION - 1 ))
                     LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_POINT_VERSION}"
                     for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
-                        sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${LAST_VERSION}
+                        for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${LAST_VERSION}" | sort | uniq ); do
+                            sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
+                        done
                     done
                 fi
             fi
@@ -294,7 +298,9 @@ jobs:
                     OBSOLETE=( sed "1,${NKEEP}d" <<<"${LIST}" )
                     for VERSION in ${OBSOLETE[@]}; do
                         for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
-                            sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${VERSION}
+                            for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${VERSION}" | sort | uniq ); do
+                                sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
+                            done
                         done
                     done
                 fi
@@ -309,7 +315,9 @@ jobs:
                     LAST_POINT_VERSION=$(( NEW_POINT_VERSION - 1 ))
                     LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_POINT_VERSION}"
                     for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
-                        sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${LAST_VERSION}
+                        for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${LAST_VERSION}" | sort | uniq ); do
+                            sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
+                        done
                     done
                 fi
             fi
