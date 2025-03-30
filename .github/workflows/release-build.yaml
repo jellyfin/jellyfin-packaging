@@ -142,6 +142,36 @@ jobs:
                 # Only include the source DSC for amd64; the other architectures are the same and conflict
                 sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
             fi
+            # Only keep ${NKEEP} (4) unstables; we have to do this manually since reprepro doesn't have granularity for this at the component level
+            if [[ ${COMPONENT} == "unstable" ]]; then
+                NKEEP=4
+                # Get whatever the oldest version is; since these are dated, a simple numerical sort works
+                LIST="$( sudo reprepro -b /srv/debian -C unstable list ${{ matrix.release }} | awk '{ print $NF }' | sort -rn | uniq )"
+                COUNT=$( wc -l <<<"${LIST}" )
+                if [[ ${COUNT} -gt ${NKEEP} ]]; then
+                    # Get anything that isn't in the latest ${NKEEP} entries
+                    OBSOLETE=( sed "1,${NKEEP}d" <<<"${LIST}" )
+                    for VERSION in ${OBSOLETE[@]}; do
+                        for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
+                            sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${VERSION}
+                        done
+                    done
+                fi
+            fi
+            # Only keep the latest point release for a given stable version; i.e. 10.10.14 obsoletes 10.10.13 and removes it, while leaving 10.9.10
+            if [[ ${COMPONENT} == "stable" ]]; then
+                NEW_VERSION=${{ matrix.release }}
+                NEW_MAJOR_VERSION="${NEW_VERSION#v}"
+                NEW_MAJOR_VERSION="${NEW_MAJOR_VERSION%.*}"
+                NEW_POINT_VERSION="${NEW_VERSION##*.}"
+                if [[ ${NEW_POINT_VERSION} -gt 0 ]]; then
+                    LAST_POINT_VERSION=$(( NEW_POINT_VERSION - 1 ))
+                    LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_POINT_VERSION}"
+                    for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
+                        sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${LAST_VERSION}
+                    done
+                fi
+            fi
 
       - name: "Move artifacts into repository"
         uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
@@ -252,6 +282,36 @@ jobs:
                 sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*_all.deb || exit 1
                 # Only include the source DSC for amd64; the other architectures are the same and conflict
                 sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
+            fi
+            # Only keep ${NKEEP} (4) unstables; we have to do this manually since reprepro doesn't have granularity for this at the component level
+            if [[ ${COMPONENT} == "unstable" ]]; then
+                NKEEP=4
+                # Get whatever the oldest version is; since these are dated, a simple numerical sort works
+                LIST="$( sudo reprepro -b /srv/ubuntu -C unstable list ${{ matrix.release }} | awk '{ print $NF }' | sort -rn | uniq )"
+                COUNT=$( wc -l <<<"${LIST}" )
+                if [[ ${COUNT} -gt ${NKEEP} ]]; then
+                    # Get anything that isn't in the latest ${NKEEP} entries
+                    OBSOLETE=( sed "1,${NKEEP}d" <<<"${LIST}" )
+                    for VERSION in ${OBSOLETE[@]}; do
+                        for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
+                            sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${VERSION}
+                        done
+                    done
+                fi
+            fi
+            # Only keep the latest point release for a given stable version; i.e. 10.10.14 obsoletes 10.10.13 and removes it, while leaving 10.9.10
+            if [[ ${COMPONENT} == "stable" ]]; then
+                NEW_VERSION=${{ matrix.release }}
+                NEW_MAJOR_VERSION="${NEW_VERSION#v}"
+                NEW_MAJOR_VERSION="${NEW_MAJOR_VERSION%.*}"
+                NEW_POINT_VERSION="${NEW_VERSION##*.}"
+                if [[ ${NEW_POINT_VERSION} -gt 0 ]]; then
+                    LAST_POINT_VERSION=$(( NEW_POINT_VERSION - 1 ))
+                    LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_POINT_VERSION}"
+                    for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
+                        sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${LAST_VERSION}
+                    done
+                fi
             fi
 
       - name: "Move artifacts into repository"
