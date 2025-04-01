@@ -150,7 +150,7 @@ jobs:
                 COUNT=$( wc -l <<<"${LIST}" )
                 if [[ ${COUNT} -gt ${NKEEP} ]]; then
                     # Get anything that isn't in the latest ${NKEEP} entries
-                    OBSOLETE=( sed "1,${NKEEP}d" <<<"${LIST}" )
+                    OBSOLETE=( $( sed "1,${NKEEP}d" <<<"${LIST}" ) )
                     for VERSION in ${OBSOLETE[@]}; do
                         for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
                             for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${VERSION}" | sort | uniq ); do
@@ -295,7 +295,7 @@ jobs:
                 COUNT=$( wc -l <<<"${LIST}" )
                 if [[ ${COUNT} -gt ${NKEEP} ]]; then
                     # Get anything that isn't in the latest ${NKEEP} entries
-                    OBSOLETE=( sed "1,${NKEEP}d" <<<"${LIST}" )
+                    OBSOLETE=( $( sed "1,${NKEEP}d" <<<"${LIST}" ) )
                     for VERSION in ${OBSOLETE[@]}; do
                         for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
                             for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${VERSION}" | sort | uniq ); do
