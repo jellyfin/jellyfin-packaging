@@ -144,7 +144,7 @@ jobs:
             fi
             # Only keep ${NKEEP} (4) unstables; we have to do this manually since reprepro doesn't have granularity for this at the component level
             if [[ ${COMPONENT} == "unstable" ]]; then
-                NKEEP=4
+                NKEEP=3
                 # Get whatever the oldest version is; since these are dated, a simple numerical sort works
                 LIST="$( sudo reprepro -b /srv/debian -C unstable list ${{ matrix.release }} | awk '{ print $NF }' | sort -rn | uniq )"
                 COUNT=$( wc -l <<<"${LIST}" )
@@ -289,7 +289,7 @@ jobs:
             fi
             # Only keep ${NKEEP} (4) unstables; we have to do this manually since reprepro doesn't have granularity for this at the component level
             if [[ ${COMPONENT} == "unstable" ]]; then
-                NKEEP=4
+                NKEEP=3
                 # Get whatever the oldest version is; since these are dated, a simple numerical sort works
                 LIST="$( sudo reprepro -b /srv/ubuntu -C unstable list ${{ matrix.release }} | awk '{ print $NF }' | sort -rn | uniq )"
                 COUNT=$( wc -l <<<"${LIST}" )
