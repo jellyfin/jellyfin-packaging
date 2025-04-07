@@ -59,7 +59,9 @@ for submodule in submodules.keys():
     submodules[submodule].head.reference = target_head
     submodules[submodule].head.reset(index=True, working_tree=True)
     sha = submodules[submodule].head.object.hexsha
+    author = submodules[submodule].head.object.author.name
+    summary = submodules[submodule].head.object.summary
     date = datetime.fromtimestamp(submodules[submodule].head.object.committed_date)
-    print(f"Submodule {submodule} now at commit {sha} ({date})")
+    print(f"Submodule {submodule} now at {target_head} (\"{summary}\" commit {sha} by {author} @ {date})")
 
 print(f"Successfully checked out submodules to ref {target_release}")
