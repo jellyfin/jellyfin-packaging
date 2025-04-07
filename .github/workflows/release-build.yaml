@@ -603,17 +603,13 @@ jobs:
         with:
           name: windows-installer-artifacts
 
-      - name: "Unzip release artifact"
-        run: |-
-          unzip *.zip
-
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
-          source: "jellyfin_${{ env.JELLYFIN_VERSION }}_windows-x64.exe"
+          source: "*.exe"
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
