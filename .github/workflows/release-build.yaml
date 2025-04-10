@@ -126,8 +126,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: false
           script: |
+            set -e
             set -o xtrace
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
                 COMPONENT="main"
@@ -184,8 +184,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: false
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/debian"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
@@ -271,8 +271,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: false
           script: |
+            set -e
             set -o xtrace
             if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
                 COMPONENT="main"
@@ -329,8 +329,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: false
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/ubuntu"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
@@ -398,8 +398,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/linux"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
@@ -471,8 +471,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/windows"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
@@ -619,8 +619,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/windows"
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}/*.exe
 
@@ -678,8 +678,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/macos"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
@@ -738,8 +738,8 @@ jobs:
           username: "${{ secrets.REPO_USER }}"
           key: "${{ secrets.REPO_KEY }}"
           debug: false
-          script_stop: true
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/portable"
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.release }}/* || exit 1
