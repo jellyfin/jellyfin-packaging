@@ -1,5 +1,5 @@
 #! /usr/bin/make -f
-CONFIG := Release
+CONFIG ?= Release
 TERM := xterm
 SHELL := /bin/bash
 

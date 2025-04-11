@@ -29,6 +29,7 @@ jobs:
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -50,7 +51,7 @@ jobs:
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} docker
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} docker ${{ env.DEBUG_FLAG }}
 
   Debian:
     runs-on: ubuntu-24.04
@@ -75,6 +76,7 @@ jobs:
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -91,7 +93,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} debian ${{ matrix.arch }} ${{ matrix.release }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} debian ${{ matrix.arch }} ${{ matrix.release }} ${{ env.DEBUG_FLAG }}
           sudo chown --recursive $USER out/debian
 
       - name: "Import repository signing GPG key"
@@ -220,6 +222,7 @@ jobs:
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -236,7 +239,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} ubuntu ${{ matrix.arch }} ${{ matrix.release }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} ubuntu ${{ matrix.arch }} ${{ matrix.release }} ${{ env.DEBUG_FLAG }}
           sudo chown --recursive $USER out/ubuntu
 
       - name: "Import repository signing GPG key"
@@ -363,6 +366,7 @@ jobs:
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -379,7 +383,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.arch }}"
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} linux ${{ matrix.arch }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} linux ${{ matrix.arch }} ${{ env.DEBUG_FLAG }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -436,6 +440,7 @@ jobs:
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_OUTPUT
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_OUTPUT
+            echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -452,7 +457,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.arch }}"
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} windows ${{ matrix.arch }} ${{ env.DEBUG_FLAG }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -643,6 +648,7 @@ jobs:
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -659,7 +665,7 @@ jobs:
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} macos ${{ matrix.arch }}
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} macos ${{ matrix.arch }} ${{ env.DEBUG_FLAG }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -703,6 +709,7 @@ jobs:
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
           fi
 
       - name: "Install dependencies"
@@ -719,7 +726,7 @@ jobs:
 
       - name: "Run builder for Portable" 
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} portable
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} portable ${{ env.DEBUG_FLAG }}
 
       - name: "Upload artifacts to repository server"
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
@@ -762,6 +769,7 @@ jobs:
           else
             echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
             echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+            echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
           fi
 
       - name: "Install dependencies"

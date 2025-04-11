@@ -29,7 +29,10 @@ case ${BUILD_TYPE} in
     ;;
 esac
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
-dotnet publish Jellyfin.Server --configuration Release ${RUNTIME} --output ${BUILD_DIR}/jellyfin/ -p:DebugSymbols=false -p:DebugType=none ${APPHOST}
+if [[ -z ${CONFIG} ]]; then
+    CONFIG="Release"
+fi
+dotnet publish Jellyfin.Server --configuration ${CONFIG} ${RUNTIME} --output ${BUILD_DIR}/jellyfin/ -p:DebugSymbols=false -p:DebugType=none ${APPHOST}
 popd
 
 # Build web

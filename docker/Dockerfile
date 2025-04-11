@@ -47,6 +47,7 @@ ARG ARTIFACT_DIR=/web
 
 ARG JELLYFIN_VERSION
 ENV JELLYFIN_VERSION=${JELLYFIN_VERSION}
+ENV CONFIG=Release
 
 RUN apk add \
     autoconf \
@@ -85,7 +86,7 @@ WORKDIR ${SOURCE_DIR}
 COPY jellyfin-server .
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-RUN dotnet publish Jellyfin.Server --arch ${DOTNET_ARCH} \
+RUN dotnet publish Jellyfin.Server --arch ${DOTNET_ARCH} --configuration ${CONFIG} \
     --output="${ARTIFACT_DIR}" --self-contained \
     -p:DebugSymbols=false -p:DebugType=none
 

@@ -82,7 +82,7 @@ def _determine_framework_versions():
 
 
 def build_package_deb(
-    jellyfin_version, build_type, build_arch, build_version, local=False
+    jellyfin_version, build_type, build_arch, build_version, local=False, debug=False
 ):
     """
     Build a .deb package (Debian or Ubuntu) within a Docker container that matches the requested distribution version
@@ -168,15 +168,15 @@ def build_package_deb(
     )
 
     log(
-        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --name {imagename} {imagename}"
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
     os.system(
-        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --name {imagename} {imagename}"
+        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
 
 
 def build_linux(
-    jellyfin_version, build_type, build_arch, _build_version, local=False
+    jellyfin_version, build_type, build_arch, _build_version, local=False, debug=False
 ):
     """
     Build a portable Linux archive
@@ -224,15 +224,15 @@ def build_linux(
     )
 
     log(
-        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=linux --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=linux --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
     os.system(
-        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=linux --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
+        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=linux --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
 
 
 def build_windows(
-    jellyfin_version, build_type, _build_arch, _build_version, local=False
+    jellyfin_version, build_type, _build_arch, _build_version, local=False, debug=False
 ):
     """
     Build a portable Windows archive
@@ -280,15 +280,15 @@ def build_windows(
     )
 
     log(
-        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=win --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=win --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
     os.system(
-        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=win --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
+        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=win --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
 
 
 def build_macos(
-    jellyfin_version, build_type, build_arch, _build_version, local=False
+    jellyfin_version, build_type, build_arch, _build_version, local=False, debug=False
 ):
     """
     Build a portable MacOS archive
@@ -336,15 +336,15 @@ def build_macos(
     )
 
     log(
-        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=osx --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=osx --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
     os.system(
-        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=osx --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
+        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env PACKAGE_ARCH={PACKAGE_ARCH} --env DOTNET_TYPE=osx --env DOTNET_ARCH={DOTNET_ARCH} --env ARCHIVE_TYPES={archivetypes} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
 
 
 def build_portable(
-    jellyfin_version, build_type, _build_arch, _build_version, local=False
+    jellyfin_version, build_type, _build_arch, _build_version, local=False, debug=False
 ):
     """
     Build a portable .NET archive
@@ -387,15 +387,15 @@ def build_portable(
     )
 
     log(
-        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
+        f">>> {docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env ARCHIVE_TYPES={archivetypes} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
     os.system(
-        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env ARCHIVE_TYPES={archivetypes} --name {imagename} {imagename}"
+        f"{docker_run_cmd} --volume {repo_root_dir}:/jellyfin --volume {repo_root_dir}/out/{build_type}:/dist --env JELLYFIN_VERSION={jellyfin_version} --env BUILD_TYPE={build_type} --env ARCHIVE_TYPES={archivetypes} --env CONFIG={'Debug' if debug else 'Release'} --name {imagename} {imagename}"
     )
 
 
 def build_docker(
-    jellyfin_version, build_type, build_arch, _build_version, local=False
+    jellyfin_version, build_type, build_arch, _build_version, local=False, debug=False
 ):
     """
     Build Docker images for one or all architectures and combining manifests
@@ -618,7 +618,7 @@ def build_docker(
 
 
 def build_nuget(
-    jellyfin_version, build_type, _build_arch, _build_version, local=False
+    jellyfin_version, build_type, _build_arch, _build_version, local=False, debug=False
 ):
     """
     Pack and upload nuget packages
@@ -716,6 +716,7 @@ parser.add_argument('build_type', choices=configurations.keys(), help='The build
 parser.add_argument('build_arch', default=None, nargs='?', help='The build architecture')
 parser.add_argument('build_version', default=None, nargs='?', help='The build release version [debian/ubuntu only]')
 parser.add_argument('--local', action='store_true', help='Local build, do not generate manifests or push them [docker only]')
+parser.add_argument('--debug', action='store_true', help='Debug build, set .NET to use Debug instead of Release')
 
 args = parser.parse_args()
 
@@ -735,5 +736,5 @@ if jellyfin_version in ["auto", "master"]:
 
 # Launch the builder function
 function_definitions[configurations[build_type]["build_function"]](
-    jellyfin_version, build_type, build_arch, build_version, local=args.local
+    jellyfin_version, build_type, build_arch, build_version, local=args.local, debug=args.debug
 )
