@@ -9,18 +9,18 @@ ARG OS_VERSION=bookworm
 ARG FFMPEG_PACKAGE=jellyfin-ffmpeg7
 
 # https://github.com/intel/compute-runtime/releases
-ARG GMMLIB_VER=22.5.4
+ARG GMMLIB_VER=22.6.0
 # >= Gen12 graphics (current)
-ARG IGC2_VER=2.2.3
-ARG IGC2_BUILD=18220
-ARG NEO_VER=24.48.31907.7
+ARG IGC2_VER=2.10.8
+ARG IGC2_BUILD=18762
+ARG NEO_VER=25.09.32961.7
 # <= Gen11 graphics (legacy)
 ARG IGC1_LEGACY_VER=1.0.17537.20
 ARG NEO_LEGACY_VER=24.35.30872.22
 
 # https://github.com/tsukumijima/libmali-rockchip
 ARG MALI_PKG_VER=1.9-1_arm64
-ARG MALI_PKG_TAG=v1.9-1-55611b0
+ARG MALI_PKG_TAG=v1.9-1-2131373
 ARG MALI_PKG_CFG=valhall-g610-g13p0-gbm
 
 # Debian architecture (amd64, arm64, armhf), set by build script
