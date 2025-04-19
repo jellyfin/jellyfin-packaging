@@ -793,4 +793,4 @@ jobs:
           NUGET_STABLE_KEY: ${{ secrets.NUGET_STABLE_KEY }}
           NUGET_UNSTABLE_KEY: ${{ secrets.NUGET_UNSTABLE_KEY }}
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} nuget
+          ./build.py ${{ env.JELLYFIN_VERSION }} nuget
