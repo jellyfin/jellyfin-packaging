@@ -20,8 +20,8 @@ ARG NEO_LEGACY_VER=24.35.30872.22
 
 # https://github.com/tsukumijima/libmali-rockchip
 ARG MALI_PKG_VER=1.9-1_arm64
-ARG MALI_PKG_TAG=v1.9-1-55611b0
-ARG MALI_PKG_CFG=valhall-g610-g13p0-gbm
+ARG MALI_PKG_TAG=v1.9-1-2131373
+ARG MALI_PKG_CFG=valhall-g610-g24p0-gbm
 
 # Debian architecture (amd64, arm64, armhf), set by build script
 ARG PACKAGE_ARCH
