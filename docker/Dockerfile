@@ -9,11 +9,11 @@ ARG OS_VERSION=bookworm
 ARG FFMPEG_PACKAGE=jellyfin-ffmpeg7
 
 # https://github.com/intel/compute-runtime/releases
-ARG GMMLIB_VER=22.5.4
+ARG GMMLIB_VER=22.7.0
 # >= Gen12 graphics (current)
-ARG IGC2_VER=2.2.3
-ARG IGC2_BUILD=18220
-ARG NEO_VER=24.48.31907.7
+ARG IGC2_VER=2.10.8
+ARG IGC2_BUILD=18926
+ARG NEO_VER=25.13.33276.16
 # <= Gen11 graphics (legacy)
 ARG IGC1_LEGACY_VER=1.0.17537.20
 ARG NEO_LEGACY_VER=24.35.30872.22
