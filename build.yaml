@@ -8,7 +8,7 @@
 # Target commits should be a merge commit!
 # Target commits should be in order from oldest to newest!
 # HOW THIS WORKS:
-#   For each submodule, and then for each upsteam framework version ARG to Docker...
+#   For each submodule, and then for each upstream framework version ARG to Docker...
 #   Provide a commit hash as a key, and a version as a value...
 #   If the given commit is in the commit tree of the current HEAD of the repo...
 #   Use the given version. Otherwise use the default.
@@ -146,6 +146,8 @@ nuget:
     - MediaBrowser.Model/MediaBrowser.Model.csproj
     - Emby.Naming/Emby.Naming.csproj
     - src/Jellyfin.Extensions/Jellyfin.Extensions.csproj
+    - src/Jellyfin.Database/Jellyfin.Database.Implementations/Jellyfin.Database.Implementations.csproj
+    - src/Jellyfin.MediaEncoding.Keyframes/Jellyfin.MediaEncoding.Keyframes.csproj
   feed_urls:
     stable: https://api.nuget.org/v3/index.json
     unstable: https://nuget.pkg.github.com/jellyfin/index.json
