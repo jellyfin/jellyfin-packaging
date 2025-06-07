@@ -1,13 +1,11 @@
-name: "Release Build"
+name: "Unstable Build"
 
 on:
+  schedule:
+    # Weekly unstable trigger on Monday at 05:00 GMT
+    - cron: '0 5 * * 1'
   workflow_dispatch:
-    # Manual trigger (from bot)
-    inputs:
-      version:
-        required: true
-        type: string
-        description: 'The server and web stable release tag (i.e. "vX.Y.Z")'
+    # Manual trigger
 
 env:
   SDK_VERSION: "9.0.x"
@@ -23,8 +21,9 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
 
       - name: "Install dependencies"
         run: |-
@@ -36,7 +35,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version || 'master' }}
+          ./checkout.py master
 
       - name: "Run builder for Docker containers"
         env:
@@ -64,8 +63,9 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
 
       - name: "Install dependencies"
         run: |-
@@ -77,7 +77,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version || 'master' }}
+          ./checkout.py master
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
@@ -118,7 +118,7 @@ jobs:
           debug: false
           script: |
             set -o xtrace
-            COMPONENT="main"
+            COMPONENT="unstable"
             # Only include the architecture-dependent deb here, as the others are done only for amd64
             sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*_${{ matrix.arch }}.deb || exit 1
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
@@ -128,17 +128,19 @@ jobs:
                 sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
             fi
 
-            # Only keep the latest point release for a given stable version; i.e. 10.10.14 obsoletes 10.10.13 and removes it, while leaving 10.9.10
-            NEW_VERSION=${{ matrix.release }}
-            NEW_MAJOR_VERSION="${NEW_VERSION#v}"
-            NEW_MAJOR_VERSION="${NEW_MAJOR_VERSION%.*}"
-            NEW_POINT_VERSION="${NEW_VERSION##*.}"
-            if [[ ${NEW_POINT_VERSION} -gt 0 ]]; then
-                LAST_POINT_VERSION=$(( NEW_POINT_VERSION - 1 ))
-                LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_POINT_VERSION}"
-                for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
-                    for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${LAST_VERSION}" | sort | uniq ); do
-                        sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
+            # Only keep ${NKEEP} (3) unstables; we have to do this manually since reprepro doesn't have granularity for this at the component level
+            NKEEP=3
+            # Get whatever the oldest version is; since these are dated, a simple numerical sort works
+            LIST="$( sudo reprepro -b /srv/debian -C unstable list ${{ matrix.release }} | awk '{ print $NF }' | sort -rn | uniq )"
+            COUNT=$( wc -l <<<"${LIST}" )
+            if [[ ${COUNT} -gt ${NKEEP} ]]; then
+                # Get anything that isn't in the latest ${NKEEP} entries
+                OBSOLETE=( $( sed "1,${NKEEP}d" <<<"${LIST}" ) )
+                for VERSION in ${OBSOLETE[@]}; do
+                    for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
+                        for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${VERSION}" | sort | uniq ); do
+                            sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
+                        done
                     done
                 done
             fi
@@ -156,8 +158,6 @@ jobs:
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-            sudo rm ${BASEDIR}/latest || true
-            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
 
   Ubuntu:
     runs-on: ubuntu-24.04
@@ -177,8 +177,9 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
 
       - name: "Install dependencies"
         run: |-
@@ -190,7 +191,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version || 'master' }}
+          ./checkout.py master
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
@@ -231,7 +232,7 @@ jobs:
           debug: false
           script: |
             set -o xtrace
-            COMPONENT="main"
+            COMPONENT="unstable"
             # Only include the architecture-dependent deb here, as the others are done only for amd64
             sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedeb ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*_${{ matrix.arch }}.deb || exit 1
             if [[ ${{ matrix.arch }} == "amd64" ]]; then
@@ -241,17 +242,19 @@ jobs:
                 sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} includedsc ${{ matrix.release }} /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/*.dsc || exit 1
             fi
 
-            # Only keep the latest point release for a given stable version; i.e. 10.10.14 obsoletes 10.10.13 and removes it, while leaving 10.9.10
-            NEW_VERSION=${{ matrix.release }}
-            NEW_MAJOR_VERSION="${NEW_VERSION#v}"
-            NEW_MAJOR_VERSION="${NEW_MAJOR_VERSION%.*}"
-            NEW_POINT_VERSION="${NEW_VERSION##*.}"
-            if [[ ${NEW_POINT_VERSION} -gt 0 ]]; then
-                LAST_POINT_VERSION=$(( NEW_POINT_VERSION - 1 ))
-                LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_POINT_VERSION}"
-                for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
-                    for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${LAST_VERSION}" | sort | uniq ); do
-                        sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
+            # Only keep ${NKEEP} (4) unstables; we have to do this manually since reprepro doesn't have granularity for this at the component level
+            NKEEP=3
+            # Get whatever the oldest version is; since these are dated, a simple numerical sort works
+            LIST="$( sudo reprepro -b /srv/ubuntu -C unstable list ${{ matrix.release }} | awk '{ print $NF }' | sort -rn | uniq )"
+            COUNT=$( wc -l <<<"${LIST}" )
+            if [[ ${COUNT} -gt ${NKEEP} ]]; then
+                # Get anything that isn't in the latest ${NKEEP} entries
+                OBSOLETE=( $( sed "1,${NKEEP}d" <<<"${LIST}" ) )
+                for VERSION in ${OBSOLETE[@]}; do
+                    for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
+                        for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${VERSION}" | sort | uniq ); do
+                            sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
+                        done
                     done
                 done
             fi
@@ -269,8 +272,10 @@ jobs:
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-            sudo rm ${BASEDIR}/latest || true
-            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            if [[ ${{ env.JELLYFIN_RELEASE_TYPE }} == "stable" ]]; then
+                sudo rm ${BASEDIR}/latest || true
+                sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
+            fi
 
   Linux:
     runs-on: ubuntu-24.04
@@ -288,8 +293,9 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
 
       - name: "Install dependencies"
         run: |-
@@ -331,8 +337,6 @@ jobs:
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-            sudo rm ${BASEDIR}/latest || true
-            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
 
   Windows:
     runs-on: ubuntu-24.04
@@ -350,10 +354,11 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_OUTPUT
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_OUTPUT
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_OUTPUT
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_OUTPUT
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
 
       - name: "Install dependencies"
         run: |-
@@ -395,8 +400,6 @@ jobs:
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-            sudo rm ${BASEDIR}/latest || true
-            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
 
       - name: "Store artifacts for next stage"
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -424,7 +427,7 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ needs.Windows.outputs.JELLYFIN_VERSION }}"
-          $cleanVersion = $version.Substring(1)
+          $cleanVersion = $version
           echo "JELLYFIN_VERSION=$cleanVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: "Checkout repository"
@@ -436,10 +439,10 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          python checkout.py ${{ inputs.version || 'master' }}
+          python checkout.py master
 
       - name: "Fetch artifacts from previous stage"
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
         with:
           name: windows-artifacts
           path: ./jellyfin-server-windows
@@ -508,7 +511,7 @@ jobs:
           echo "JELLYFIN_RELEASE_TYPE=${{ needs.Windows.outputs.JELLYFIN_RELEASE_TYPE }}" >> $GITHUB_ENV
 
       - name: "Fetch artifact from previous stage"
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
         with:
           name: windows-installer-artifacts
 
@@ -546,8 +549,9 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
 
       - name: "Install dependencies"
         run: |-
@@ -559,7 +563,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version || 'master' }}
+          ./checkout.py master
 
       - name: "Run builder for ${{ matrix.version }} ${{ matrix.arch }}"
         run: |-
@@ -589,8 +593,6 @@ jobs:
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-            sudo rm ${BASEDIR}/latest || true
-            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
 
   Portable:
     runs-on: ubuntu-24.04
@@ -599,8 +601,9 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
 
       - name: "Install dependencies"
         run: |-
@@ -642,8 +645,6 @@ jobs:
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
             sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || exit 1
-            sudo rm ${BASEDIR}/latest || true
-            sudo ln -sf ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }} ${BASEDIR}/latest || exit 1
 
   Nuget:
     runs-on: ubuntu-24.04
@@ -651,8 +652,9 @@ jobs:
       - name: "Set dated version for unstable builds"
         id: version
         run: |-
-          echo "JELLYFIN_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
-          echo "JELLYFIN_RELEASE_TYPE=stable" >> $GITHUB_ENV
+          echo "JELLYFIN_VERSION=$(date +'%Y%m%d%H')" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=unstable" >> $GITHUB_ENV
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
 
       - name: "Install dependencies"
         run: |-
@@ -669,7 +671,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version || 'master' }}
+          ./checkout.py master
 
       - name: "Run builder for Nuget"
         env:
