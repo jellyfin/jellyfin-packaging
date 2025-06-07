@@ -31,8 +31,6 @@ debian:
       PACKAGE_ARCH: amd64
     arm64:
       PACKAGE_ARCH: arm64
-    armhf:
-      PACKAGE_ARCH: armhf
   cross-gcc:
     bullseye: '10'
     bookworm: '12'
@@ -49,8 +47,6 @@ ubuntu:
       PACKAGE_ARCH: amd64
     arm64:
       PACKAGE_ARCH: arm64
-    armhf:
-      PACKAGE_ARCH: armhf
   cross-gcc:
     focal: '10'
     jammy: '12'
@@ -76,9 +72,6 @@ linux:
     arm64-musl:
       DOTNET_ARCH: musl-arm64
       PACKAGE_ARCH: arm64-musl
-    armhf:
-      DOTNET_ARCH: arm
-      PACKAGE_ARCH: armhf
   dockerfile: portable/Dockerfile
   imagename: jellyfin-builder-linux
 windows:
@@ -127,12 +120,6 @@ docker:
       PACKAGE_ARCH: arm64
       QEMU_ARCH: aarch64
       TARGET_ARCH: arm64/v8
-    armhf:
-      DOTNET_ARCH: arm
-      IMAGE_ARCH: arm32v7
-      PACKAGE_ARCH: armhf
-      QEMU_ARCH: arm
-      TARGET_ARCH: arm/v7
   dockerfile: docker/Dockerfile
   imagename: jellyfin/jellyfin
 

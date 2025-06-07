@@ -689,7 +689,7 @@ def usage():
     log("  BUILD_TYPE: The type of build to execute")
     log(f"    * Valid options are: {', '.join(configurations.keys())}")
     log("  BUILD_ARCH: The CPU architecture of the build")
-    log("    * Valid options are: <empty> [portable/docker only], amd64, arm64, armhf")
+    log("    * Valid options are: <empty> [portable/docker only], amd64, arm64")
     log("  BUILD_VERSION: A valid OS distribution version (.deb build types only)")
 
 

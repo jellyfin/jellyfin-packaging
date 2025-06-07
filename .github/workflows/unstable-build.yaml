@@ -57,7 +57,6 @@ jobs:
         arch:
           - amd64
           - arm64
-          - armhf
     continue-on-error: false  # true in prod, false for testing
     steps:
       - name: "Set dated version for unstable builds"
@@ -171,7 +170,6 @@ jobs:
         arch:
           - amd64
           - arm64
-          - armhf
     continue-on-error: false  # true in prod, false for testing
     steps:
       - name: "Set dated version for unstable builds"
@@ -287,7 +285,6 @@ jobs:
           - amd64-musl
           - arm64
           - arm64-musl
-          - armhf
     continue-on-error: false  # true in prod, false for testing
     steps:
       - name: "Set dated version for unstable builds"
