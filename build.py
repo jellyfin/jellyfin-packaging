@@ -419,14 +419,19 @@ def build_docker(
     dockerfile = configurations[build_type]["dockerfile"]
 
     # Determine if this is a "latest"-type image (v in jellyfin_version) or not
-    if "v" in jellyfin_version:
+    if "v" in jellyfin_version and not "rc" in jellyfin_version: 
         is_stable = True
+        is_preview = False
+    elif "rc" in jellyfin_version:
+        is_stable = False
+        is_preview = True
     else:
         is_stable = False
+        is_preview False
 
     jellyfin_version = jellyfin_version.replace("v", "")
 
-    log(f"NOTE: Build type is {'stable' if is_stable else 'unstable'} for version {jellyfin_version}")
+    log(f"NOTE: Build type is {'stable' if is_stable else 'preview/unstable'} for version {jellyfin_version}")
     log("")
 
     # Set today's date in a convenient format for use as an image suffix
@@ -446,7 +451,7 @@ def build_docker(
         TARGET_ARCH = configurations["docker"]["archmaps"][_build_arch]["TARGET_ARCH"]
 
         # Use a unique docker image name for consistency
-        if is_stable:
+        if is_stable or is_preview:
             imagename = f"{configurations['docker']['imagename']}:{jellyfin_version}-{_build_arch}.{date}"
         else:
             imagename = f"{configurations['docker']['imagename']}:{jellyfin_version}-{_build_arch}"
@@ -509,7 +514,7 @@ def build_docker(
         log(f">> Building Docker manifests for {server}...")
         manifests = list()
 
-        if is_stable:
+        if is_stable or is_preview:
             log(">>> Building X.Y.Z dated version manifest...")
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
@@ -561,6 +566,15 @@ def build_docker(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:latest {' '.join(images)}"
             )
             manifests.append(f"{server}/{configurations['docker']['imagename']}:latest")
+        elif is_preview:
+            log(">>> Building preview manifest...")
+            log(
+                f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:preview {' '.join(images)}"
+            )
+            os.system(
+                f"docker manifest create {server}/{configurations['docker']['imagename']}:preview {' '.join(images)}"
+            )
+            manifests.append(f"{server}/{configurations['docker']['imagename']}:preview")
         else:
             log(">>> Building unstable manifest...")
             log(
@@ -631,10 +645,15 @@ def build_nuget(
     log(project_files)
 
     # Determine if this is a "latest"-type image (v in jellyfin_version) or not
-    if "v" in jellyfin_version:
+    if "v" in jellyfin_version and not "rc" in jellyfin_version:
         is_stable = True
+        is_preview = False
+    elif "rc" in jellyfin_version:
+        is_stable = False
+        is_preview = True
     else:
         is_stable = False
+        is_preview = False
 
     jellyfin_version = jellyfin_version.replace("v", "")
 
@@ -642,7 +661,7 @@ def build_nuget(
     date = datetime.now().strftime("%Y%m%d%H%M%S")
 
     pack_command_base = "dotnet pack -o out/nuget/"
-    if is_stable:
+    if is_stable or is_preview:
         pack_command = f"{pack_command_base} -p:Version={jellyfin_version}"
     else:
         pack_command = (
@@ -660,7 +679,7 @@ def build_nuget(
     if local:
         return
 
-    if is_stable:
+    if is_stable or is_preview:
         nuget_repo = configurations["nuget"]["feed_urls"]["stable"]
         nuget_key = getenv("NUGET_STABLE_KEY")
     else:
