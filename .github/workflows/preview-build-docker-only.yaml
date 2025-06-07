@@ -1,0 +1,53 @@
+name: "Preview Build"
+
+on:
+  workflow_dispatch:
+    # Manual trigger (from bot)
+    inputs:
+      version:
+        required: true
+        type: string
+        description: 'The server and web stable release tag (i.e. "vX.Y.Z")'
+      preview_id:
+        required: true
+        type: string
+        description: 'The numerical preview ID (e.g. 1 for `rc1`)'
+
+env:
+  SDK_VERSION: "9.0.x"
+
+permissions:
+  contents: read
+
+jobs:
+  Docker:
+    runs-on: ubuntu-24.04
+    continue-on-error: false  # true in prod, false for testing
+    steps:
+      - name: "Set dated version for unstable builds"
+        id: version
+        run: |-
+          echo "JELLYFIN_VERSION=${{ inputs.version }}-rc${{ inputs.preview_id }}" >> $GITHUB_ENV
+          echo "JELLYFIN_RELEASE_TYPE=preview" >> $GITHUB_ENV
+          echo "DEBUG_FLAG=--debug" >>$GITHUB_ENV
+
+      - name: "Install dependencies"
+        run: |-
+          sudo apt-get update
+          sudo apt-get install --yes python3-git python3-yaml
+
+      - name: "Checkout repository"
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: "Prepare repository"
+        run: |-
+          ./checkout.py ${{ inputs.version }}-rc${{ inputs.preview_id }}
+
+      - name: "Run builder for Docker containers"
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |-
+          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} docker ${{ env.DEBUG_FLAG }}
