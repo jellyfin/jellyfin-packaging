@@ -427,7 +427,7 @@ def build_docker(
         is_preview = True
     else:
         is_stable = False
-        is_preview False
+        is_preview = False
 
     jellyfin_version = jellyfin_version.replace("v", "")
 
