@@ -200,7 +200,7 @@ RUN if test "${PACKAGE_ARCH}" = "arm64"; then \
  && apt-get autoremove --yes \
  && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
 
-# Setup jemalloc: link the library to a jellyfin's own path to handle arch specific library path
+# Setup jemalloc: link the library to a path owned by us to handle arch specific library paths
 RUN mkdir -p /usr/lib/jellyfin \
   && JEMALLOC_LINKED=0 \
   && if [ "${PACKAGE_ARCH}" = "amd64" ]; then \
