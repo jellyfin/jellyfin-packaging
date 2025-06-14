@@ -161,6 +161,7 @@ RUN apt-get update \
     locales \
     libfontconfig1 \
     libfreetype6 \
+    libjemalloc2 \
  && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen \
  && apt-get remove gnupg apt-transport-https --yes \
  && apt-get clean autoclean --yes \
@@ -198,6 +199,27 @@ RUN if test "${PACKAGE_ARCH}" = "arm64"; then \
  && apt-get clean autoclean --yes \
  && apt-get autoremove --yes \
  && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
+
+# Setup jemalloc: link the library to a path owned by us to handle arch specific library paths
+RUN mkdir -p /usr/lib/jellyfin \
+  && JEMALLOC_LINKED=0 \
+  && if [ "${PACKAGE_ARCH}" = "amd64" ]; then \
+         if [ -f "/usr/lib/x86_64-linux-gnu/libjemalloc.so.2" ]; then \
+             ln -s /usr/lib/x86_64-linux-gnu/libjemalloc.so.2 /usr/lib/jellyfin/libjemalloc.so.2 && JEMALLOC_LINKED=1; \
+         fi; \
+     elif [ "${PACKAGE_ARCH}" = "arm64" ]; then \
+         if [ -f "/usr/lib/aarch64-linux-gnu/libjemalloc.so.2" ]; then \
+             ln -s /usr/lib/aarch64-linux-gnu/libjemalloc.so.2 /usr/lib/jellyfin/libjemalloc.so.2 && JEMALLOC_LINKED=1; \
+         fi; \
+     fi \
+  && if [ "$JEMALLOC_LINKED" -eq 1 ]; then \
+         echo "jemalloc library linked successfully for ${PACKAGE_ARCH}." ; \
+     else \
+         echo "WARNING: jemalloc library .so file not found for PACKAGE_ARCH ${PACKAGE_ARCH}. Either the arch is not supported or copy failed. LD_PRELOAD might not work as expected." >&2; \
+     fi
+
+# Set LD_PRELOAD to use the linked jemalloc library
+ENV LD_PRELOAD=/usr/lib/jellyfin/libjemalloc.so.2
 
 RUN mkdir -p ${JELLYFIN_DATA_DIR} ${JELLYFIN_CACHE_DIR} \
  && chmod 777 ${JELLYFIN_DATA_DIR} ${JELLYFIN_CACHE_DIR}
