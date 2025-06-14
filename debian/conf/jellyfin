@@ -30,6 +30,9 @@ JELLYFIN_WEB_OPT="--webdir=/usr/share/jellyfin/web"
 # ffmpeg binary paths, overriding the system values
 JELLYFIN_FFMPEG_OPT="--ffmpeg=/usr/lib/jellyfin-ffmpeg/ffmpeg"
 
+# Use jemalloc2 for improved RAM usage (#11588)
+LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+
 # Disable glibc dynamic heap adjustment
 MALLOC_TRIM_THRESHOLD_=131072
 
