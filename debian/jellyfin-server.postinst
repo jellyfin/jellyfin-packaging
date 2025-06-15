@@ -19,8 +19,6 @@ CONFIGDATA=${JELLYFIN_CONFIG_DIRECTORY-/etc/$NAME}
 LOGDATA=${JELLYFIN_LOG_DIRECTORY-/var/log/$NAME}
 CACHEDATA=${JELLYFIN_CACHE_DIRECTORY-/var/cache/$NAME}
 
-MULTIARCH_ARCH="$( dpkg-architecture -qDEB_HOST_MULTIARCH )"
-
 case "$1" in
   configure)
     # create jellyfin group if it does not exist
@@ -53,7 +51,7 @@ case "$1" in
     done
 
     # Install libjemalloc.so symlink into /usr/lib/jellyfin
-    ln -sf /usr/lib/${MULTIARCH_ARCH}/libjemalloc.so.2 /usr/lib/jellyfin/libjemalloc.so
+    ln -sf $( ldconfig -p | grep libjemalloc | awk '{print $NF}' | head -n1 ) /usr/lib/jellyfin/libjemalloc.so
 
     # Install jellyfin symlink into /usr/bin
     ln -sf /usr/lib/jellyfin/bin/jellyfin /usr/bin/jellyfin
