@@ -51,7 +51,10 @@ case "$1" in
     done
 
     # Install libjemalloc.so symlink into /usr/lib/jellyfin
-    ln -sf $( ldconfig -p | grep libjemalloc | awk '{print $NF}' | head -n1 ) /usr/lib/jellyfin/libjemalloc.so
+    LIBJEMALLOC_PATH="$( ldconfig -p | grep libjemalloc | awk '{print $NF}' | head -n1 )"
+    if [[ -n ${LIBJEMALLOC_PATH} && -f ${LIBJEMALLOC_PATH} ]]; then
+        ln -sf ${LIBJEMALLOC_PATH} /usr/lib/jellyfin/libjemalloc.so
+    fi
 
     # Install jellyfin symlink into /usr/bin
     ln -sf /usr/lib/jellyfin/bin/jellyfin /usr/bin/jellyfin
