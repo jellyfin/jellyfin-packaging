@@ -26,6 +26,7 @@ debian:
   releases:
     bullseye: '11'
     bookworm: '12'
+    trixie: '13'
   archmaps:
     amd64:
       PACKAGE_ARCH: amd64
@@ -34,6 +35,7 @@ debian:
   cross-gcc:
     bullseye: '10'
     bookworm: '12'
+    trixie: '14'
   build_function: build_package_deb
   dockerfile: debian/docker/Dockerfile
   imagename: jellyfin-builder-debian

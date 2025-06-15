@@ -54,6 +54,7 @@ jobs:
         release:
           - bullseye
           - bookworm
+          - trixie
         arch:
           - amd64
           - arm64
