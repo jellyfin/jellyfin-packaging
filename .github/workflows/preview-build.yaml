@@ -368,7 +368,7 @@ jobs:
 
       - name: "Prepare repository"
         run: |-
-          ./checkout.py ${{ inputs.version }}-rc${{ inputs.preview_id }}
+          python ./checkout.py ${{ inputs.version }}-rc${{ inputs.preview_id }}
 
       - name: "Fetch artifacts from previous stage"
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
