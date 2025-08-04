@@ -387,7 +387,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path jellyfin
           Expand-Archive -Path 'jellyfin_*-amd64.zip' -DestinationPath jellyfin -Force
-          #Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin)
+          Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin)
 
       - name: "Add NSSM"
         working-directory: ./jellyfin-server-windows
