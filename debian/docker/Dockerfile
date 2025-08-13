@@ -45,6 +45,8 @@ RUN apt-get update -y \
     libcurl*openssl-dev \
     libfreetype*-dev \
     libssl-dev \
+    libicu-dev \
+    icu-devtools \
  && apt-get clean autoclean -y \
  && apt-get autoremove -y \
  && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/* \

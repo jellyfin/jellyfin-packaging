@@ -39,6 +39,8 @@ RUN apt-get update -y \
     libssl*.* \
     liblttng-ust*\
     libssl-dev \
+    libicu-dev \
+    icu-devtools \
     libfontconfig*-dev \
     libcurl*openssl-dev \
     libfreetype*-dev \
