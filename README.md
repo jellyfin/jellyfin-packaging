@@ -48,7 +48,7 @@ This repository contains operating system and Docker packaging for Jellyfin, for
 
 ## Quickstart
 
-To build Jellyfin packages for yourself, follow this quickstart guide. You will need to be running on a Linux system, preferably Debian- or Ubuntu-based, with Docker, Python3 and the Python packages `PyYAML` and `git` (`python3-yaml` and `python3-git` in Debian). Other systems including WSL are untested.
+To build Jellyfin packages for yourself, follow this quickstart guide. You will need to be running on an amd64 Linux system, preferably Debian- or Ubuntu-based, with Docker, Python3 and the Python packages `PyYAML` and `git` (`python3-yaml` and `python3-git` in Debian). Other systems including WSL are untested.
 
 1. Install Docker on your system. The build scripts leverage Docker containers to perform clean builds and avoid contaminating the host system with dependencies.
 
@@ -68,7 +68,7 @@ If you want a non-Docker image output (`.deb`, `tar`/`zip` archive, etc.) follow
    
    * The second argument is the "platform" you want to build for. The available options are listed as top-level keys in the `build.yaml` configuration file or in the `-h` help output.
 
-   * The third argument is, for all platforms except `portable` (DotNET portable), the architecture you want to build for. For each platform, the available architectures can be found as the keys under `archmaps` in the `build.yaml` configuration file.
+   * The third argument is, for all platforms except `portable` (DotNET portable), the architecture you want to build for. For each platform, the available architectures can be found as the keys under `archmaps` in the `build.yaml` configuration file. Cross-building of `arm64` on `amd64` is supported, but not the other way around.
 
    * The fourth argument is exclusive to `debian` and `ubuntu` `.deb` packages, and is the release codename of Debian or Ubuntu to build for. For each platform, the available releases can be found as the keys under `releases` in the `build.yaml` configuration file.
 
@@ -114,7 +114,7 @@ If you want a Docker image output follow this process:
    
    * The second argument is the "platform" you want to build for. For Docker images, this should be `docker`.
 
-   * The third argument is the architecture you wish to build for. This argument is optional, and not providing it will build images for all supported architectures (sequentially).
+   * The third argument is the architecture you wish to build for. This argument is optional, and not providing it will build images for all supported architectures (sequentially). Cross-building of `arm64` on `amd64` is supported, but not the other way around.
 
    * The fourth argument is `--local`, which should be provided to prevent the script from trying to generate image manifests and push the resulting images to our repositories.
 

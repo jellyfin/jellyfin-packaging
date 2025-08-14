@@ -106,6 +106,7 @@ def build_package_deb(
                 f"{build_version} is not a valid {build_type} version in {configurations[build_type]['releases'].keys()}"
             )
         PACKAGE_ARCH = _determine_arch(build_type, build_arch, build_version)
+        GCC_ARCH = configurations[build_type]["archmaps"][build_arch]["GCC_ARCH"]
     except Exception as e:
         log(f"Invalid/unsupported arguments: {e}")
         exit(1)
@@ -147,6 +148,7 @@ def build_package_deb(
     build_args.append(f"--build-arg PACKAGE_TYPE={os_type}")
     build_args.append(f"--build-arg PACKAGE_VERSION={os_version}")
     build_args.append(f"--build-arg PACKAGE_ARCH={PACKAGE_ARCH}")
+    build_args.append(f"--build-arg GCC_ARCH={GCC_ARCH}")
     build_args.append(f"--build-arg GCC_VERSION={crossgccvers}")
 
     # Determine framework versions

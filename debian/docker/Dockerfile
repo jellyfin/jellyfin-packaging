@@ -7,6 +7,7 @@ ARG GCC_VERSION=12
 ARG PACKAGE_TYPE
 ARG PACKAGE_VERSION
 ARG PACKAGE_ARCH
+ARG GCC_ARCH
 
 FROM ${PACKAGE_TYPE}:${PACKAGE_VERSION}
 
@@ -17,6 +18,7 @@ ARG NODEJS_VERSION
 ARG PACKAGE_TYPE
 ARG PACKAGE_VERSION
 ARG PACKAGE_ARCH
+ARG GCC_ARCH
 ARG GCC_VERSION
 
 # Docker run environment
@@ -26,6 +28,7 @@ ENV DEB_BUILD_OPTIONS=noddebs
 ENV TYPE=${PACKAGE_TYPE}
 ENV VERSION=${PACKAGE_VERSION}
 ENV ARCH=${PACKAGE_ARCH}
+ENV GCC_ARCH=${GCC_ARCH}
 
 # Prepare Debian build environment
 RUN apt-get update -y \
@@ -69,9 +72,6 @@ RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
  && set -o xtrace \
  && dpkg --add-architecture ${PACKAGE_ARCH} \
  && apt-get update -y \
- && apt-get install --no-install-recommends -y cross-gcc-dev \
- && TARGET_LIST="${PACKAGE_ARCH}" cross-gcc-gensource ${GCC_VERSION} \
- && cd cross-gcc-packages-amd64/cross-gcc-${GCC_VERSION}-${PACKAGE_ARCH} \
  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get -f install --no-install-recommends -o Dpkg::Options::="--force-overwrite" -y \
     bison \
@@ -92,6 +92,8 @@ RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
     binutils-aarch64-linux-gnu \
     binutils-arm-linux-gnueabihf \
     gcc-${GCC_VERSION}-source \
+    gcc-${GCC_ARCH}-linux-gnu \
+    binutils-${GCC_ARCH}-linux-gnu \
     libstdc++-${GCC_VERSION}-dev-${PACKAGE_ARCH}-cross \
     libc6-dev:${PACKAGE_ARCH} \
     linux-libc-dev:${PACKAGE_ARCH} \

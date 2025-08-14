@@ -30,8 +30,10 @@ debian:
   archmaps:
     amd64:
       PACKAGE_ARCH: amd64
+      GCC_ARCH: x86-64
     arm64:
       PACKAGE_ARCH: arm64
+      GCC_ARCH: aarch64
   cross-gcc:
     bullseye: '10'
     bookworm: '12'
