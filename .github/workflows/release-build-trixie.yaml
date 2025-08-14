@@ -24,7 +24,7 @@ jobs:
         release:
           - trixie
         arch:
-          - amd64
+          #- amd64
           - arm64
     continue-on-error: false  # true in prod, false for testing
     steps:
