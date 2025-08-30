@@ -34,6 +34,11 @@ export COMPlus_EnableDiagnostics=0
 %:
 	dh $@
 
+override_dh_gencontrol:
+	ICU_MAJOR="$$(apt-cache policy libicu-dev 2>/dev/null \
+		| sed -n 's/  Candidate: \([0-9]\+\)\..*/\1/p' | head -n1)" && \
+	dh_gencontrol -- -Vicu:Depends="libicu$$ICU_MAJOR"
+
 override_dh_auto_test:
 
 override_dh_clistrip:
@@ -61,4 +66,4 @@ override_dh_installinit:
 	dh_installinit --name=jellyfin
 
 override_dh_shdeplibs:
-	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
+	dh_shlibdeps -- --ignore-missing-info
