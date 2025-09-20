@@ -40,7 +40,7 @@ ARG JELLYFIN_VERSION
 #
 # Build the web artifacts
 #
-FROM node:${NODEJS_VERSION}-alpine as web
+FROM node:${NODEJS_VERSION}-alpine AS web
 
 ARG SOURCE_DIR=/src
 ARG ARTIFACT_DIR=/web
@@ -74,7 +74,7 @@ RUN npm ci --no-audit --unsafe-perm \
 #
 # Build the server artifacts
 #
-FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-${OS_VERSION}-slim as server
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-${OS_VERSION}-slim AS server
 
 ARG DOTNET_ARCH
 
@@ -95,8 +95,8 @@ RUN dotnet publish Jellyfin.Server --arch ${DOTNET_ARCH} --configuration ${CONFI
 #
 # Build the final combined image
 #
-FROM multiarch/qemu-user-static:x86_64-${QEMU_ARCH} as qemu
-FROM --platform=linux/${TARGET_ARCH} ${IMAGE_ARCH}/debian:${OS_VERSION}-slim as combined
+FROM multiarch/qemu-user-static:x86_64-${QEMU_ARCH} AS qemu
+FROM --platform=linux/${TARGET_ARCH} ${IMAGE_ARCH}/debian:${OS_VERSION}-slim AS combined
 
 ARG OS_VERSION
 ARG FFMPEG_PACKAGE
