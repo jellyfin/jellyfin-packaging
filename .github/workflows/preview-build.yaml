@@ -37,7 +37,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Prepare repository"
         run: |-
@@ -79,7 +79,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml debsigs devscripts
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Prepare repository"
         run: |-
@@ -156,7 +156,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml debsigs devscripts
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Prepare repository"
         run: |-
@@ -231,7 +231,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Prepare repository"
         run: |-
@@ -295,7 +295,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Prepare repository"
         run: |-
@@ -360,7 +360,7 @@ jobs:
           echo "JELLYFIN_VERSION=$cleanVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Install dependencies"
         run: |-
@@ -488,7 +488,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Prepare repository"
         run: |-
@@ -540,7 +540,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Prepare repository"
         run: |-
@@ -596,7 +596,7 @@ jobs:
           dotnet-version: ${{ env.SDK_VERSION }}
 
       - name: "Checkout repository"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: "Prepare repository"
         run: |-
