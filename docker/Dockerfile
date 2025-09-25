@@ -1,19 +1,19 @@
 # Docker build arguments
-ARG DOTNET_VERSION=8.0
-ARG NODEJS_VERSION=20
+ARG DOTNET_VERSION=9.0
+ARG NODEJS_VERSION=24
 
 # Combined image version (Debian)
-ARG OS_VERSION=bookworm
+ARG OS_VERSION=trixie
 
 # Jellyfin FFMPEG package
 ARG FFMPEG_PACKAGE=jellyfin-ffmpeg7
 
 # https://github.com/intel/compute-runtime/releases
-ARG GMMLIB_VER=22.7.0
+ARG GMMLIB_VER=22.8.1
 # >= Gen12 graphics (current)
-ARG IGC2_VER=2.10.8
-ARG IGC2_BUILD=18926
-ARG NEO_VER=25.13.33276.16
+ARG IGC2_VER=2.18.5
+ARG IGC2_BUILD=19820
+ARG NEO_VER=25.35.35096.9
 # <= Gen11 graphics (legacy)
 ARG IGC1_LEGACY_VER=1.0.17537.24
 ARG NEO_LEGACY_VER=24.35.30872.36
