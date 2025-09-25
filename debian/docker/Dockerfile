@@ -1,8 +1,8 @@
 # Docker build arguments
-ARG DOTNET_VERSION=8.0
-ARG NODEJS_VERSION=20
-# Default to 12, but set externally by the `build.py` script
-ARG GCC_VERSION=12
+ARG DOTNET_VERSION=9.0
+ARG NODEJS_VERSION=24
+# Default to 13, but set externally by the `build.py` script
+ARG GCC_VERSION=13
 
 ARG PACKAGE_TYPE
 ARG PACKAGE_VERSION
