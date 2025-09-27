@@ -58,7 +58,6 @@ def _determine_framework_versions():
 
     framework_args = dict()
 
-    submodules = dict()
     for submodule in this_repo.submodules:
         if submodule.name in configurations["frameworks"].keys():
             for framework_arg in configurations["frameworks"][submodule.name].keys():
@@ -412,7 +411,7 @@ def build_docker(
 
     if build_arch:
         if build_arch not in architectures:
-            log(f"Error: Archtecture {build_arch} is not valid.")
+            log(f"Error: Architecture {build_arch} is not valid.")
             exit(1)
         else:
             architectures = [build_arch]
@@ -448,7 +447,6 @@ def build_docker(
         # Get our ARCH variables from the archmaps
         PACKAGE_ARCH = configurations["docker"]["archmaps"][_build_arch]["PACKAGE_ARCH"]
         DOTNET_ARCH = configurations["docker"]["archmaps"][_build_arch]["DOTNET_ARCH"]
-        QEMU_ARCH = configurations["docker"]["archmaps"][_build_arch]["QEMU_ARCH"]
         IMAGE_ARCH = configurations["docker"]["archmaps"][_build_arch]["IMAGE_ARCH"]
         TARGET_ARCH = configurations["docker"]["archmaps"][_build_arch]["TARGET_ARCH"]
 
@@ -460,10 +458,10 @@ def build_docker(
 
         # Clean up any existing qemu static image
         log(
-            f">>> {docker_run_cmd} --privileged multiarch/qemu-user-static:register --reset"
+            f">>> {docker_run_cmd} --privileged linuxserver/qemu-static --reset -p yes"
         )
         os.system(
-            f"{docker_run_cmd} --privileged multiarch/qemu-user-static:register --reset"
+            f"{docker_run_cmd} --privileged linuxserver/qemu-static --reset -p yes"
         )
         log("")
 
@@ -471,7 +469,6 @@ def build_docker(
         build_args = list()
         build_args.append(f"--build-arg PACKAGE_ARCH={PACKAGE_ARCH}")
         build_args.append(f"--build-arg DOTNET_ARCH={DOTNET_ARCH}")
-        build_args.append(f"--build-arg QEMU_ARCH={QEMU_ARCH}")
         build_args.append(f"--build-arg IMAGE_ARCH={IMAGE_ARCH}")
         build_args.append(f"--build-arg TARGET_ARCH={TARGET_ARCH}")
         build_args.append(f"--build-arg JELLYFIN_VERSION={jellyfin_version}")
@@ -484,6 +481,9 @@ def build_docker(
                 build_args.append(
                     f"--build-arg {arg}={framework_versions[arg]}"
                 )
+
+        if local:
+            build_args.append("--load")
 
         build_args = ' '.join(build_args)
 
