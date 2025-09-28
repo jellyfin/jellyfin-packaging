@@ -72,7 +72,7 @@ RUN npm ci --no-audit --unsafe-perm \
 #
 # Build the server artifacts
 #
-FROM --platform=linux/${TARGET_ARCH} ${IMAGE_ARCH}/debian:${OS_VERSION}-slim AS server
+FROM debian:${OS_VERSION}-slim AS server
 
 ARG DOTNET_ARCH
 ARG DOTNET_VERSION
