@@ -54,6 +54,9 @@ case "$1" in
     LIBJEMALLOC_PATH="$( ldconfig -p | grep libjemalloc | awk '{print $NF}' | head -n1 )"
     if [[ -n ${LIBJEMALLOC_PATH} && -f ${LIBJEMALLOC_PATH} ]]; then
         ln -sf ${LIBJEMALLOC_PATH} /usr/lib/jellyfin/libjemalloc.so
+    else
+        echo "failed to find libjemalloc on system"
+        exit 1
     fi
 
     # Install jellyfin symlink into /usr/bin
