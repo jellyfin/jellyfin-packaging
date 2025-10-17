@@ -435,6 +435,11 @@ jobs:
         run: |-
           python -m pip install --upgrade gitpython
 
+      - name: "Install NSIS"
+        uses: negrutiu/nsis-install@f3339c88dba6fd08910d5275a943f8f746d94876 # v2
+        with:
+          distro: official
+
       - name: "Prepare repository"
         run: |-
           python checkout.py master
