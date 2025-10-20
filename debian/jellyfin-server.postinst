@@ -52,10 +52,14 @@ case "$1" in
 
     # Install libjemalloc.so symlink into /usr/lib/jellyfin
     LIBJEMALLOC_PATH="$( ldconfig -p | grep libjemalloc | awk '{print $NF}' | head -n1 )"
+    if [[ -z ${LIBJEMALLOC_PATH} ]]; then
+        # Try to find the path with `find` instead of `ldconfig`; hackier, but a good fallback
+        LIBJEMALLOC_PATH="$( find /usr/lib -type f -name "libjemalloc.so*" | head -n1 )"
+    fi
     if [[ -n ${LIBJEMALLOC_PATH} && -f ${LIBJEMALLOC_PATH} ]]; then
         ln -sf ${LIBJEMALLOC_PATH} /usr/lib/jellyfin/libjemalloc.so
     else
-        echo "failed to find libjemalloc on system"
+        echo "failed to find libjemalloc on system; ensure the 'libjemalloc2' package is [being] installed"
         exit 1
     fi
 
