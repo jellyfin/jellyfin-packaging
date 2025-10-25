@@ -208,6 +208,21 @@ RUN if test "${PACKAGE_ARCH}" = "arm64"; then \
  && apt-get autoremove --yes \
  && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
 
+# Add fonts for east asian languages rendering
+RUN apt update --yes \
+ && apt install --no-install-recommends --no-install-suggests --yes \
+        fonts-wqy-zenhei \
+        fonts-wqy-microhei \
+        fonts-arphic-ukai \
+        fonts-arphic-uming \
+        fonts-noto-cjk \
+        fonts-ipafont-mincho \
+        fonts-ipafont-gothic \
+        fonts-unfonts-core \
+ && apt clean autoclean --yes \
+ && apt autoremove --yes \
+ && rm -rf /var/cache/apt/archives* /var/lib/apt/lists/*
+
 # Setup jemalloc: link the library to a path owned by us to handle arch specific library paths
 RUN mkdir -p /usr/lib/jellyfin \
   && JEMALLOC_LINKED=0 \
