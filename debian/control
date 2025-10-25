@@ -3,7 +3,7 @@ Section: misc
 Priority: optional
 Maintainer: Jellyfin Packaging Team <packaging@jellyfin.org>
 Build-Depends:  debhelper (>= 10),
-                npm | nodejs,
+                npm | nodejs, dotnet-sdk-9.0
 Standards-Version: 3.9.4
 Homepage: https://jellyfin.org
 Vcs-Browser: https://github.com/jellyfin
