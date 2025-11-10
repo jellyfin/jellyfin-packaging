@@ -2,7 +2,7 @@
 # This is a POSIX shell fragment
 
 # Use this file to override the default configurations; add additional
-# options with JELLYFIN_ADD_OPTS.
+# options with JELLYFIN_ADDITIONAL_OPTS.
 
 # Under systemd, use
 #  /etc/systemd/system/jellyfin.service.d/jellyfin.service.conf
@@ -62,4 +62,4 @@ JELLYFIN_ADDITIONAL_OPTS=""
 # Application username
 JELLYFIN_USER="jellyfin"
 # Full application command
-JELLYFIN_ARGS="$JELLYFIN_WEB_OPT $JELLYFIN_FFMPEG_OPT $JELLYFIN_SERVICE_OPT $JELLYFIN_NOWEBAPP_OPT $JELLFIN_ADDITIONAL_OPTS --datadir $JELLYFIN_DATA_DIR --configdir $JELLYFIN_CONFIG_DIR --logdir $JELLYFIN_LOG_DIR --cachedir $JELLYFIN_CACHE_DIR"
+JELLYFIN_ARGS="$JELLYFIN_WEB_OPT $JELLYFIN_FFMPEG_OPT $JELLYFIN_SERVICE_OPT $JELLYFIN_NOWEBAPP_OPT $JELLYFIN_ADDITIONAL_OPTS --datadir $JELLYFIN_DATA_DIR --configdir $JELLYFIN_CONFIG_DIR --logdir $JELLYFIN_LOG_DIR --cachedir $JELLYFIN_CACHE_DIR"
