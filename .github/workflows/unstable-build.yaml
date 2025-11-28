@@ -110,7 +110,7 @@ jobs:
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}"
 
       - name: "Import artifacts into reprepro"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
@@ -146,7 +146,7 @@ jobs:
             fi
 
       - name: "Move artifacts into repository"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
@@ -223,7 +223,7 @@ jobs:
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}"
 
       - name: "Import artifacts into reprepro"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
@@ -259,7 +259,7 @@ jobs:
             fi
 
       - name: "Move artifacts into repository"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
@@ -322,7 +322,7 @@ jobs:
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
@@ -385,7 +385,7 @@ jobs:
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
@@ -528,7 +528,7 @@ jobs:
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
@@ -583,7 +583,7 @@ jobs:
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.arch }}"
 
       - name: "Move artifacts into repository"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
@@ -635,7 +635,7 @@ jobs:
           target: "/srv/incoming/server/${{ env.JELLYFIN_VERSION }}/portable"
 
       - name: "Move artifacts into repository"
-        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a # v1.2.3
+        uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
         with:
           host: "${{ secrets.REPO_HOST }}"
           username: "${{ secrets.REPO_USER }}"
