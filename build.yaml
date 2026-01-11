@@ -16,6 +16,7 @@ frameworks:
   jellyfin-web:
     NODEJS_VERSION:
       6c0a64ef12b9eb40a7c4ee4b9d43d0a5f32f2287: 20  # Default
+      2a7006502aa2b71d705683040a5c644ab4edaf1e: 24
   jellyfin-server:
     DOTNET_VERSION:
       6d1abf67c36379f0b061095619147a3691841e21: 8.0  # Default
