@@ -20,6 +20,7 @@ frameworks:
     DOTNET_VERSION:
       6d1abf67c36379f0b061095619147a3691841e21: 8.0  # Default
       ceb850c77052c465af8422dcf152f1d1d1530457: 9.0
+      9e480f6efb4bc0e1f0d1323ed7ed5a7208fded99: 10.0
 
 # DEB packages
 debian:
