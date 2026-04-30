@@ -48,6 +48,7 @@ ubuntu:
     focal: '20.04'
     jammy: '22.04'
     noble: '24.04'
+    resolute: '26.04'
   archmaps:
     amd64:
       PACKAGE_ARCH: amd64
@@ -59,6 +60,7 @@ ubuntu:
     focal: '10'
     jammy: '12'
     noble: '13'
+    resolute: '14'
   build_function: build_package_deb
   dockerfile: debian/docker/Dockerfile
   imagename: jellyfin-builder-ubuntu

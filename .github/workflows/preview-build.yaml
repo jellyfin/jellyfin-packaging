@@ -138,6 +138,7 @@ jobs:
           - focal
           - jammy
           - noble
+          - resolute
         arch:
           - amd64
           - arm64
