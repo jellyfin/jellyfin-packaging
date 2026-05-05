@@ -60,10 +60,10 @@ RUN if test "${PACKAGE_ARCH}" != "$( dpkg --print-architecture )"; then \
  if grep -q -i ubuntu /etc/os-release; then \
    rm /etc/apt/sources.list /etc/apt/sources.list.d/* || true \
    && export CODENAME="$( lsb_release -c -s )" \
-   && echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ ${CODENAME} main restricted universe multiverse" >>/etc/apt/sources.list.d/amd64.list \
-   && echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ ${CODENAME}-updates main restricted universe multiverse" >>/etc/apt/sources.list.d/amd64.list \
-   && echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ ${CODENAME}-backports main restricted universe multiverse" >>/etc/apt/sources.list.d/amd64.list \
-   && echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ ${CODENAME}-security main restricted universe multiverse" >>/etc/apt/sources.list.d/amd64.list \
+   && echo "deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu/ ${CODENAME} main restricted universe multiverse" >>/etc/apt/sources.list.d/amd64.list \
+   && echo "deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu/ ${CODENAME}-updates main restricted universe multiverse" >>/etc/apt/sources.list.d/amd64.list \
+   && echo "deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu/ ${CODENAME}-backports main restricted universe multiverse" >>/etc/apt/sources.list.d/amd64.list \
+   && echo "deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu/ ${CODENAME}-security main restricted universe multiverse" >>/etc/apt/sources.list.d/amd64.list \
    && echo "deb [arch=${PACKAGE_ARCH}] http://ports.ubuntu.com/ ${CODENAME} main restricted universe multiverse" >>/etc/apt/sources.list.d/${PACKAGE_ARCH}.list \
    && echo "deb [arch=${PACKAGE_ARCH}] http://ports.ubuntu.com/ ${CODENAME}-updates main restricted universe multiverse" >>/etc/apt/sources.list.d/${PACKAGE_ARCH}.list \
    && echo "deb [arch=${PACKAGE_ARCH}] http://ports.ubuntu.com/ ${CODENAME}-backports main restricted universe multiverse" >>/etc/apt/sources.list.d/${PACKAGE_ARCH}.list \
