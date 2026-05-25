@@ -38,9 +38,11 @@ MALLOC_TRIM_THRESHOLD_=131072
 
 # [OPTIONAL] run Jellyfin as a headless service
 #JELLYFIN_SERVICE_OPT="--service"
+JELLYFIN_SERVICE_OPT=""
 
 # [OPTIONAL] run Jellyfin without the web app
 #JELLYFIN_NOWEBAPP_OPT="--nowebclient"
+JELLYFIN_NOWEBAPP_OPT=""
 
 # Space to add additional command line options to jellyfin (for help see ~$ jellyfin --help)
 JELLYFIN_ADDITIONAL_OPTS=""
