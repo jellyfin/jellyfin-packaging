@@ -10,14 +10,14 @@ Vcs-Browser: https://github.com/jellyfin
 
 Package: jellyfin
 Architecture: all
-Depends: jellyfin-server, jellyfin-web, jellyfin-ffmpeg7
+Depends: jellyfin-server, jellyfin-web, jellyfin-ffmpeg8
 Description: Jellyfin is the Free Software Media System.
  This metapackage provides the core Jellyfin components from one name.
 
 Package: jellyfin-server
 Architecture: any
 Depends: libfontconfig1, libjemalloc2, adduser, ${icu:Depends}
-Recommends: jellyfin-web, sudo, jellyfin-ffmpeg7 | ffmpeg
+Recommends: jellyfin-web, sudo, jellyfin-ffmpeg8 | ffmpeg
 Description: Jellyfin is the Free Software Media System.
  This package provides the Jellyfin server backend and API.
 
