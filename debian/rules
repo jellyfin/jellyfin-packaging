@@ -41,6 +41,12 @@ override_dh_gencontrol:
 
 override_dh_auto_test:
 
+# libpdfium.so is a prebuilt third-party binary carrying an 8-byte GNU build ID,
+# which the runner's debugedit cannot rewrite ("Cannot handle 8-byte build ID"),
+# aborting dh_strip. It is already stripped, so exclude it from dh_strip entirely.
+override_dh_strip:
+	dh_strip -Xlibpdfium.so
+
 override_dh_clistrip:
 
 override_dh_auto_build:
