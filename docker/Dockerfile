@@ -11,9 +11,9 @@ ARG FFMPEG_PACKAGE=jellyfin-ffmpeg8
 # https://github.com/intel/compute-runtime/releases
 ARG GMMLIB_VER=22.10.0
 # >= Gen12 graphics (current)
-ARG IGC2_VER=2.34.4
-ARG IGC2_BUILD=21428
-ARG NEO_VER=26.18.38308.1
+ARG IGC2_VER=2.38.2
+ARG IGC2_BUILD=22051
+ARG NEO_VER=26.27.39122.1
 # <= Gen11 graphics (legacy)
 ARG IGC1_LEGACY_VER=1.0.17537.24
 ARG NEO_LEGACY_VER=24.35.30872.36
