@@ -58,7 +58,6 @@ jobs:
       fail-fast: false
       matrix:
         release:
-          - bullseye
           - bookworm
           - trixie
         arch:
@@ -135,7 +134,6 @@ jobs:
       fail-fast: false
       matrix:
         release:
-          - focal
           - jammy
           - noble
           - resolute
