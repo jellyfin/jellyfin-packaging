@@ -245,6 +245,13 @@ def main() -> int:
     set_status(project_id, item_id, field_id, options["Review"])
     log("Set PR to Review.")
 
+    # Move issues this PR closes to In Progress.
+    for closing in pr["closingIssuesReferences"]["nodes"]:
+        issue_item_id = get_item_id(repo, closing["number"], project_id, issue=True)
+        if issue_item_id is not None and "In Progress" in options:
+            set_status(project_id, issue_item_id, field_id, options["In Progress"])
+            log(f"Moved issue #{closing['number']} to In Progress.")
+
     # Move to Approved once it has enough approvals.
     if current_approving_reviewers(repo, pr_number) >= required_approvals:
         set_status(project_id, item_id, field_id, options["Approved"])
