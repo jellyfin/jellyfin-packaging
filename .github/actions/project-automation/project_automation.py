@@ -116,12 +116,12 @@ def resolve_target_title(base_ref: str, projects: list[dict]) -> str | None:
         majors = [
             int(m.group(1))
             for p in projects
-            if (m := re.fullmatch(r"Jellyfin (\d+)\.\d+", p["title"]))
+            if (m := re.fullmatch(r"Jellyfin (\d+)(?:\.\d+)?", p["title"]))
         ]
-        return f"Jellyfin {max(majors)}.0" if majors else None
+        return f"Jellyfin {max(majors)}" if majors else None
 
     match = re.fullmatch(r"release-(\d+)(?:\.\d+)?\.z", base_ref)
-    return f"Jellyfin {match.group(1)}.0" if match else None
+    return f"Jellyfin {match.group(1)}" if match else None
 
 
 def get_status_field(project_id: str) -> tuple[str, dict[str, str]]:
