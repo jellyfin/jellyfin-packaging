@@ -679,3 +679,37 @@ jobs:
           NUGET_UNSTABLE_KEY: ${{ secrets.NUGET_UNSTABLE_KEY }}
         run: |-
           ./build.py ${{ env.JELLYFIN_VERSION }} nuget
+
+  MilestoneRollover:
+    name: "Roll release milestones forward"
+    needs:
+      - Docker
+      - Debian
+      - Ubuntu
+      - Linux
+      - Windows
+      - WindowsInstaller
+      - WindowsInstallerUpload
+      - MacOS
+      - Portable
+      - Nuget
+    runs-on: ubuntu-24.04
+    environment: project-automation
+    continue-on-error: true
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: "Generate app token"
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.PROJECT_AUTOMATION_CLIENT_ID }}
+          private-key: ${{ secrets.PROJECT_AUTOMATION_KEY }}
+          owner: jellyfin
+
+      - name: "Close the released milestone and open the next one"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: python3 .github/scripts/milestone_rollover.py
