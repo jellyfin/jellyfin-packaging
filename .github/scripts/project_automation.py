@@ -18,7 +18,7 @@ REPOS = ["jellyfin", "jellyfin-web"]
 # The status columns this script sets, in order.
 PROGRESSION = ["Todo", "Review", "Approved"]
 
-RELEASE_BOARD = re.compile(r"Jellyfin \d+")
+RELEASE_BOARD = re.compile(r"Jellyfin v?(\d+)")
 
 MILESTONE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.\d+)?")
 
@@ -99,10 +99,10 @@ mutation($p: ID!, $i: ID!, $f: ID!, $v: String!) {
 """
 
 
-ARCHIVE_ITEM_MUTATION = """
+DELETE_ITEM_MUTATION = """
 mutation($p: ID!, $i: ID!) {
-  archiveProjectV2Item(input: { projectId: $p, itemId: $i }) {
-    item { id }
+  deleteProjectV2Item(input: { projectId: $p, itemId: $i }) {
+    deletedItemId
   }
 }
 """
@@ -240,9 +240,8 @@ def set_status(project_id: str, item_id: str, field_id: str, option_id: str) -> 
     gql(SET_STATUS_MUTATION, p=project_id, i=item_id, f=field_id, v=option_id)
 
 
-# Archiving keeps the card and its field values, and can be undone. Deleting cannot.
-def archive_item(project_id: str, item_id: str) -> None:
-    gql(ARCHIVE_ITEM_MUTATION, p=project_id, i=item_id)
+def remove_item(project_id: str, item_id: str) -> None:
+    gql(DELETE_ITEM_MUTATION, p=project_id, i=item_id)
 
 
 def reconcile_target(
@@ -307,11 +306,13 @@ def main() -> int:
         log("DRY RUN: no changes will be written.\n")
 
     projects = list_projects()
-    project_ids = {p["title"]: p["id"] for p in projects}
     board_titles = {p["id"]: p["title"] for p in projects}
-    release_boards = {
-        p["id"] for p in projects if RELEASE_BOARD.fullmatch(p["title"])
-    }
+    release_boards: dict[int, str] = {}
+    for project in projects:
+        match = RELEASE_BOARD.fullmatch(project["title"])
+        if match:
+            release_boards[int(match.group(1))] = project["id"]
+    board_ids = set(release_boards.values())
     boards: dict[str, tuple[str, dict[str, str]]] = {}
 
     summary = ["## Project board reconciliation", ""]
@@ -326,7 +327,7 @@ def main() -> int:
             "milestoned": 0,
             "moved": 0,
             "added": 0,
-            "archived": 0,
+            "removed": 0,
             "ok": 0,
             "skipped": 0,
             "failed": 0,
@@ -358,8 +359,8 @@ def main() -> int:
                         log(f"  #{number}: FAILED to set milestone: {exc}")
                         counts["failed"] += 1
 
-            title = f"Jellyfin {major}" if major is not None else None
-            project_id = project_ids.get(title) if title else None
+            project_id = release_boards.get(major) if major is not None else None
+            title = board_titles.get(project_id) if project_id else None
 
             if project_id is None:
                 counts["skipped"] += 1
@@ -381,22 +382,22 @@ def main() -> int:
             # Remove the PR from every release board except the right one.
             for other in pr["projectItems"]["nodes"]:
                 other_id = other["project"]["id"]
-                if other_id == project_id or other_id not in release_boards:
+                if other_id == project_id or other_id not in board_ids:
                     continue
                 value = other["fieldValueByName"]
                 status = value["name"] if value else None
                 if status is not None and status not in PROGRESSION:
                     continue
 
-                log(f"  #{number}: archive from {board_titles[other_id]}")
+                log(f"  #{number}: remove from {board_titles[other_id]}")
                 if dry_run:
-                    counts["archived"] += 1
+                    counts["removed"] += 1
                     continue
                 try:
-                    archive_item(other_id, other["id"])
-                    counts["archived"] += 1
+                    remove_item(other_id, other["id"])
+                    counts["removed"] += 1
                 except (RuntimeError, GraphQLError) as exc:
-                    log(f"  #{number}: FAILED to archive: {exc}")
+                    log(f"  #{number}: FAILED to remove: {exc}")
                     counts["failed"] += 1
 
         failures += counts["failed"]
@@ -404,7 +405,7 @@ def main() -> int:
         summary.append(
             f"- **jellyfin/{repo}**: {counts['milestoned']} milestoned, "
             f"{counts['added']} added, {counts['moved']} moved, "
-            f"{counts['archived']} archived, {counts['ok']} already correct, "
+            f"{counts['removed']} removed, {counts['ok']} already correct, "
             f"{counts['skipped']} skipped, {counts['failed']} failed"
         )
 
