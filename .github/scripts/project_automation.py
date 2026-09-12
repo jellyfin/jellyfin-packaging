@@ -9,18 +9,20 @@ import os
 import re
 import subprocess
 import sys
+from collections.abc import Iterator
 
 ORG = "jellyfin"
 
-# Repository -> how many approvals a PR needs before it counts as Approved.
-REPOS = {"jellyfin": 2, "jellyfin-web": 1}
+REPOS = ["jellyfin", "jellyfin-web"]
 
 # The status columns this script sets, in order.
 PROGRESSION = ["Todo", "Review", "Approved"]
 
-# Matches board titles like "Jellyfin 13". Titles with a minor version, such as
-# "Jellyfin 10.11", do not match, so the script never touches those boards.
 RELEASE_BOARD = re.compile(r"Jellyfin \d+")
+
+MILESTONE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.\d+)?")
+
+RELEASE_BRANCH = re.compile(r"release-(\d+)(?:\.\d+)?\.z")
 
 PROJECTS_QUERY = """
 query($owner: String!) {
@@ -56,7 +58,8 @@ query($owner: String!, $repo: String!, $cursor: String) {
         id
         number
         baseRefName
-        reviews(last: 100) { nodes { state author { login } } }
+        milestone { title }
+        reviewDecision
         projectItems(first: 20) {
           nodes {
             id
@@ -132,12 +135,24 @@ def gql(query: str, **variables: object) -> dict:
     return payload["data"]
 
 
+def rest(path: str, method: str = "GET", **fields: object) -> object:
+    args = ["gh", "api", path]
+    if method != "GET":
+        args.extend(["-X", method])
+    for key, value in fields.items():
+        args.extend(["-F", f"{key}={value}"])
+    proc = subprocess.run(args, capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise RuntimeError(f"gh api {path} failed: {proc.stderr.strip()}")
+    return json.loads(proc.stdout)
+
+
 def require_token() -> bool:
     if os.environ.get("GH_TOKEN", "").strip():
         return True
     log(
         "GH_TOKEN is empty: the app token step did not produce a token.\n"
-        "Check that PROJECT_AUTOMATION_APP_ID and PROJECT_AUTOMATION_KEY are set "
+        "Check that PROJECT_AUTOMATION_CLIENT_ID and PROJECT_AUTOMATION_KEY are set "
         "and that the app is installed on the organization."
     )
     return False
@@ -147,17 +162,46 @@ def list_projects() -> list[dict]:
     return gql(PROJECTS_QUERY, owner=ORG)["organization"]["projectsV2"]["nodes"]
 
 
-def resolve_target_title(base_ref: str, projects: list[dict]) -> str | None:
-    if base_ref == "master":
-        majors = [
-            int(m.group(1))
-            for p in projects
-            if (m := re.fullmatch(r"Jellyfin (\d+)(?:\.\d+)?", p["title"]))
-        ]
-        return f"Jellyfin {max(majors)}" if majors else None
+def open_milestones(repo: str) -> dict[int, dict]:
+    # major version -> milestone. When a major has several open milestones the
+    # lowest minor wins, because that is the one shipping next.
+    best: dict[int, tuple[int, dict]] = {}
+    for milestone in rest(f"repos/{ORG}/{repo}/milestones?state=open&per_page=100"):
+        match = MILESTONE.fullmatch(milestone["title"])
+        if match is None:
+            continue
+        major, minor = int(match.group(1)), int(match.group(2) or 0)
+        if major not in best or minor < best[major][0]:
+            best[major] = (minor, milestone)
+    return {major: milestone for major, (_, milestone) in best.items()}
 
-    match = re.fullmatch(r"release-(\d+)(?:\.\d+)?\.z", base_ref)
-    return f"Jellyfin {match.group(1)}" if match else None
+
+def set_milestone(repo: str, number: int, milestone_number: int) -> None:
+    rest(f"repos/{ORG}/{repo}/issues/{number}", "PATCH", milestone=milestone_number)
+
+
+def target_major(
+    pr: dict, milestones: dict[int, dict], newest: int | None
+) -> tuple[int | None, dict | None]:
+    # Returns the major release this PR belongs to, and the milestone to apply
+    # when it has none yet.
+    if pr["milestone"]:
+        match = MILESTONE.fullmatch(pr["milestone"]["title"])
+        return (int(match.group(1)) if match else None), None
+
+    # A PR against a release branch belongs to that release by definition.
+    branch = RELEASE_BRANCH.fullmatch(pr["baseRefName"])
+    if branch:
+        major = int(branch.group(1))
+    elif pr["baseRefName"] == "master" and pr["reviewDecision"] == "APPROVED":
+        major = newest
+    else:
+        return None, None
+
+    # The major stands on its own. The milestone is only what to apply, and is
+    # None when the repository has no open milestone for that release yet.
+    milestone = milestones.get(major) if major is not None else None
+    return major, milestone
 
 
 def get_status_field(project_id: str) -> tuple[str, dict[str, str]]:
@@ -167,7 +211,7 @@ def get_status_field(project_id: str) -> tuple[str, dict[str, str]]:
     return field["id"], {o["name"]: o["id"] for o in field["options"]}
 
 
-def iter_open_pull_requests(repo: str):
+def iter_open_pull_requests(repo: str) -> Iterator[dict]:
     cursor = None
     while True:
         variables = {"owner": ORG, "repo": repo}
@@ -178,16 +222,6 @@ def iter_open_pull_requests(repo: str):
         if not page["pageInfo"]["hasNextPage"]:
             return
         cursor = page["pageInfo"]["endCursor"]
-
-
-def approving_reviewers(pr: dict) -> int:
-    latest: dict[str, str] = {}
-    for review in reversed(pr["reviews"]["nodes"]):
-        author = review.get("author")
-        if author is None:
-            continue
-        latest.setdefault(author["login"], review["state"])
-    return sum(state == "APPROVED" for state in latest.values())
 
 
 def add_item_to_project(project_id: str, content_id: str) -> str | None:
@@ -216,7 +250,6 @@ def reconcile_target(
     project_id: str,
     field_id: str,
     options: dict[str, str],
-    required: int,
     title: str,
     dry_run: bool,
 ) -> str:
@@ -228,7 +261,7 @@ def reconcile_target(
     value = item["fieldValueByName"] if item else None
     current = value["name"] if value else None
 
-    wanted = "Approved" if approving_reviewers(pr) >= required else "Review"
+    wanted = "Approved" if pr["reviewDecision"] == "APPROVED" else "Review"
     if wanted not in options:
         log(f"  #{number}: board '{title}' has no '{wanted}' column")
         return "skipped"
@@ -288,8 +321,9 @@ def main() -> int:
 
     failures = 0
 
-    for repo, required in REPOS.items():
+    for repo in REPOS:
         counts = {
+            "milestoned": 0,
             "moved": 0,
             "added": 0,
             "archived": 0,
@@ -297,27 +331,54 @@ def main() -> int:
             "skipped": 0,
             "failed": 0,
         }
-        log(f"=== jellyfin/{repo} (needs {required} approval(s)) ===")
+        log(f"=== jellyfin/{repo} ===")
+        try:
+            milestones = open_milestones(repo)
+        except RuntimeError as exc:
+            log(f"  FAILED to read milestones: {exc}")
+            failures += 1
+            summary.append(f"- **jellyfin/{repo}**: could not read milestones")
+            continue
+        newest = max(milestones) if milestones else None
+        if not milestones:
+            log(f"  no open milestones in {repo}, so no PR can be routed")
 
         for pr in iter_open_pull_requests(repo):
             number = pr["number"]
-            title = resolve_target_title(pr["baseRefName"], projects)
+            major, milestone = target_major(pr, milestones, newest)
+            if milestone is not None:
+                log(f"  #{number}: set milestone {milestone['title']}")
+                if dry_run:
+                    counts["milestoned"] += 1
+                else:
+                    try:
+                        set_milestone(repo, number, milestone["number"])
+                        counts["milestoned"] += 1
+                    except RuntimeError as exc:
+                        log(f"  #{number}: FAILED to set milestone: {exc}")
+                        counts["failed"] += 1
+
+            title = f"Jellyfin {major}" if major is not None else None
             project_id = project_ids.get(title) if title else None
+
             if project_id is None:
                 counts["skipped"] += 1
-                continue
+                if pr["milestone"]:
+                    # A milestone naming no board is still a person's decision,
+                    # so leave whatever cards the PR already has alone.
+                    continue
+            else:
+                if project_id not in boards:
+                    boards[project_id] = get_status_field(project_id)
+                field_id, options = boards[project_id]
 
-            if project_id not in boards:
-                boards[project_id] = get_status_field(project_id)
-            field_id, options = boards[project_id]
+                counts[
+                    reconcile_target(
+                        pr, project_id, field_id, options, title, dry_run
+                    )
+                ] += 1
 
-            counts[
-                reconcile_target(
-                    pr, project_id, field_id, options, required, title, dry_run
-                )
-            ] += 1
-
-            # Remove the PR from any release board that is no longer the right one.
+            # Remove the PR from every release board except the right one.
             for other in pr["projectItems"]["nodes"]:
                 other_id = other["project"]["id"]
                 if other_id == project_id or other_id not in release_boards:
@@ -339,11 +400,11 @@ def main() -> int:
                     counts["failed"] += 1
 
         failures += counts["failed"]
-        log(f"  {counts}\n")
+        log("  " + ", ".join(f"{k}={v}" for k, v in counts.items()) + "\n")
         summary.append(
-            f"- **jellyfin/{repo}**: {counts['added']} added, "
-            f"{counts['moved']} moved, {counts['archived']} archived, "
-            f"{counts['ok']} already correct, "
+            f"- **jellyfin/{repo}**: {counts['milestoned']} milestoned, "
+            f"{counts['added']} added, {counts['moved']} moved, "
+            f"{counts['archived']} archived, {counts['ok']} already correct, "
             f"{counts['skipped']} skipped, {counts['failed']} failed"
         )
 
