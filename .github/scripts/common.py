@@ -40,9 +40,7 @@ def gql(query: str, **variables: object) -> dict:
 
 
 def rest(path: str, method: str = "GET", **fields: object) -> object:
-    args = ["gh", "api", path]
-    if method != "GET":
-        args.extend(["-X", method])
+    args = ["gh", "api", path, "-X", method]
     for key, value in fields.items():
         args.extend(["-F", f"{key}={value}"])
     proc = subprocess.run(args, capture_output=True, text=True)
