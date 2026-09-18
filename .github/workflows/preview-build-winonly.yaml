@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   Windows:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -184,7 +184,7 @@ jobs:
     needs:
       - Windows
       - WindowsInstaller
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
