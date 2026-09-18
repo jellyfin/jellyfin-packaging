@@ -151,6 +151,17 @@ jobs:
           debug: false
           script: |
             export BASEDIR="/srv/repository/main/server/debian"
+            NEW_VERSION=${{ matrix.release }}
+            NEW_MINOR_VERSION="${NEW_VERSION##*.}"
+            if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
+                # Remove preview since we just released the real version
+                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                    sudo rm -f ${BASEDIR}/latest-preview
+                fi
+                # Move current `latest` to be `previous-stable`
+                sudo rm ${BASEDIR}/previous-stable || true
+                sudo mv -t ${BASEDIR}/previous-stable ${BASEDIR}/latest-stable
+            fi
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/debian/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
@@ -263,6 +274,17 @@ jobs:
           debug: false
           script: |
             export BASEDIR="/srv/repository/main/server/ubuntu"
+            NEW_VERSION=${{ matrix.release }}
+            NEW_MINOR_VERSION="${NEW_VERSION##*.}"
+            if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
+                # Remove preview since we just released the real version
+                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                    sudo rm -f ${BASEDIR}/latest-preview
+                fi
+                # Move current `latest` to be `previous-stable`
+                sudo rm ${BASEDIR}/previous-stable || true
+                sudo mv -t ${BASEDIR}/previous-stable ${BASEDIR}/latest-stable
+            fi
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/ubuntu/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
@@ -324,6 +346,17 @@ jobs:
           script: |
             set -e
             export BASEDIR="/srv/repository/main/server/linux"
+            NEW_VERSION=${{ matrix.release }}
+            NEW_MINOR_VERSION="${NEW_VERSION##*.}"
+            if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
+                # Remove preview since we just released the real version
+                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                    sudo rm -f ${BASEDIR}/latest-preview
+                fi
+                # Move current `latest` to be `previous-stable`
+                sudo rm ${BASEDIR}/previous-stable || true
+                sudo mv -t ${BASEDIR}/previous-stable ${BASEDIR}/latest-stable
+            fi
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/linux/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
@@ -388,6 +421,17 @@ jobs:
           script: |
             set -e
             export BASEDIR="/srv/repository/main/server/windows"
+            NEW_VERSION=${{ matrix.release }}
+            NEW_MINOR_VERSION="${NEW_VERSION##*.}"
+            if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
+                # Remove preview since we just released the real version
+                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                    sudo rm -f ${BASEDIR}/latest-preview
+                fi
+                # Move current `latest` to be `previous-stable`
+                sudo rm ${BASEDIR}/previous-stable || true
+                sudo mv -t ${BASEDIR}/previous-stable ${BASEDIR}/latest-stable
+            fi
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/windows/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
@@ -587,6 +631,17 @@ jobs:
           script: |
             set -e
             export BASEDIR="/srv/repository/main/server/macos"
+            NEW_VERSION=${{ matrix.release }}
+            NEW_MINOR_VERSION="${NEW_VERSION##*.}"
+            if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
+                # Remove preview since we just released the real version
+                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                    sudo rm -f ${BASEDIR}/latest-preview
+                fi
+                # Move current `latest` to be `previous-stable`
+                sudo rm ${BASEDIR}/previous-stable || true
+                sudo mv -t ${BASEDIR}/previous-stable ${BASEDIR}/latest-stable
+            fi
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }} || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/${{ matrix.arch }}/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/macos/${{ matrix.release }}/${{ matrix.arch }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
@@ -640,6 +695,17 @@ jobs:
           script: |
             set -e
             export BASEDIR="/srv/repository/main/server/portable"
+            NEW_VERSION=${{ matrix.release }}
+            NEW_MINOR_VERSION="${NEW_VERSION##*.}"
+            if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
+                # Remove preview since we just released the real version
+                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                    sudo rm -f ${BASEDIR}/latest-preview
+                fi
+                # Move current `latest` to be `previous-stable`
+                sudo rm ${BASEDIR}/previous-stable || true
+                sudo mv -t ${BASEDIR}/previous-stable ${BASEDIR}/latest-stable
+            fi
             sudo mkdir -p ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any || exit 1
             sudo mv -t ${BASEDIR}/${{ env.JELLYFIN_RELEASE_TYPE }}/${{ env.JELLYFIN_VERSION }}/any/ /srv/incoming/server/${{ env.JELLYFIN_VERSION }}/portable/${{ matrix.release }}/* || exit 1
             sudo rm ${BASEDIR}/latest-${{ env.JELLYFIN_RELEASE_TYPE }} || true
