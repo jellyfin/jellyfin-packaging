@@ -131,10 +131,10 @@ jobs:
             NEW_VERSION=${{ matrix.release }}
             NEW_MAJOR_VERSION="${NEW_VERSION#v}"
             NEW_MAJOR_VERSION="${NEW_MAJOR_VERSION%.*}"
-            NEW_POINT_VERSION="${NEW_VERSION##*.}"
-            if [[ ${NEW_POINT_VERSION} -gt 0 ]]; then
-                LAST_POINT_VERSION=$(( NEW_POINT_VERSION - 1 ))
-                LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_POINT_VERSION}"
+            NEW_MINOR_VERSION="${NEW_VERSION##*.}"
+            if [[ ${NEW_MINOR_VERSION} -gt 0 ]]; then
+                LAST_MINOR_VERSION=$(( NEW_MINOR_VERSION - 1 ))
+                LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_MINOR_VERSION}"
                 for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
                     for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${LAST_VERSION}" | sort | uniq ); do
                         sudo reprepro --waitforlock 30 --basedir /srv/debian --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
@@ -243,10 +243,10 @@ jobs:
             NEW_VERSION=${{ matrix.release }}
             NEW_MAJOR_VERSION="${NEW_VERSION#v}"
             NEW_MAJOR_VERSION="${NEW_MAJOR_VERSION%.*}"
-            NEW_POINT_VERSION="${NEW_VERSION##*.}"
-            if [[ ${NEW_POINT_VERSION} -gt 0 ]]; then
-                LAST_POINT_VERSION=$(( NEW_POINT_VERSION - 1 ))
-                LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_POINT_VERSION}"
+            NEW_MINOR_VERSION="${NEW_VERSION##*.}"
+            if [[ ${NEW_MINOR_VERSION} -gt 0 ]]; then
+                LAST_MINOR_VERSION=$(( NEW_MINOR_VERSION - 1 ))
+                LAST_VERSION="${NEW_MAJOR_VERSION}.${LAST_MINOR_VERSION}"
                 for PACKAGE in jellyfin jellyfin-server jellyfin-web; do
                     for SCRAP_VERSION in $( sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} list ${{ matrix.release }} | grep "${PACKAGE} " | grep "${LAST_VERSION}" | sort | uniq ); do
                         sudo reprepro --waitforlock 30 --basedir /srv/ubuntu --component ${COMPONENT} remove ${{ matrix.release }} ${PACKAGE}=${SCRAP_VERSION}
