@@ -10,7 +10,7 @@ on:
         description: 'The server and web stable release tag (i.e. "vX.Y.Z")'
 
 env:
-  SDK_VERSION: "9.0.x"
+  SDK_VERSION: "10.0.x"
 
 permissions:
   contents: read
