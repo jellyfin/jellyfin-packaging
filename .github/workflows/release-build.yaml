@@ -680,6 +680,36 @@ jobs:
         run: |-
           ./build.py ${{ env.JELLYFIN_VERSION }} nuget
 
+  Helm:
+    name: "Release Helm chart"
+    # The chart's appVersion is the Docker image tag, so the image must be pushed first
+    needs:
+      - Docker
+    runs-on: ubuntu-24.04
+    environment: project-automation
+    steps:
+      - name: "Generate app token"
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.PROJECT_AUTOMATION_CLIENT_ID }}
+          private-key: ${{ secrets.PROJECT_AUTOMATION_KEY }}
+          owner: jellyfin
+          repositories: jellyfin-helm
+          permission-actions: write
+
+      - name: "Trigger chart version bump in jellyfin-helm"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |-
+          APP_VERSION="${RELEASE_VERSION#v}"
+          gh workflow run app_release.yaml \
+            --repo jellyfin/jellyfin-helm \
+            --ref master \
+            --field jellyfin_version="${APP_VERSION}"
+          echo "Dispatched jellyfin-helm chart release with appVersion \`${APP_VERSION}\`: https://github.com/jellyfin/jellyfin-helm/actions/workflows/app_release.yaml" >> $GITHUB_STEP_SUMMARY
+
   MilestoneRollover:
     name: "Roll release milestones forward"
     needs:
