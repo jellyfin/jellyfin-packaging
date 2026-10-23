@@ -45,7 +45,7 @@ jobs:
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: |-
-          sudo --preserve-env ./build.py ${{ env.JELLYFIN_VERSION }} docker ${{ env.DEBUG_FLAG }}
+          sudo --preserve-env=DOCKER_USERNAME,DOCKER_TOKEN,GHCR_USERNAME,GHCR_TOKEN ./build.py ${{ env.JELLYFIN_VERSION }} docker ${{ env.DEBUG_FLAG }}
 
   Debian:
     runs-on: ubuntu-26.04
