@@ -128,7 +128,7 @@ jobs:
             fi
 
             # Only keep the latest point release for a given stable version; i.e. 10.10.14 obsoletes 10.10.13 and removes it, while leaving 10.9.10
-            NEW_VERSION=${{ matrix.release }}
+            NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MAJOR_VERSION="${NEW_VERSION#v}"
             NEW_MAJOR_VERSION="${NEW_MAJOR_VERSION%.*}"
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
@@ -151,11 +151,11 @@ jobs:
           debug: false
           script: |
             export BASEDIR="/srv/repository/main/server/debian"
-            NEW_VERSION=${{ matrix.release }}
+            NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
             if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
                 # Remove preview since we just released the real version
-                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                if [[ -L ${BASEDIR}/latest-preview ]]; then
                     sudo rm -f ${BASEDIR}/latest-preview
                 fi
             fi
@@ -248,7 +248,7 @@ jobs:
             fi
 
             # Only keep the latest point release for a given stable version; i.e. 10.10.14 obsoletes 10.10.13 and removes it, while leaving 10.9.10
-            NEW_VERSION=${{ matrix.release }}
+            NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MAJOR_VERSION="${NEW_VERSION#v}"
             NEW_MAJOR_VERSION="${NEW_MAJOR_VERSION%.*}"
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
@@ -271,11 +271,11 @@ jobs:
           debug: false
           script: |
             export BASEDIR="/srv/repository/main/server/ubuntu"
-            NEW_VERSION=${{ matrix.release }}
+            NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
             if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
                 # Remove preview since we just released the real version
-                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                if [[ -L ${BASEDIR}/latest-preview ]]; then
                     sudo rm -f ${BASEDIR}/latest-preview
                 fi
             fi
@@ -340,11 +340,11 @@ jobs:
           script: |
             set -e
             export BASEDIR="/srv/repository/main/server/linux"
-            NEW_VERSION=${{ matrix.release }}
+            NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
             if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
                 # Remove preview since we just released the real version
-                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                if [[ -L ${BASEDIR}/latest-preview ]]; then
                     sudo rm -f ${BASEDIR}/latest-preview
                 fi
             fi
@@ -412,11 +412,11 @@ jobs:
           script: |
             set -e
             export BASEDIR="/srv/repository/main/server/windows"
-            NEW_VERSION=${{ matrix.release }}
+            NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
             if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
                 # Remove preview since we just released the real version
-                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                if [[ -L ${BASEDIR}/latest-preview ]]; then
                     sudo rm -f ${BASEDIR}/latest-preview
                 fi
             fi
@@ -619,11 +619,11 @@ jobs:
           script: |
             set -e
             export BASEDIR="/srv/repository/main/server/macos"
-            NEW_VERSION=${{ matrix.release }}
+            NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
             if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
                 # Remove preview since we just released the real version
-                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                if [[ -L ${BASEDIR}/latest-preview ]]; then
                     sudo rm -f ${BASEDIR}/latest-preview
                 fi
             fi
@@ -680,11 +680,11 @@ jobs:
           script: |
             set -e
             export BASEDIR="/srv/repository/main/server/portable"
-            NEW_VERSION=${{ matrix.release }}
+            NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
             if [[ ${NEW_MINOR_VERSION} -eq 0 ]]; then
                 # Remove preview since we just released the real version
-                if [[ -l ${BASEDIR}/latest-preview ]]; then
+                if [[ -L ${BASEDIR}/latest-preview ]]; then
                     sudo rm -f ${BASEDIR}/latest-preview
                 fi
             fi
