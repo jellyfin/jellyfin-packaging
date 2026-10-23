@@ -39,6 +39,13 @@ except Exception as e:
 
 
 # Shared functions
+def _run_or_exit(command):
+    # Callers log the command themselves; some contain credentials, so don't repeat it here
+    ret = os.system(command)
+    if ret != 0:
+        log(f"Error: Command failed with status {ret}")
+        exit(1)
+
 def _determine_arch(build_type, build_arch, build_version):
     PACKAGE_ARCH = (
         configurations[build_type]["archmaps"][build_arch]["PACKAGE_ARCH"]
@@ -473,6 +480,7 @@ def build_docker(
         build_args.append(f"--build-arg TARGET_ARCH={TARGET_ARCH}")
         build_args.append(f"--build-arg JELLYFIN_VERSION={jellyfin_version}")
         build_args.append(f"--build-arg CONFIG={'Debug' if debug else 'Release'}")
+        build_args.append("--provenance=false")
 
         # Determine framework versions
         framework_versions = _determine_framework_versions()
@@ -499,7 +507,7 @@ def build_docker(
         images_hub.append(imagename)
 
         if not local:
-            os.system(f"docker image tag {imagename} ghcr.io/{imagename}")
+            _run_or_exit(f"docker image tag {imagename} ghcr.io/{imagename}")
             images_ghcr.append(f"ghcr.io/{imagename}")
 
         log("")
@@ -508,8 +516,8 @@ def build_docker(
         return
 
     if not getenv('DOCKER_USERNAME') or not getenv('DOCKER_TOKEN'):
-        log("Warning: No DOCKER_USERNAME or DOCKER_TOKEN in environment; skipping manifest build and push (DockerHub and GHCR).")
-        return
+        log("Error: No DOCKER_USERNAME or DOCKER_TOKEN in environment; cannot push to DockerHub and GHCR (use --local to build without pushing).")
+        exit(1)
 
     def build_manifests(server, images):
         # Build the manifests
@@ -521,7 +529,7 @@ def build_docker(
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
             )
-            os.system(
+            _run_or_exit(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version}.{date} {' '.join(images)}"
             )
             manifests.append(
@@ -532,22 +540,23 @@ def build_docker(
         log(
             f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
         )
-        os.system(
+        _run_or_exit(
             f"docker manifest create {server}/{configurations['docker']['imagename']}:{jellyfin_version} {' '.join(images)}"
         )
         manifests.append(f"{server}/{configurations['docker']['imagename']}:{jellyfin_version}")
 
         if is_stable:
-            # Build major-minor point version
-            log(">>> Building X.Y version manifest...")
+            # Build major-minor point version, unless X.Y is already the full version above
             manifest_version_xy = '.'.join(jellyfin_version.split('.')[0:2])
-            log(
-                f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_xy} {' '.join(images)}"
-            )
-            os.system(
-                f"docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_xy} {' '.join(images)}"
-            )
-            manifests.append(f"{server}/{configurations['docker']['imagename']}:{manifest_version_xy}")
+            if manifest_version_xy != jellyfin_version:
+                log(">>> Building X.Y version manifest...")
+                log(
+                    f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_xy} {' '.join(images)}"
+                )
+                _run_or_exit(
+                    f"docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_xy} {' '.join(images)}"
+                )
+                manifests.append(f"{server}/{configurations['docker']['imagename']}:{manifest_version_xy}")
 
             # Build major-only point version
             log(">>> Building X version manifest...")
@@ -555,7 +564,7 @@ def build_docker(
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_x} {' '.join(images)}"
             )
-            os.system(
+            _run_or_exit(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:{manifest_version_x} {' '.join(images)}"
             )
             manifests.append(f"{server}/{configurations['docker']['imagename']}:{manifest_version_x}")
@@ -564,7 +573,7 @@ def build_docker(
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:latest {' '.join(images)}"
             )
-            os.system(
+            _run_or_exit(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:latest {' '.join(images)}"
             )
             manifests.append(f"{server}/{configurations['docker']['imagename']}:latest")
@@ -573,7 +582,7 @@ def build_docker(
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:preview {' '.join(images)}"
             )
-            os.system(
+            _run_or_exit(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:preview {' '.join(images)}"
             )
             manifests.append(f"{server}/{configurations['docker']['imagename']}:preview")
@@ -582,7 +591,7 @@ def build_docker(
             log(
                 f">>>> docker manifest create {server}/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
             )
-            os.system(
+            _run_or_exit(
                 f"docker manifest create {server}/{configurations['docker']['imagename']}:unstable {' '.join(images)}"
             )
             manifests.append(f"{server}/{configurations['docker']['imagename']}:unstable")
@@ -590,7 +599,7 @@ def build_docker(
         return manifests
 
     # Log in to DockerHub
-    os.system(
+    _run_or_exit(
         f"docker login -u {getenv('DOCKER_USERNAME')} -p {getenv('DOCKER_TOKEN')} 2>&1"
     )
 
@@ -598,7 +607,7 @@ def build_docker(
     for image in images_hub:
         log(f">>> Pushing image {image} to DockerHub")
         log(f">>>> docker push {image} 2>&1")
-        os.system(f"docker push {image} 2>&1")
+        _run_or_exit(f"docker push {image} 2>&1")
 
     manifests_hub = build_manifests("docker.io", images_hub)
 
@@ -606,13 +615,13 @@ def build_docker(
     for manifest in manifests_hub:
         log(f">>> Pushing manifest {manifest} to DockerHub")
         log(f">>>> docker manifest push --purge {manifest} 2>&1")
-        os.system(f"docker manifest push --purge {manifest} 2>&1")
+        _run_or_exit(f"docker manifest push --purge {manifest} 2>&1")
 
     # Log out of DockerHub
     os.system("docker logout")
 
     # Log in to GHCR
-    os.system(
+    _run_or_exit(
         f"docker login -u {getenv('GHCR_USERNAME')} -p {getenv('GHCR_TOKEN')} ghcr.io 2>&1"
     )
 
@@ -620,7 +629,7 @@ def build_docker(
     for image in images_ghcr:
         log(f">>> Pushing image {image} to GHCR")
         log(f">>>> docker push {image} 2>&1")
-        os.system(f"docker push {image} 2>&1")
+        _run_or_exit(f"docker push {image} 2>&1")
 
     manifests_ghcr = build_manifests("ghcr.io", images_ghcr)
 
@@ -628,7 +637,7 @@ def build_docker(
     for manifest in manifests_ghcr:
         log(f">>> Pushing manifest {manifest} to GHCR")
         log(f">>>> docker manifest push --purge {manifest} 2>&1")
-        os.system(f"docker manifest push --purge {manifest} 2>&1")
+        _run_or_exit(f"docker manifest push --purge {manifest} 2>&1")
 
     # Log out of GHCR
     os.system("docker logout")
@@ -676,7 +685,7 @@ def build_nuget(
 
         project_pack_command = f"{pack_command} jellyfin-server/{project}"
         log(f">>>> {project_pack_command}")
-        os.system(project_pack_command)
+        _run_or_exit(project_pack_command)
 
     if local:
         return
@@ -692,9 +701,10 @@ def build_nuget(
         log(f"Error: Failed to get NUGET_*_KEY environment variable")
         exit(1)
 
-    push_command = f"dotnet nuget push out/nuget/*.nupkg -s {nuget_repo} -k {nuget_key}"
+    # --skip-duplicate lets a re-run succeed when some packages were already published
+    push_command = f"dotnet nuget push out/nuget/*.nupkg -s {nuget_repo} -k {nuget_key} --skip-duplicate"
     log(f">>>> {push_command}")
-    os.system(push_command)
+    _run_or_exit(push_command)
 
 
 def usage():

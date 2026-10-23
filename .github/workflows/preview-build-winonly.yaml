@@ -14,7 +14,7 @@ on:
         description: 'The numerical preview ID (e.g. 1 for `rc1`)'
 
 env:
-  SDK_VERSION: "9.0.x"
+  SDK_VERSION: "10.0.x"
 
 permissions:
   contents: read

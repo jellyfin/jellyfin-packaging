@@ -150,6 +150,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           debug: false
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/debian"
             NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
@@ -270,6 +271,7 @@ jobs:
           key: "${{ secrets.REPO_KEY }}"
           debug: false
           script: |
+            set -e
             export BASEDIR="/srv/repository/main/server/ubuntu"
             NEW_VERSION=${{ env.JELLYFIN_VERSION }}
             NEW_MINOR_VERSION="${NEW_VERSION##*.}"
