@@ -712,7 +712,7 @@ jobs:
           sudo apt-get install --yes python3-git python3-yaml
 
       - name: "Setup .NET"
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           dotnet-version: ${{ env.SDK_VERSION }}
 
@@ -740,7 +740,7 @@ jobs:
     steps:
       - name: "Generate app token"
         id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         with:
           client-id: ${{ vars.PROJECT_AUTOMATION_CLIENT_ID }}
           private-key: ${{ secrets.PROJECT_AUTOMATION_KEY }}
@@ -782,7 +782,7 @@ jobs:
 
       - name: "Generate app token"
         id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         with:
           client-id: ${{ vars.PROJECT_AUTOMATION_CLIENT_ID }}
           private-key: ${{ secrets.PROJECT_AUTOMATION_KEY }}
